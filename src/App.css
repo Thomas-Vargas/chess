@@ -1,0 +1,20 @@
+.square {
+  height: 60px;
+  width: 60px;
+}
+
+.chess-board {
+  border: 2px solid black;
+}
+
+.dark-square {
+  background-color: #b58863; /* Set the background color for dark squares */
+}
+
+.light-square {
+  background-color: #f0d9b5; /* Set the background color for light squares */
+}
+
+.board-row {
+  display: flex;
+}
