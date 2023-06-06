@@ -1,6 +1,7 @@
 import React from "react";
 import Piece from "./Piece";
 import { Grid } from "@mui/material";
+import { useState } from "react";
 
 const ChessBoard = () => {
   const boardState = {
@@ -38,7 +39,7 @@ const ChessBoard = () => {
       g7: { piece: "pawn", player: "black" },
       h7: { piece: "pawn", player: "black" },
     },
-    currentPlayer: "white",
+    currentPlayer: "black",
   };
 
   const renderSquare = (square, isDark) => {
@@ -48,14 +49,21 @@ const ChessBoard = () => {
       return <div className={`square ${isDark ? "dark" : "light"}-square`} />;
     }
     // Render the Piece component and pass the necessary props
-    return <Piece piece={piece} color={piece.player} />;
+    return (
+      <Piece 
+        piece={piece} 
+        color={piece.player} 
+        className={`${isDark ? "dark" : "light"}-square`} 
+        square={square}
+        boardState={boardState}
+      />)
   };
 
   const renderRow = (row) => {
     const rowSquares = ["a", "b", "c", "d", "e", "f", "g", "h"];
     return rowSquares.map((col, index) => {
       const square = `${col}${row}`;
-      const isDark = (index + row) % 2 === 0; // Check if the square is dark
+      const isDark = (index + row) % 2 !== 0;
       return <div key={square}>{renderSquare(square, isDark)}</div>;
     });
   };
@@ -65,7 +73,7 @@ const ChessBoard = () => {
     return (
       <Grid container direction="column" className="chess-board">
         {rows.map((row, index) => (
-          <Grid container item key={row} className={`board-row ${index % 2 === 0 ? "dark" : "light"}-row`}>
+          <Grid container item key={row} className={`board-row ${index % 2 === 0 ? "light" : "dark"}-row`}>
             {renderRow(row)}
           </Grid>
         ))}

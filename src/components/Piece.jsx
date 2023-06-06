@@ -1,7 +1,7 @@
 import React from "react";
 
-const Piece = ({ piece, isDark, color }) => {
-    const pieceColor = color === "white" ? "white" : "black";
+const Piece = ({ piece, color, className, square, boardState }) => {
+  const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
     white: {
       king: {
@@ -53,10 +53,29 @@ const Piece = ({ piece, isDark, color }) => {
     },
   };
 
+  const onPieceClick = () => {
+    console.log(`hello from ${square}`);
+    console.log(square);
+    if (piece && piece.player === boardState.currentPlayer) {
+      // Determine the possible moves for the selected pawn
+      if (piece.piece === "pawn") {
+        const possibleMoves = getPawnMoves(square, piece.player);
+        console.log("Possible moves:", possibleMoves);
+      }
+
+    }
+  }
+
+  const getPawnMoves = (square, player) => {
+    const moves = [];
+
+    return moves;
+  };
+
   const pieceStyle = pieceStyles[piece.player][piece.piece];
 
   return (
-    <div className={`square piece ${isDark ? "dark" : "light"}-square`}>
+    <div className={`piece ${color}-piece ${className}`} onClick={onPieceClick}>
       <span className={`chess-piece ${pieceColor}`}>{pieceStyle.content}</span>
     </div>
   );
