@@ -1,6 +1,6 @@
 import React from "react";
 
-const Piece = ({ piece, color, className, square, boardState }) => {
+const Piece = ({ piece, color, className, square, boardState, setBoardState }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
     white: {
@@ -60,15 +60,17 @@ const Piece = ({ piece, color, className, square, boardState }) => {
       if (piece.piece === "pawn") {
         const possibleMoves = getPawnMoves(square, piece.player);
         console.log("Possible moves:", possibleMoves);
+        setBoardState({...boardState, validMoves: possibleMoves})
       }
 
     }
   }
 
   // to dos:
-  // check if pawns first move
+  // check if pawns first move - DONE
   // check if piece in front of pawn, stop any movement - DONE
-  // show valid moves
+  // show valid moves -DONE
+  // make move
   // check for capture
   const getPawnMoves = (square, player) => {
     const col = square[0];
