@@ -1,6 +1,7 @@
 .square, .piece {
   height: 60px;
   width: 60px;
+  position: relative;
 }
 
 .chess-board {
@@ -17,4 +18,15 @@
 
 .board-row {
   display: flex;
+}
+
+.valid-move-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 15px;
+  height: 15px;
+  background-color: green;
+  border-radius: 50%;
 }

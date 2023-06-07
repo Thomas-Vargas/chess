@@ -4,7 +4,7 @@ import { Grid } from "@mui/material";
 import { useState } from "react";
 
 const ChessBoard = () => {
-  const boardState = {
+  const gameStartState = {
     board: {
       11: { piece: "rook", player: "white" },
       21: { piece: "knight", player: "white" },
@@ -14,7 +14,7 @@ const ChessBoard = () => {
       61: { piece: "bishop", player: "white" },
       71: { piece: "knight", player: "white" },
       81: { piece: "rook", player: "white" },
-      12: { piece: "pawn", player: "white" },
+      13: { piece: "pawn", player: "white" },
       22: { piece: "pawn", player: "white" },
       32: { piece: "pawn", player: "white" },
       42: { piece: "pawn", player: "white" },
@@ -30,7 +30,7 @@ const ChessBoard = () => {
       68: { piece: "bishop", player: "black" },
       78: { piece: "knight", player: "black" },
       88: { piece: "rook", player: "black" },
-      17: { piece: "pawn", player: "black" },
+      16: { piece: "pawn", player: "black" },
       27: { piece: "pawn", player: "black" },
       37: { piece: "pawn", player: "black" },
       47: { piece: "pawn", player: "black" },
@@ -40,14 +40,22 @@ const ChessBoard = () => {
       87: { piece: "pawn", player: "black" },
     },
     currentPlayer: "black",
+    validMoves: []
   };
+  const [boardState, setBoardState] = useState(gameStartState)
 
   const renderSquare = (square, isDark) => {
     const piece = boardState.board[square];
+    const isValidMove = boardState.validMoves.includes(Number(square));
     // Check if the square is empty
     if (!piece) {
-      return <div className={`square ${isDark ? "dark" : "light"}-square ${square}`} />;
+      return (
+        <div className={`square ${isDark ? "dark" : "light"}-square ${square}`}>
+          {isValidMove && <div className="valid-move-dot" />}
+        </div>
+      );
     }
+
     // Render the Piece component and pass the necessary props
     return (
       <Piece 

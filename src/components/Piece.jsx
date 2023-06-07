@@ -65,6 +65,11 @@ const Piece = ({ piece, color, className, square, boardState }) => {
     }
   }
 
+  // to dos:
+  // check if pawns first move
+  // check if piece in front of pawn, stop any movement - DONE
+  // show valid moves
+  // check for capture
   const getPawnMoves = (square, player) => {
     const col = square[0];
     const row = square[1];
@@ -72,12 +77,20 @@ const Piece = ({ piece, color, className, square, boardState }) => {
     const moves = [];
 
     if (player === 'white') {
-      moves.push(col + (Number(row) + 1));
-      moves.push(col + (Number(row) + 2));
+      if (!boardState.board.hasOwnProperty(col + (Number(row) + 1))) {
+        moves.push(col + (Number(row) + 1));
+        if (!boardState.board.hasOwnProperty(col + (Number(row) + 2)) && row == 2) {
+          moves.push(col + (Number(row) + 2));
+        }
+      }
     }
     if (player === 'black') {
-      moves.push(col + (Number(row) - 1));
-      moves.push(col + (Number(row) - 2));
+      if (!boardState.board.hasOwnProperty(col + (Number(row) - 1))) {
+        moves.push(col + (Number(row) - 1));
+        if (!boardState.board.hasOwnProperty(col + (Number(row) - 2)) && row == 7) {
+          moves.push(col + (Number(row) - 2));
+        }
+      }
     }
     return moves;
   };
