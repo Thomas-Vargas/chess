@@ -54,7 +54,6 @@ const Piece = ({ piece, color, className, square, boardState }) => {
   };
 
   const onPieceClick = () => {
-    console.log(`hello from ${square}`);
     console.log(square);
     if (piece && piece.player === boardState.currentPlayer) {
       // Determine the possible moves for the selected pawn
@@ -67,8 +66,19 @@ const Piece = ({ piece, color, className, square, boardState }) => {
   }
 
   const getPawnMoves = (square, player) => {
+    const col = square[0];
+    const row = square[1];
+
     const moves = [];
 
+    if (player === 'white') {
+      moves.push(col + (Number(row) + 1));
+      moves.push(col + (Number(row) + 2));
+    }
+    if (player === 'black') {
+      moves.push(col + (Number(row) - 1));
+      moves.push(col + (Number(row) - 2));
+    }
     return moves;
   };
 
@@ -76,7 +86,7 @@ const Piece = ({ piece, color, className, square, boardState }) => {
 
   return (
     <div className={`piece ${color}-piece ${className}`} onClick={onPieceClick}>
-      <span className={`chess-piece ${pieceColor}`}>{pieceStyle.content}</span>
+      <span className={`chess-piece ${pieceColor} ${square}`}>{pieceStyle.content}</span>
     </div>
   );
 };

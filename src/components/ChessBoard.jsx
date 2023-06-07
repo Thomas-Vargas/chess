@@ -6,38 +6,38 @@ import { useState } from "react";
 const ChessBoard = () => {
   const boardState = {
     board: {
-      a1: { piece: "rook", player: "white" },
-      b1: { piece: "knight", player: "white" },
-      c1: { piece: "bishop", player: "white" },
-      d1: { piece: "queen", player: "white" },
-      e1: { piece: "king", player: "white" },
-      f1: { piece: "bishop", player: "white" },
-      g1: { piece: "knight", player: "white" },
-      h1: { piece: "rook", player: "white" },
-      a2: { piece: "pawn", player: "white" },
-      b2: { piece: "pawn", player: "white" },
-      c2: { piece: "pawn", player: "white" },
-      d2: { piece: "pawn", player: "white" },
-      e2: { piece: "pawn", player: "white" },
-      f2: { piece: "pawn", player: "white" },
-      g2: { piece: "pawn", player: "white" },
-      h2: { piece: "pawn", player: "white" },
-      a8: { piece: "rook", player: "black" },
-      b8: { piece: "knight", player: "black" },
-      c8: { piece: "bishop", player: "black" },
-      d8: { piece: "queen", player: "black" },
-      e8: { piece: "king", player: "black" },
-      f8: { piece: "bishop", player: "black" },
-      g8: { piece: "knight", player: "black" },
-      h8: { piece: "rook", player: "black" },
-      a7: { piece: "pawn", player: "black" },
-      b7: { piece: "pawn", player: "black" },
-      c7: { piece: "pawn", player: "black" },
-      d7: { piece: "pawn", player: "black" },
-      e7: { piece: "pawn", player: "black" },
-      f7: { piece: "pawn", player: "black" },
-      g7: { piece: "pawn", player: "black" },
-      h7: { piece: "pawn", player: "black" },
+      11: { piece: "rook", player: "white" },
+      21: { piece: "knight", player: "white" },
+      31: { piece: "bishop", player: "white" },
+      41: { piece: "queen", player: "white" },
+      51: { piece: "king", player: "white" },
+      61: { piece: "bishop", player: "white" },
+      71: { piece: "knight", player: "white" },
+      81: { piece: "rook", player: "white" },
+      12: { piece: "pawn", player: "white" },
+      22: { piece: "pawn", player: "white" },
+      32: { piece: "pawn", player: "white" },
+      42: { piece: "pawn", player: "white" },
+      52: { piece: "pawn", player: "white" },
+      62: { piece: "pawn", player: "white" },
+      72: { piece: "pawn", player: "white" },
+      82: { piece: "pawn", player: "white" },
+      18: { piece: "rook", player: "black" },
+      28: { piece: "knight", player: "black" },
+      38: { piece: "bishop", player: "black" },
+      48: { piece: "queen", player: "black" },
+      58: { piece: "king", player: "black" },
+      68: { piece: "bishop", player: "black" },
+      78: { piece: "knight", player: "black" },
+      88: { piece: "rook", player: "black" },
+      17: { piece: "pawn", player: "black" },
+      27: { piece: "pawn", player: "black" },
+      37: { piece: "pawn", player: "black" },
+      47: { piece: "pawn", player: "black" },
+      57: { piece: "pawn", player: "black" },
+      67: { piece: "pawn", player: "black" },
+      77: { piece: "pawn", player: "black" },
+      87: { piece: "pawn", player: "black" },
     },
     currentPlayer: "black",
   };
@@ -46,7 +46,7 @@ const ChessBoard = () => {
     const piece = boardState.board[square];
     // Check if the square is empty
     if (!piece) {
-      return <div className={`square ${isDark ? "dark" : "light"}-square`} />;
+      return <div className={`square ${isDark ? "dark" : "light"}-square ${square}`} />;
     }
     // Render the Piece component and pass the necessary props
     return (
@@ -60,7 +60,7 @@ const ChessBoard = () => {
   };
 
   const renderRow = (row) => {
-    const rowSquares = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    const rowSquares = ["1", "2", "3", "4", "5", "6", "7", "8"];
     return rowSquares.map((col, index) => {
       const square = `${col}${row}`;
       const isDark = (index + row) % 2 !== 0;

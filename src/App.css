@@ -1,4 +1,4 @@
-.square {
+.square, .piece {
   height: 60px;
   width: 60px;
 }
