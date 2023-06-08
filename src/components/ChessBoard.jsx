@@ -40,27 +40,44 @@ const ChessBoard = () => {
       87: { piece: "pawn", player: "black" },
     },
     currentPlayer: "white",
-    validMoves: []
+    validMoves: {piece: "", pieceSquare: '', possibleMoves: []}
   })
 
   useEffect(() => {
-    // Trigger a rerender when boardState.validMoves changes
-    // This will update the board with the valid moves
-    // You can add any additional logic or side effects here
     console.log("Board state updated:", boardState);
   }, [boardState.validMoves]);
 
+  const makeMove = (square) => {
+    // Create a copy of the boardState object
+    let previousBoardState = { ...boardState };
+  
+    // Remove the key from the copied boardState object
+    const previousPieceSquare = boardState.validMoves.pieceSquare;
+    delete previousBoardState.board[previousPieceSquare];
+
+    const updatedBoardState = {...previousBoardState, currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white"};
+    updatedBoardState.board[square] = boardState.validMoves.piece;
+    updatedBoardState.validMoves.possibleMoves = [];
+    setBoardState(updatedBoardState);
+  };
+
   const renderSquare = (square, isDark) => {
     const piece = boardState.board[square];
-    const isValidMove = boardState.validMoves.includes(square);
-    
+    const isValidMove = boardState.validMoves.possibleMoves.includes(square);
+    // console.log(boardState.validMoves.possibleMoves.includes(square));
 
     // Check if the square is empty
     if (!piece) {
       return (
-        <div className={`square ${isDark ? "dark" : "light"}-square ${square}`}>
-          {isValidMove && <div className="valid-move-dot" />}
-        </div>
+        <>
+          {isValidMove ? (
+            <div className={`square ${isDark ? "dark" : "light"}-square ${square}`} onClick={() => makeMove(square)}>
+              <div className="valid-move-dot" />
+            </div>
+          ) : (
+            <div className={`square ${isDark ? "dark" : "light"}-square ${square}`} />
+          )}
+        </>
       );
     }
 

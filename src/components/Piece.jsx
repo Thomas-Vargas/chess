@@ -60,7 +60,7 @@ const Piece = ({ piece, color, className, square, boardState, setBoardState }) =
       if (piece.piece === "pawn") {
         const possibleMoves = getPawnMoves(square, piece.player);
         console.log("Possible moves:", possibleMoves);
-        setBoardState({...boardState, validMoves: possibleMoves})
+        setBoardState({...boardState, validMoves: {pieceSquare: square, possibleMoves, piece}})
       }
 
     }
@@ -70,7 +70,7 @@ const Piece = ({ piece, color, className, square, boardState, setBoardState }) =
   // check if pawns first move - DONE
   // check if piece in front of pawn, stop any movement - DONE
   // show valid moves -DONE
-  // make move
+  // make move - DONE`
   // check for capture
   const getPawnMoves = (square, player) => {
     const col = square[0];
