@@ -64,7 +64,6 @@ const ChessBoard = () => {
   const renderSquare = (square, isDark) => {
     const piece = boardState.board[square];
     const isValidMove = boardState.validMoves.possibleMoves.includes(square);
-    // console.log(boardState.validMoves.possibleMoves.includes(square));
 
     // Check if the square is empty
     if (!piece) {
