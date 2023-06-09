@@ -164,28 +164,67 @@ const Piece = ({
   };
 
   // TODOs:
-  // check how far rook can move before running into piece or going out of bounds
-  // check if collision piece is the players or not
-  // store valid moves and captures in state
+  // check how far rook can move before running into piece or going out of bounds - DONE
+  // check if collision piece is the players or not - DONE
+  // store valid moves and captures in state - DONE
+  // NOTES:
+  // It doesnt seem like i need to know what the color of the piece is, move logic will always be the same
   const getRookMoves = () => {
     const col = square[0];
     const row = square[1];
     const moves = [];
     const captures = [];
-
+    
+    // Find valid moves and captures moving forward
     for (let i = Number(row) + 1; i <= 8; i++) {
-      console.log(col + i);
       if (boardState.board.hasOwnProperty(col + i) && boardState.board[col + i].player === piece.player) {
         break;
       }
-      console.log("piece to capture color", col + i)
       if (boardState.board.hasOwnProperty(col + i) && boardState.board[col + i].player !== piece.player) {
-        console.log(true)
         captures.push(col + i);
         break;
       }
       moves.push(col + i);
     }
+
+    //find valid moves and captures moving back
+    for (let i = Number(row) - 1; i >= 1; i--) {
+      if (boardState.board.hasOwnProperty(col + i) && boardState.board[col + i].player === piece.player) {
+        break;
+      }
+      if (boardState.board.hasOwnProperty(col + i) && boardState.board[col + i].player !== piece.player) {
+        captures.push(col + i);
+        break;
+      }
+      moves.push(col + i);
+    }
+
+    // Find valid moves and captures moving right
+    for (let i = Number(col) + 1; i <= 8; i++) {
+      console.log(i + row)
+      if (boardState.board.hasOwnProperty(i + row) && boardState.board[i + row].player === piece.player) {
+        break;
+      }
+      if (boardState.board.hasOwnProperty(i + row) && boardState.board[i + row].player !== piece.player) {
+        captures.push(i + row);
+        break;
+      }
+      moves.push(i + row);
+    }
+
+    // Find valid moves and captures moving left
+    for (let i = Number(col) - 1; i >= 1; i--) {
+      console.log(i + row);
+      if (boardState.board.hasOwnProperty(i + row) && boardState.board[i + row].player === piece.player) {
+        break;
+      }
+      if (boardState.board.hasOwnProperty(i + row) && boardState.board[i + row].player !== piece.player) {
+        captures.push(i + row);
+        break;
+      }
+      moves.push(i + row);
+    }
+
     return {moves, captures}
   }
 

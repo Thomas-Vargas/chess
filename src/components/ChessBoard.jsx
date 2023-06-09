@@ -44,7 +44,7 @@ const ChessBoard = () => {
   })
 
   useEffect(() => {
-    console.log("Board state updated:", boardState);
+    // console.log("Board state updated:", boardState);
   }, [boardState.validMoves]);
 
   const makeMove = (square) => {
