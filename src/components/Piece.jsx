@@ -9,8 +9,6 @@ const Piece = ({
   setBoardState,
   isValidCapture,
 }) => {
-  console.log(isValidCapture);
-  console.log("square valid capture", square);
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
     white: {
@@ -89,7 +87,7 @@ const Piece = ({
   // show valid moves -DONE
   // make move - DONE`
   // check for capture - DONE
-  // display possible captures
+  // display possible captures - DONE
   // capture piece func
   const getPawnMoves = (square, player) => {
     const col = square[0];
@@ -110,7 +108,6 @@ const Piece = ({
         }
       }
       // check for valid capture
-      // i dont think i need to check for out of bounds because that piece will never exist in board state to capture
       if (
         boardState.board.hasOwnProperty(
           Number(`${Number(col) + 1}` + `${Number(row) + 1}`)
@@ -136,27 +133,66 @@ const Piece = ({
           moves.push(col + (Number(row) - 2));
         }
       }
+      // check for valid capture
+      if (
+        boardState.board.hasOwnProperty(
+          Number(`${Number(col) + 1}` + `${Number(row) - 1}`)
+        )
+      ) {
+        captures.push(`${Number(col) + 1}` + `${Number(row) - 1}`);
+      }
+      if (
+        boardState.board.hasOwnProperty(
+          Number(`${Number(col) - 1}` + `${Number(row) - 1}`)
+        )
+      ) {
+        captures.push(`${Number(col) - 1}` + `${Number(row) - 1}`);
+      }
     }
     return { moves, captures };
   };
 
-  const capturePiece = () => {};
+  // remove square piece from boardstate
+  // place piece making capture on removed square
+  const capturePiece = () => {
+    let previousBoardState = { ...boardState };
+    delete previousBoardState.board[square];
+    delete previousBoardState.board[boardState.validMoves.pieceSquare];
+    const updatedBoardState = {
+      ...previousBoardState,
+      currentPlayer:
+        previousBoardState.currentPlayer === "white" ? "black" : "white",
+    };
+    updatedBoardState.board[square] = boardState.validMoves.piece;
+    updatedBoardState.validMoves.possibleMoves = [];
+    updatedBoardState.validMoves.possibleCaptures = [];
+    setBoardState(updatedBoardState);
+  };
 
   const pieceStyle = pieceStyles[piece.player][piece.piece];
 
   return (
     <>
-      <div
-        className={`piece ${color}-piece ${className}`}
-        onClick={onPieceClick}
-      >
-        <span className={`chess-piece ${pieceColor} ${square}`}>
-          {pieceStyle.content}
-        </span>
-        {isValidCapture && (
-          <div className="valid-capture-ring" />
-        )}
-      </div>
+      {isValidCapture ? (
+        <div
+          className={`piece ${color}-piece ${className}`}
+          onClick={capturePiece}
+        >
+          <span className={`chess-piece ${pieceColor} ${square}`}>
+            {pieceStyle.content}
+          </span>
+          {isValidCapture && <div className="valid-capture-ring" />}
+        </div>
+      ) : (
+        <div
+          className={`piece ${color}-piece ${className}`}
+          onClick={onPieceClick}
+        >
+          <span className={`chess-piece ${pieceColor} ${square}`}>
+            {pieceStyle.content}
+          </span>
+        </div>
+      )}
     </>
   );
 };
