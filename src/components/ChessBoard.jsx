@@ -40,7 +40,7 @@ const ChessBoard = () => {
       87: { piece: "pawn", player: "black" },
     },
     currentPlayer: "white",
-    validMoves: {piece: "", pieceSquare: '', possibleMoves: []}
+    validMoves: {piece: "", pieceSquare: "", possibleMoves: [], possibleCaptures: []}
   })
 
   useEffect(() => {
@@ -64,6 +64,7 @@ const ChessBoard = () => {
   const renderSquare = (square, isDark) => {
     const piece = boardState.board[square];
     const isValidMove = boardState.validMoves.possibleMoves.includes(square);
+    const isValidCapture = boardState.validMoves.possibleCaptures.includes(square);
 
     // Check if the square is empty
     if (!piece) {
@@ -89,6 +90,7 @@ const ChessBoard = () => {
         square={square}
         boardState={boardState}
         setBoardState={setBoardState}
+        isValidCapture={isValidCapture}
       />)
   };
 
