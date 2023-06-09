@@ -88,7 +88,8 @@ const Piece = ({
   // make move - DONE`
   // check for capture - DONE
   // display possible captures - DONE
-  // capture piece func
+  // capture piece func - DONE
+  // stop player from capturing own pieces
   const getPawnMoves = (square, player) => {
     const col = square[0];
     const row = square[1];
@@ -111,14 +112,18 @@ const Piece = ({
       if (
         boardState.board.hasOwnProperty(
           Number(`${Number(col) + 1}` + `${Number(row) + 1}`)
-        )
+        ) &&
+        boardState.board[Number(`${Number(col) + 1}` + `${Number(row) + 1}`)]
+          .player != "white"
       ) {
         captures.push(`${Number(col) + 1}` + `${Number(row) + 1}`);
       }
       if (
         boardState.board.hasOwnProperty(
           Number(`${Number(col) - 1}` + `${Number(row) + 1}`)
-        )
+        ) &&
+        boardState.board[Number(`${Number(col) - 1}` + `${Number(row) + 1}`)]
+          .player != "white"
       ) {
         captures.push(`${Number(col) - 1}` + `${Number(row) + 1}`);
       }
@@ -137,14 +142,18 @@ const Piece = ({
       if (
         boardState.board.hasOwnProperty(
           Number(`${Number(col) + 1}` + `${Number(row) - 1}`)
-        )
+        ) &&
+        boardState.board[Number(`${Number(col) + 1}` + `${Number(row) - 1}`)]
+          .player != "black"
       ) {
         captures.push(`${Number(col) + 1}` + `${Number(row) - 1}`);
       }
       if (
         boardState.board.hasOwnProperty(
           Number(`${Number(col) - 1}` + `${Number(row) - 1}`)
-        )
+        ) &&
+        boardState.board[Number(`${Number(col) - 1}` + `${Number(row) - 1}`)]
+          .player != "black"
       ) {
         captures.push(`${Number(col) - 1}` + `${Number(row) - 1}`);
       }
