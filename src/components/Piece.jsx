@@ -62,12 +62,24 @@ const Piece = ({
   };
 
   const onPieceClick = () => {
-    console.log(square);
     if (piece && piece.player === boardState.currentPlayer) {
       // Determine the possible moves for the selected pawn
       if (piece.piece === "pawn") {
         const possibleMoves = getPawnMoves(square, piece.player);
-        console.log("Possible moves:", possibleMoves);
+        console.log("Possible Pawn moves:", possibleMoves);
+        setBoardState({
+          ...boardState,
+          validMoves: {
+            pieceSquare: square,
+            possibleMoves: possibleMoves.moves,
+            possibleCaptures: possibleMoves.captures,
+            piece,
+          },
+        });
+      }
+      if (piece.piece === "rook") {
+        const possibleMoves = getRookMoves();
+        console.log("Possible Rook moves:", possibleMoves);
         setBoardState({
           ...boardState,
           validMoves: {
@@ -81,19 +93,9 @@ const Piece = ({
     }
   };
 
-  // to dos:
-  // check if pawns first move - DONE
-  // check if piece in front of pawn, stop any movement - DONE
-  // show valid moves -DONE
-  // make move - DONE`
-  // check for capture - DONE
-  // display possible captures - DONE
-  // capture piece func - DONE
-  // stop player from capturing own pieces
   const getPawnMoves = (square, player) => {
     const col = square[0];
     const row = square[1];
-
     const moves = [];
     const captures = [];
 
@@ -161,8 +163,32 @@ const Piece = ({
     return { moves, captures };
   };
 
-  // remove square piece from boardstate
-  // place piece making capture on removed square
+  // TODOs:
+  // check how far rook can move before running into piece or going out of bounds
+  // check if collision piece is the players or not
+  // store valid moves and captures in state
+  const getRookMoves = () => {
+    const col = square[0];
+    const row = square[1];
+    const moves = [];
+    const captures = [];
+
+    for (let i = Number(row) + 1; i <= 8; i++) {
+      console.log(col + i);
+      if (boardState.board.hasOwnProperty(col + i) && boardState.board[col + i].player === piece.player) {
+        break;
+      }
+      console.log("piece to capture color", col + i)
+      if (boardState.board.hasOwnProperty(col + i) && boardState.board[col + i].player !== piece.player) {
+        console.log(true)
+        captures.push(col + i);
+        break;
+      }
+      moves.push(col + i);
+    }
+    return {moves, captures}
+  }
+
   const capturePiece = () => {
     let previousBoardState = { ...boardState };
     delete previousBoardState.board[square];
@@ -170,7 +196,7 @@ const Piece = ({
     const updatedBoardState = {
       ...previousBoardState,
       currentPlayer:
-        previousBoardState.currentPlayer === "white" ? "black" : "white",
+      previousBoardState.currentPlayer === "white" ? "black" : "white",
     };
     updatedBoardState.board[square] = boardState.validMoves.piece;
     updatedBoardState.validMoves.possibleMoves = [];

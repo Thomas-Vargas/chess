@@ -58,6 +58,7 @@ const ChessBoard = () => {
     const updatedBoardState = {...previousBoardState, currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white"};
     updatedBoardState.board[square] = boardState.validMoves.piece;
     updatedBoardState.validMoves.possibleMoves = [];
+    updatedBoardState.validMoves.possibleCaptures = [];
     setBoardState(updatedBoardState);
   };
 
