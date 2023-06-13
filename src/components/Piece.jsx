@@ -90,6 +90,19 @@ const Piece = ({
           },
         });
       }
+      if (piece.piece === "bishop") {
+        const possibleMoves = getBishopMoves();
+        console.log("Possible Bishop moves:", possibleMoves);
+        setBoardState({
+          ...boardState,
+          validMoves: {
+            pieceSquare: square,
+            possibleMoves: possibleMoves.moves,
+            possibleCaptures: possibleMoves.captures,
+            piece,
+          },
+        });
+      }
     }
   };
 
@@ -163,10 +176,6 @@ const Piece = ({
     return { moves, captures };
   };
 
-  // TODOs:
-  // check how far rook can move before running into piece or going out of bounds - DONE
-  // check if collision piece is the players or not - DONE
-  // store valid moves and captures in state - DONE
   // NOTES:
   // It doesnt seem like i need to know what the color of the piece is, move logic will always be the same
   const getRookMoves = () => {
@@ -227,6 +236,104 @@ const Piece = ({
 
     return {moves, captures}
   }
+
+  const getBishopMoves = () => {
+    const col = square[0];
+    const row = square[1];
+    const moves = [];
+    const captures = [];
+  
+    // Find valid moves and captures moving up/right
+    for (let i = 1; i <= 8; i++) {
+      const nextCol = Number(col) + i;
+      const nextRow = Number(row) + i;
+      const nextSquare = `${nextCol}${nextRow}`;
+  
+      if (nextCol > 8 || nextRow > 8) {
+        break; // Exit loop if out of board bounds
+      }
+  
+      if (boardState.board.hasOwnProperty(nextSquare)) {
+        if (boardState.board[nextSquare].player === piece.player) {
+          break; // Stop further moves in this direction if the square is occupied by the same player's piece
+        } else {
+          captures.push(nextSquare); // Add to captures if the square is occupied by the opponent's piece
+          break; // Stop further moves in this direction
+        }
+      } else {
+        moves.push(nextSquare); // Add to moves if the square is empty
+      }
+    }
+  
+    // Find valid moves and captures moving up/left
+    for (let i = 1; i <= 8; i++) {
+      const nextCol = Number(col) - i;
+      const nextRow = Number(row) + i;
+      const nextSquare = `${nextCol}${nextRow}`;
+  
+      if (nextCol < 1 || nextRow > 8) {
+        break; // Exit loop if out of board bounds
+      }
+  
+      if (boardState.board.hasOwnProperty(nextSquare)) {
+        if (boardState.board[nextSquare].player === piece.player) {
+          break; // Stop further moves in this direction if the square is occupied by the same player's piece
+        } else {
+          captures.push(nextSquare); // Add to captures if the square is occupied by the opponent's piece
+          break; // Stop further moves in this direction
+        }
+      } else {
+        moves.push(nextSquare); // Add to moves if the square is empty
+      }
+    }
+  
+    // Find valid moves and captures moving down/left
+    for (let i = 1; i <= 8; i++) {
+      const nextCol = Number(col) - i;
+      const nextRow = Number(row) - i;
+      const nextSquare = `${nextCol}${nextRow}`;
+  
+      if (nextCol < 1 || nextRow < 1) {
+        break; // Exit loop if out of board bounds
+      }
+  
+      if (boardState.board.hasOwnProperty(nextSquare)) {
+        if (boardState.board[nextSquare].player === piece.player) {
+          break; // Stop further moves in this direction if the square is occupied by the same player's piece
+        } else {
+          captures.push(nextSquare); // Add to captures if the square is occupied by the opponent's piece
+          break; // Stop further moves in this direction
+        }
+      } else {
+        moves.push(nextSquare); // Add to moves if the square is empty
+      }
+    }
+  
+    // Find valid moves and captures moving down/right
+    for (let i = 1; i <= 8; i++) {
+      const nextCol = Number(col) + i;
+      const nextRow = Number(row) - i;
+      const nextSquare = `${nextCol}${nextRow}`;
+  
+      if (nextCol > 8 || nextRow < 1) {
+        break; // Exit loop if out of board bounds
+      }
+  
+      if (boardState.board.hasOwnProperty(nextSquare)) {
+        if (boardState.board[nextSquare].player === piece.player) {
+          break; // Stop further moves in this direction if the square is occupied by the same player's piece
+        } else {
+          captures.push(nextSquare); // Add to captures if the square is occupied by the opponent's piece
+          break; // Stop further moves in this direction
+        }
+      } else {
+        moves.push(nextSquare); // Add to moves if the square is empty
+      }
+    }
+  
+    return { moves, captures };
+  }
+  
 
   const capturePiece = () => {
     let previousBoardState = { ...boardState };
