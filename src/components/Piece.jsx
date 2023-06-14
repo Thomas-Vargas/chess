@@ -189,8 +189,6 @@ const Piece = ({
     return { moves, captures };
   };
 
-  // NOTES:
-  // It doesnt seem like i need to know what the color of the piece is, move logic will always be the same
   const getRookMoves = () => {
     const col = square[0];
     const row = square[1];
