@@ -116,6 +116,19 @@ const Piece = ({
           },
         });
       }
+      if (piece.piece === "queen") {
+        const possibleMoves = getQueenMoves();
+        console.log("Possible Queen moves:", possibleMoves);
+        setBoardState({
+          ...boardState,
+          validMoves: {
+            pieceSquare: square,
+            possibleMoves: possibleMoves.moves,
+            possibleCaptures: possibleMoves.captures,
+            piece,
+          },
+        });
+      }
     }
   };
 
@@ -374,6 +387,15 @@ const Piece = ({
     }
 
     return {moves, captures}
+  }
+
+  const getQueenMoves = () => {
+    const diagonalMoves = getBishopMoves();
+    const horizontalAndVerticalMoves = getRookMoves();
+    const moves = [...diagonalMoves.moves, ...horizontalAndVerticalMoves.moves];
+    const captures = [...diagonalMoves.captures, ...horizontalAndVerticalMoves.captures];
+
+    return {moves, captures};
   }
   
 
