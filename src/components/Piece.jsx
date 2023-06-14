@@ -103,6 +103,19 @@ const Piece = ({
           },
         });
       }
+      if (piece.piece === "knight") {
+        const possibleMoves = getKnightMoves();
+        console.log("Possible Knight moves:", possibleMoves);
+        setBoardState({
+          ...boardState,
+          validMoves: {
+            pieceSquare: square,
+            possibleMoves: possibleMoves.moves,
+            possibleCaptures: possibleMoves.captures,
+            piece,
+          },
+        });
+      }
     }
   };
 
@@ -250,18 +263,18 @@ const Piece = ({
       const nextSquare = `${nextCol}${nextRow}`;
   
       if (nextCol > 8 || nextRow > 8) {
-        break; // Exit loop if out of board bounds
+        break; 
       }
   
       if (boardState.board.hasOwnProperty(nextSquare)) {
         if (boardState.board[nextSquare].player === piece.player) {
-          break; // Stop further moves in this direction if the square is occupied by the same player's piece
+          break;
         } else {
-          captures.push(nextSquare); // Add to captures if the square is occupied by the opponent's piece
-          break; // Stop further moves in this direction
+          captures.push(nextSquare);
+          break;
         }
       } else {
-        moves.push(nextSquare); // Add to moves if the square is empty
+        moves.push(nextSquare);
       }
     }
   
@@ -272,18 +285,18 @@ const Piece = ({
       const nextSquare = `${nextCol}${nextRow}`;
   
       if (nextCol < 1 || nextRow > 8) {
-        break; // Exit loop if out of board bounds
+        break;
       }
   
       if (boardState.board.hasOwnProperty(nextSquare)) {
         if (boardState.board[nextSquare].player === piece.player) {
-          break; // Stop further moves in this direction if the square is occupied by the same player's piece
+          break;
         } else {
-          captures.push(nextSquare); // Add to captures if the square is occupied by the opponent's piece
-          break; // Stop further moves in this direction
+          captures.push(nextSquare);
+          break;
         }
       } else {
-        moves.push(nextSquare); // Add to moves if the square is empty
+        moves.push(nextSquare);
       }
     }
   
@@ -294,18 +307,18 @@ const Piece = ({
       const nextSquare = `${nextCol}${nextRow}`;
   
       if (nextCol < 1 || nextRow < 1) {
-        break; // Exit loop if out of board bounds
+        break;
       }
   
       if (boardState.board.hasOwnProperty(nextSquare)) {
         if (boardState.board[nextSquare].player === piece.player) {
-          break; // Stop further moves in this direction if the square is occupied by the same player's piece
+          break;
         } else {
-          captures.push(nextSquare); // Add to captures if the square is occupied by the opponent's piece
-          break; // Stop further moves in this direction
+          captures.push(nextSquare);
+          break;
         }
       } else {
-        moves.push(nextSquare); // Add to moves if the square is empty
+        moves.push(nextSquare);
       }
     }
   
@@ -316,22 +329,53 @@ const Piece = ({
       const nextSquare = `${nextCol}${nextRow}`;
   
       if (nextCol > 8 || nextRow < 1) {
-        break; // Exit loop if out of board bounds
+        break;
       }
   
       if (boardState.board.hasOwnProperty(nextSquare)) {
         if (boardState.board[nextSquare].player === piece.player) {
-          break; // Stop further moves in this direction if the square is occupied by the same player's piece
+          break;
         } else {
-          captures.push(nextSquare); // Add to captures if the square is occupied by the opponent's piece
-          break; // Stop further moves in this direction
+          captures.push(nextSquare);
+          break;
         }
       } else {
-        moves.push(nextSquare); // Add to moves if the square is empty
+        moves.push(nextSquare);
       }
     }
   
     return { moves, captures };
+  }
+
+  const getKnightMoves = () => {
+    const col = square[0];
+    const row = square[1];
+    const moves = [];
+    const captures = [];
+    const potentialMoves = [];
+
+    //moves up
+    potentialMoves.push(`${Number(col) + 1}${Number(row) + 2}`);
+    potentialMoves.push(`${Number(col) - 1}${Number(row) + 2}`);
+    potentialMoves.push(`${Number(col) + 2}${Number(row) + 1}`);
+    potentialMoves.push(`${Number(col) - 2}${Number(row) + 1}`);
+    //moves down
+    potentialMoves.push(`${Number(col) - 1}${Number(row) - 2}`);
+    potentialMoves.push(`${Number(col) + 1}${Number(row) - 2}`);
+    potentialMoves.push(`${Number(col) - 2}${Number(row) - 1}`);
+    potentialMoves.push(`${Number(col) + 2}${Number(row) - 1}`);
+
+    const validMoves = potentialMoves.filter(move => Number(move) >= 10 && Number(move) <= 88 && !move.includes('0'));
+
+    for (let move of validMoves) {
+      if (boardState.board.hasOwnProperty(move) && boardState.board[move].player !== piece.player) {
+        captures.push(move);
+      } else if (!boardState.board.hasOwnProperty(move)) {
+        moves.push(move);
+      }
+    }
+
+    return {moves, captures}
   }
   
 
