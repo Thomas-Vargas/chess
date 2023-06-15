@@ -129,6 +129,19 @@ const Piece = ({
           },
         });
       }
+      if (piece.piece === "king") {
+        const possibleMoves = getKingMoves();
+        console.log("Possible King moves:", possibleMoves);
+        setBoardState({
+          ...boardState,
+          validMoves: {
+            pieceSquare: square,
+            possibleMoves: possibleMoves.moves,
+            possibleCaptures: possibleMoves.captures,
+            piece,
+          },
+        });
+      }
     }
   };
 
@@ -398,6 +411,34 @@ const Piece = ({
     return {moves, captures};
   }
   
+  const getKingMoves = () => {
+    const col = square[0];
+    const row = square[1];
+    const moves = [];
+    const captures = [];
+    const potentialMoves = [];
+
+    potentialMoves.push(col + `${Number(row) + 1}`);
+    potentialMoves.push(col + `${Number(row) - 1}`);
+    potentialMoves.push(`${Number(col) + 1}` + row);
+    potentialMoves.push(`${Number(col) - 1}` + row);
+    potentialMoves.push(`${Number(col) + 1}` + `${Number(row) + 1}`);
+    potentialMoves.push(`${Number(col) + 1}` + `${Number(row) - 1}`);
+    potentialMoves.push(`${Number(col) - 1}` + `${Number(row) + 1}`);
+    potentialMoves.push(`${Number(col) - 1}` + `${Number(row) - 1}`);
+
+    const validMoves = potentialMoves.filter(move => Number(move) >= 10 && Number(move) <= 88 && !move.includes('0'));
+    
+    for (let move of validMoves) {
+      if (boardState.board.hasOwnProperty(move) && boardState.board[move].player !== piece.player) {
+        captures.push(move);
+      } else if (!boardState.board.hasOwnProperty(move)) {
+        moves.push(move);
+      }
+    }
+
+    return {moves, captures}
+  }
 
   const capturePiece = () => {
     let previousBoardState = { ...boardState };
