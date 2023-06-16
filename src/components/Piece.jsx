@@ -74,6 +74,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
+            possibleCastles: []
           },
         });
       }
@@ -87,6 +88,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
+            possibleCastles: []
           },
         });
       }
@@ -100,6 +102,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
+            possibleCastles: []
           },
         });
       }
@@ -113,6 +116,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
+            possibleCastles: []
           },
         });
       }
@@ -126,6 +130,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
+            possibleCastles: []
           },
         });
       }
@@ -139,6 +144,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
+            possibleCastles: possibleMoves.castle
           },
         });
       }
@@ -416,7 +422,10 @@ const Piece = ({
     const row = square[1];
     const moves = [];
     const captures = [];
+    const castle = [];
     const potentialMoves = [];
+
+    // console.log(boardState.board['81'].firstMove);
 
     potentialMoves.push(col + `${Number(row) + 1}`);
     potentialMoves.push(col + `${Number(row) - 1}`);
@@ -437,7 +446,26 @@ const Piece = ({
       }
     }
 
-    return {moves, captures}
+    if (color === 'white') {
+      // check for possible castle right and left
+      if (!boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) && !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) && piece.firstMove === true && boardState.board['81'].firstMove === true) {
+        castle.push(`${Number(col) + 2}` + row);
+      } 
+      if (!boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) && !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) && !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) && piece.firstMove === true && boardState.board['11'].firstMove === true) {
+        castle.push(`${Number(col) - 2}` + row);
+      }
+    }
+    else if (color === "black") {
+      if (!boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) && !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) && piece.firstMove === true && boardState.board['88'].firstMove === true) {
+        castle.push(`${Number(col) + 2}` + row);
+      } 
+      if (!boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) && !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) && !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) && piece.firstMove === true && boardState.board['18'].firstMove === true) {
+        castle.push(`${Number(col) - 2}` + row);
+      }
+    }
+
+    console.log(castle);
+    return {moves, captures, castle}
   }
 
   const capturePiece = () => {
@@ -450,6 +478,12 @@ const Piece = ({
       previousBoardState.currentPlayer === "white" ? "black" : "white",
     };
     updatedBoardState.board[square] = boardState.validMoves.piece;
+
+    // change first move property to false on first move
+    if (updatedBoardState.board[square].hasOwnProperty('firstMove')) {
+      updatedBoardState.board[square].firstMove = false;
+    }
+
     updatedBoardState.validMoves.possibleMoves = [];
     updatedBoardState.validMoves.possibleCaptures = [];
     setBoardState(updatedBoardState);

@@ -6,14 +6,14 @@ import { useState, useEffect } from "react";
 const ChessBoard = () => {
   const [boardState, setBoardState] = useState({
     board: {
-      11: { piece: "rook", player: "white" },
+      11: { piece: "rook", player: "white", firstMove: true },
       21: { piece: "knight", player: "white" },
       31: { piece: "bishop", player: "white" },
       41: { piece: "queen", player: "white" },
-      51: { piece: "king", player: "white" },
+      51: { piece: "king", player: "white", firstMove: true },
       61: { piece: "bishop", player: "white" },
       71: { piece: "knight", player: "white" },
-      81: { piece: "rook", player: "white" },
+      81: { piece: "rook", player: "white", firstMove: true },
       12: { piece: "pawn", player: "white" },
       22: { piece: "pawn", player: "white" },
       32: { piece: "pawn", player: "white" },
@@ -22,14 +22,14 @@ const ChessBoard = () => {
       62: { piece: "pawn", player: "white" },
       72: { piece: "pawn", player: "white" },
       82: { piece: "pawn", player: "white" },
-      18: { piece: "rook", player: "black" },
+      18: { piece: "rook", player: "black", firstMove: true },
       28: { piece: "knight", player: "black" },
       38: { piece: "bishop", player: "black" },
       48: { piece: "queen", player: "black" },
-      58: { piece: "king", player: "black" },
+      58: { piece: "king", player: "black", firstMove: true },
       68: { piece: "bishop", player: "black" },
       78: { piece: "knight", player: "black" },
-      88: { piece: "rook", player: "black" },
+      88: { piece: "rook", player: "black", firstMove: true },
       17: { piece: "pawn", player: "black" },
       27: { piece: "pawn", player: "black" },
       37: { piece: "pawn", player: "black" },
@@ -40,7 +40,7 @@ const ChessBoard = () => {
       87: { piece: "pawn", player: "black" },
     },
     currentPlayer: "white",
-    validMoves: {piece: "", pieceSquare: "", possibleMoves: [], possibleCaptures: []}
+    validMoves: {piece: "", pieceSquare: "", possibleMoves: [], possibleCaptures: [], possibleCastles: []}
   })
 
   useEffect(() => {
@@ -57,15 +57,88 @@ const ChessBoard = () => {
 
     const updatedBoardState = {...previousBoardState, currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white"};
     updatedBoardState.board[square] = boardState.validMoves.piece;
+    
+    // change first move property to false on first move
+    if (updatedBoardState.board[square].hasOwnProperty('firstMove')) {
+      updatedBoardState.board[square].firstMove = false;
+    }
+
     updatedBoardState.validMoves.possibleMoves = [];
     updatedBoardState.validMoves.possibleCaptures = [];
     setBoardState(updatedBoardState);
   };
 
+  const handleCastle = (square) => {
+    let previousBoardState = { ...boardState };
+    switch(square) {
+      case '71':
+        delete previousBoardState.board['51'];
+        delete previousBoardState.board['81'];
+        const updatedBoardState = {
+          ...previousBoardState,
+          currentPlayer:
+          previousBoardState.currentPlayer === "white" ? "black" : "white",
+        };
+        updatedBoardState.board['71'] = { piece: "king", player: "white", firstMove: false };
+        updatedBoardState.board['61'] = { piece: "rook", player: "white", firstMove: false };
+        updatedBoardState.validMoves.possibleMoves = [];
+        updatedBoardState.validMoves.possibleCaptures = [];
+        updatedBoardState.validMoves.possibleCastles = [];
+        setBoardState(updatedBoardState);
+        break;
+      case '31': 
+        delete previousBoardState.board['51'];
+        delete previousBoardState.board['11'];
+        const updatedBoardState1 = {
+          ...previousBoardState,
+          currentPlayer:
+          previousBoardState.currentPlayer === "white" ? "black" : "white",
+        };
+        updatedBoardState1.board['31'] = { piece: "king", player: "white", firstMove: false };
+        updatedBoardState1.board['41'] = { piece: "rook", player: "white", firstMove: false };
+        updatedBoardState1.validMoves.possibleMoves = [];
+        updatedBoardState1.validMoves.possibleCaptures = [];
+        updatedBoardState1.validMoves.possibleCastles = [];
+        setBoardState(updatedBoardState1);
+        break;
+      case '78':
+        delete previousBoardState.board['58'];
+        delete previousBoardState.board['88'];
+        const updatedBoardState2 = {
+          ...previousBoardState,
+          currentPlayer:
+          previousBoardState.currentPlayer === "white" ? "black" : "white",
+        };
+        updatedBoardState2.board['78'] = { piece: "king", player: "black", firstMove: false };
+        updatedBoardState2.board['68'] = { piece: "rook", player: "black", firstMove: false };
+        updatedBoardState2.validMoves.possibleMoves = [];
+        updatedBoardState2.validMoves.possibleCaptures = [];
+        updatedBoardState2.validMoves.possibleCastles = [];
+        setBoardState(updatedBoardState2);
+        break;
+      case '38':
+        delete previousBoardState.board['58'];
+        delete previousBoardState.board['18'];
+        const updatedBoardState3 = {
+          ...previousBoardState,
+          currentPlayer:
+          previousBoardState.currentPlayer === "white" ? "black" : "white",
+        };
+        updatedBoardState3.board['38'] = { piece: "king", player: "black", firstMove: false };
+        updatedBoardState3.board['48'] = { piece: "rook", player: "black", firstMove: false };
+        updatedBoardState3.validMoves.possibleMoves = [];
+        updatedBoardState3.validMoves.possibleCaptures = [];
+        updatedBoardState3.validMoves.possibleCastles = [];
+        setBoardState(updatedBoardState3);
+        break;
+    }
+  }
+
   const renderSquare = (square, isDark) => {
     const piece = boardState.board[square];
     const isValidMove = boardState.validMoves.possibleMoves.includes(square);
     const isValidCapture = boardState.validMoves.possibleCaptures.includes(square);
+    const isValidCastle = boardState.validMoves.possibleCastles.includes(square);
 
     // Check if the square is empty
     if (!piece) {
@@ -76,7 +149,9 @@ const ChessBoard = () => {
               <div className="valid-move-dot" />
             </div>
           ) : (
-            <div className={`square ${isDark ? "dark" : "light"}-square ${square}`} />
+            <div className={`square ${isDark ? "dark" : "light"}-square ${square}`}>
+              {isValidCastle && <div className="valid-capture-ring" onClick={() => handleCastle(square)} />}
+            </div>
           )}
         </>
       );
