@@ -1,7 +1,8 @@
 import React from "react";
 import Piece from "./Piece";
-import { Grid } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
 import { useState, useEffect } from "react";
+import {Box, Button, Typography, Modal, Stack, IconButton } from "@mui/material";
 
 const ChessBoard = () => {
   const [boardState, setBoardState] = useState({
@@ -14,7 +15,7 @@ const ChessBoard = () => {
       61: { piece: "bishop", player: "white" },
       71: { piece: "knight", player: "white" },
       81: { piece: "rook", player: "white", firstMove: true },
-      12: { piece: "pawn", player: "white" },
+      16: { piece: "pawn", player: "white" },
       22: { piece: "pawn", player: "white" },
       32: { piece: "pawn", player: "white" },
       42: { piece: "pawn", player: "white" },
@@ -42,6 +43,20 @@ const ChessBoard = () => {
     currentPlayer: "white",
     validMoves: {piece: "", pieceSquare: "", possibleMoves: [], possibleCaptures: [], possibleCastles: []}
   })
+  const [open, setOpen] = useState(false);
+  const [selectedPromotionPiece, setSelectedPromotionPiece] = useState(null);
+
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+  };
 
   useEffect(() => {
     // console.log("Board state updated:", boardState);
@@ -55,18 +70,40 @@ const ChessBoard = () => {
     const previousPieceSquare = boardState.validMoves.pieceSquare;
     delete previousBoardState.board[previousPieceSquare];
 
-    const updatedBoardState = {...previousBoardState, currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white"};
+    let updatedBoardState = {...previousBoardState, currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white"};
     updatedBoardState.board[square] = boardState.validMoves.piece;
+
+    // the piece
+    console.log(updatedBoardState.board[square]);
+    // the square it is now on
+    console.log(square[1]);
     
     // change first move property to false on first move
     if (updatedBoardState.board[square].hasOwnProperty('firstMove')) {
       updatedBoardState.board[square].firstMove = false;
     }
 
+    // check for pawn promotion 
+    if (updatedBoardState.board[square].piece === 'pawn' && (square[1] == 8 || square[1] == 1)) {
+      promotePawn(updatedBoardState, square);
+      // setBoardState(updatedBoardState);
+    } else {
+      setBoardState(updatedBoardState);
+    }
+
     updatedBoardState.validMoves.possibleMoves = [];
     updatedBoardState.validMoves.possibleCaptures = [];
-    setBoardState(updatedBoardState);
   };
+
+  const selectPromotionPiece = (piece) => {
+    setSelectedPromotionPiece(piece);
+    setOpen(false);
+  }
+
+  const promotePawn = (updatedBoardState, square) => {
+    console.log(square);
+    setOpen(true)
+  }
 
   const handleCastle = (square) => {
     let previousBoardState = { ...boardState };
@@ -167,6 +204,7 @@ const ChessBoard = () => {
         boardState={boardState}
         setBoardState={setBoardState}
         isValidCapture={isValidCapture}
+        promotePawn={promotePawn}
       />)
   };
 
@@ -192,7 +230,54 @@ const ChessBoard = () => {
     );
   };
 
-  return <div style={{ width: "484px" }}>{renderBoard()}</div>;
+  return (
+    <div style={{ width: "484px" }}>
+      {renderBoard()}
+      <Modal
+        open={open}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h4" component="h2" textAlign="center" mb="10px">
+            Promote Pawn
+          </Typography>
+          <Divider />
+          {boardState.currentPlayer === 'white' ? (
+            <Stack direction="row" justifyContent="center">
+              <Button onClick={() => selectPromotionPiece({ piece: "queen", player: "white" })}>
+                <img src="/chess-pieces/white-queen.png" alt="White Queen" />
+              </Button>
+              <Button onClick={() => selectPromotionPiece({ piece: "rook", player: "white" })}>
+                <img src="/chess-pieces/white-rook.png" alt="White Rook" />
+              </Button>
+              <Button>
+                <img src="/chess-pieces/white-knight.png" alt="White Knight" />
+              </Button>
+              <Button>
+                <img src="/chess-pieces/white-bishop.png" alt="White Bishop" />
+              </Button>
+            </Stack>
+          ) : (
+            <Stack direction="row" justifyContent="center">
+            <Button>
+              <img src="/chess-pieces/black-queen.png" alt="Black Queen" />
+            </Button>
+            <Button>
+              <img src="/chess-pieces/black-rook.png" alt="Black Rook" />
+            </Button>
+            <Button>
+              <img src="/chess-pieces/black-knight.png" alt="Black Knight" />
+            </Button>
+            <Button>
+              <img src="/chess-pieces/black-bishop.png" alt="Black Bishop" />
+            </Button>
+          </Stack>
+          )}
+        </Box>
+      </Modal>
+    </div>
+  );
 };
 
 export default ChessBoard;

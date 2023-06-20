@@ -8,6 +8,7 @@ const Piece = ({
   boardState,
   setBoardState,
   isValidCapture,
+  promotePawn
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -472,7 +473,7 @@ const Piece = ({
     let previousBoardState = { ...boardState };
     delete previousBoardState.board[square];
     delete previousBoardState.board[boardState.validMoves.pieceSquare];
-    const updatedBoardState = {
+    let updatedBoardState = {
       ...previousBoardState,
       currentPlayer:
       previousBoardState.currentPlayer === "white" ? "black" : "white",
@@ -484,9 +485,17 @@ const Piece = ({
       updatedBoardState.board[square].firstMove = false;
     }
 
+    // check for pawn promotion 
+    // check for pawn promotion 
+    if (updatedBoardState.board[square].piece === 'pawn' && (square[1] == 8 || square[1] == 1)) {
+      promotePawn(updatedBoardState, square);
+      // setBoardState(updatedBoardState);
+    } else {
+      setBoardState(updatedBoardState);
+    }
+
     updatedBoardState.validMoves.possibleMoves = [];
     updatedBoardState.validMoves.possibleCaptures = [];
-    setBoardState(updatedBoardState);
   };
 
   const pieceStyle = pieceStyles[piece.player][piece.piece];
