@@ -1,4 +1,4 @@
-import ChessBoard from "./components/ChessBoard";
+import ChessBoard from "./components/ChessBoard/ChessBoard";
 import { Stack } from "@mui/material";
 import './App.css'
 
