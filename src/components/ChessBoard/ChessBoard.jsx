@@ -52,7 +52,7 @@ const ChessBoard = () => {
   });
   const [open, setOpen] = useState(false);
   const [promotionSquare, setPromotionSquare] = useState(null);
-  const [check, setCheck] = useState(false);
+  const [inCheckStatus, setInCheckStatus] = useState(false);
 
   console.log(boardState);
 
@@ -96,14 +96,84 @@ const ChessBoard = () => {
       // check for check
       if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState)) {
         console.log("major major we have a check")
-        setCheck(true);
+
+        if (isGameOver(square, updatedBoardState.board[square], updatedBoardState)) {
+
+        }
+        setInCheckStatus(true);
       }
+
+      if (isGameOver(square, updatedBoardState.board[square], updatedBoardState)) {
+
+      }
+
+      updatedBoardState.validMoves.possibleMoves = [];
+      updatedBoardState.validMoves.possibleCaptures = [];
       setBoardState(updatedBoardState);
     }
-
-    updatedBoardState.validMoves.possibleMoves = [];
-    updatedBoardState.validMoves.possibleCaptures = [];
   };
+
+  const isGameOver = (squareCausingCheck, pieceCausingCheck, updatedBoardState) => {
+    let isGameOver = false;
+    console.log("piece in is game over", pieceCausingCheck)
+    console.log("board state in isgameover", updatedBoardState)
+    console.log("square cuasing check", squareCausingCheck)
+    let possibleMoves;
+
+    // get all moves
+    for (let position in updatedBoardState.board) {
+      if (updatedBoardState.board[position].player === updatedBoardState.currentPlayer) {
+          switch(updatedBoardState.board[position].piece) {
+            case "queen":
+              // console.log("current position to find moves", position);
+              // console.log("current piece to find moves", updatedBoardState.board[position].piece)
+              let queenMoves = getQueenMoves(position, updatedBoardState.board[position]);
+
+              // console.log(queenMoves)
+              possibleMoves = {...queenMoves, piece: updatedBoardState.board[position]};
+              break;
+            case "rook":
+              let rookMoves = getRookMoves(position, updatedBoardState.board[position]);
+              
+              // console.log(rookMoves)
+              possibleMoves = {...rookMoves, piece: updatedBoardState.board[position]};
+              break;
+            case "knight":
+              let knightMoves = getKnightMoves(position, updatedBoardState.board[position]);
+
+              // console.log(knightMoves);
+              possibleMoves = {...knightMoves, piece: updatedBoardState.board[position]};
+              break;
+            case "bishop":
+              let bishopMoves = getBishopMoves(position, updatedBoardState.board[position]);
+
+              // console.log(bishopMoves);
+              possibleMoves = {...bishopMoves, piece: updatedBoardState.board[position]};
+              break;
+            case "pawn":
+              let pawnMoves = getPawnMoves(position, updatedBoardState.board[position].player);
+
+              // console.log(pawnMoves);
+              possibleMoves = {...pawnMoves, piece: updatedBoardState.board[position]};
+              break;
+          }
+
+          console.log("possible moves", possibleMoves)
+          
+          if (possibleMoves.captures && possibleMoves.captures.includes(squareCausingCheck)) {
+            console.log("piece can be captured");
+            isGameOver = false;
+            break;
+          } else {
+            possibleMoves = {}
+          }
+      }
+
+      // console.log(possibleMoves)
+    }
+
+    return isGameOver;
+  }
 
   const isThisMoveACheck = (square, piece, updatedBoardState) => {
     let nextMoves = [];
@@ -259,7 +329,7 @@ const ChessBoard = () => {
 
     // Find valid moves and captures moving right
     for (let i = Number(col) + 1; i <= 8; i++) {
-      console.log(i + row);
+      // console.log(i + row);
       if (
         boardState.board.hasOwnProperty(i + row) &&
         boardState.board[i + row].player === piece.player
@@ -278,7 +348,7 @@ const ChessBoard = () => {
 
     // Find valid moves and captures moving left
     for (let i = Number(col) - 1; i >= 1; i--) {
-      console.log(i + row);
+      // console.log(i + row);
       if (
         boardState.board.hasOwnProperty(i + row) &&
         boardState.board[i + row].player === piece.player
@@ -722,7 +792,7 @@ const ChessBoard = () => {
 
   return (
     <div style={{ width: "484px" }}>
-      {check && <Typography variant="h5" textAlign="center">Check!</Typography>}
+      {inCheckStatus && <Typography variant="h5" textAlign="center">Check!</Typography>}
       {renderBoard()}
       <PawnPromotionModal
         boardState={boardState}
