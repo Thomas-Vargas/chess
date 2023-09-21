@@ -95,18 +95,21 @@ const ChessBoard = () => {
       if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState)) {
         console.log("major major we have a check");
 
+        const clonedBoardState = _.cloneDeep(updatedBoardState);
         // check if game is over
-        // if (isGameOver(square, updatedBoardState.board[square], updatedBoardState)) {
-        // }
+        if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
+          console.log("game over chump");
+        } else {
+          console.log("the show goes on");
+        }
 
         // save check status to generate valid moves for escaping check
         setInCheckStatus(true);
       }
 
-      const clonedBoardState = _.cloneDeep(updatedBoardState);
       // only for testing, remove later
-      if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
-      }
+      // if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
+      // }
 
       updatedBoardState.validMoves.possibleMoves = [];
       updatedBoardState.validMoves.possibleCaptures = [];
@@ -117,16 +120,15 @@ const ChessBoard = () => {
   };
 
   const isGameOver = (squareCausingCheck, pieceCausingCheck, updatedBoardState) => {
-    let isGameOver = false;
-    console.log("piece in is game over", pieceCausingCheck);
-    console.log("board state in isgameover", updatedBoardState);
-    console.log("square cuasing check", squareCausingCheck);
+    let isGameOver = true;
+    // console.log("piece in is game over", pieceCausingCheck);
+    // console.log("board state in isgameover", updatedBoardState);
+    // console.log("square cuasing check", squareCausingCheck);
     let possibleMoves;
 
     // get all moves
     for (let position in updatedBoardState.board) {
       if (updatedBoardState.board[position].player === updatedBoardState.currentPlayer) {
-
         possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
 
         console.log("possible moves", possibleMoves);
@@ -161,11 +163,19 @@ const ChessBoard = () => {
 
             // use test board state to see if it blocks check
             // find legal moves for piece that made the check
-
-
             // check if it can still capture the king
             const checkPieceMoves = getPieceMoves(squareCausingCheck, pieceCausingCheck, testBoardState);
-            console.log("checkPieceMoves:", checkPieceMoves);
+
+            // get correct king
+            const kingPosition = getKingPosition(testBoardState, pieceCausingCheck.player);
+
+            // console.log("king position", kingPosition);
+            // console.log("checkPieceMoves:", checkPieceMoves);
+
+            if (!checkPieceMoves.captures.includes(kingPosition)) {
+              isGameOver = false;
+              break;
+            }
           }
         }
         possibleMoves = {};
@@ -174,18 +184,18 @@ const ChessBoard = () => {
 
     return isGameOver;
   };
-  
+
   const getKingPosition = (boardState, player) => {
     for (let key in boardState.board) {
       if (boardState.board[key].piece === "king" && boardState.board[key].player !== player) {
         return key;
       }
     }
-  }
+  };
 
   const getPieceMoves = (square, pieceObj, boardState) => {
-    console.log("square", square);
-    console.log(pieceObj)
+    // console.log("square", square);
+    // console.log(pieceObj)
     let possibleMoves;
     switch (pieceObj.piece) {
       case "queen":
@@ -234,8 +244,8 @@ const ChessBoard = () => {
         break;
     }
 
-    return possibleMoves
-  }
+    return possibleMoves;
+  };
 
   const isThisMoveACheck = (square, piece, updatedBoardState) => {
     let nextMoves = [];
@@ -262,7 +272,7 @@ const ChessBoard = () => {
     console.log("next moves", nextMoves);
 
     // find position of opponent king - refactor to function
-    let kingPosition = getKingPosition(updatedBoardState, piece.player)
+    let kingPosition = getKingPosition(updatedBoardState, piece.player);
 
     console.log("king position", kingPosition);
 
@@ -540,17 +550,39 @@ const ChessBoard = () => {
 
     if (color === "white") {
       // check for possible castle right and left
-      if (!boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) && !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) && piece.firstMove === true && boardState.board["81"].firstMove === true) {
+      if (
+        !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
+        piece.firstMove === true &&
+        boardState.board["81"].firstMove === true
+      ) {
         castle.push(`${Number(col) + 2}` + row);
       }
-      if (!boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) && !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) && !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) && piece.firstMove === true && boardState.board["11"].firstMove === true) {
+      if (
+        !boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
+        piece.firstMove === true &&
+        boardState.board["11"].firstMove === true
+      ) {
         castle.push(`${Number(col) - 2}` + row);
       }
     } else if (color === "black") {
-      if (!boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) && !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) && piece.firstMove === true && boardState.board["88"].firstMove === true) {
+      if (
+        !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
+        piece.firstMove === true &&
+        boardState.board["88"].firstMove === true
+      ) {
         castle.push(`${Number(col) + 2}` + row);
       }
-      if (!boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) && !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) && !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) && piece.firstMove === true && boardState.board["18"].firstMove === true) {
+      if (
+        !boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
+        piece.firstMove === true &&
+        boardState.board["18"].firstMove === true
+      ) {
         castle.push(`${Number(col) - 2}` + row);
       }
     }
@@ -694,7 +726,27 @@ const ChessBoard = () => {
     }
 
     // Render the Piece component and pass the necessary props
-    return <Piece piece={piece} color={piece.player} className={`${isDark ? "dark" : "light"}-square`} square={square} boardState={boardState} setBoardState={setBoardState} isValidCapture={isValidCapture} promotePawn={promotePawn} getPawnMoves={getPawnMoves} getBishopMoves={getBishopMoves} getKnightMoves={getKnightMoves} getRookMoves={getRookMoves} getQueenMoves={getQueenMoves} getKingMoves={getKingMoves} />;
+    return (
+      <Piece
+        piece={piece}
+        color={piece.player}
+        className={`${isDark ? "dark" : "light"}-square`}
+        square={square}
+        boardState={boardState}
+        setBoardState={setBoardState}
+        isValidCapture={isValidCapture}
+        promotePawn={promotePawn}
+        getPawnMoves={getPawnMoves}
+        getBishopMoves={getBishopMoves}
+        getKnightMoves={getKnightMoves}
+        getRookMoves={getRookMoves}
+        getQueenMoves={getQueenMoves}
+        getKingMoves={getKingMoves}
+        setInCheckStatus={setInCheckStatus}
+        isGameOver={isGameOver}
+        isThisMoveACheck={isThisMoveACheck}
+      />
+    );
   };
 
   const renderRow = (row) => {

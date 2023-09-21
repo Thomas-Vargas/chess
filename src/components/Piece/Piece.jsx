@@ -1,4 +1,5 @@
 import React from "react";
+import _ from "lodash";
 
 const Piece = ({
   piece,
@@ -14,7 +15,10 @@ const Piece = ({
   getKnightMoves,
   getPawnMoves,
   getRookMoves,
-  getQueenMoves
+  getQueenMoves,
+  isThisMoveACheck,
+  isGameOver,
+  setInCheckStatus
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -179,6 +183,25 @@ const Piece = ({
       promotePawn(updatedBoardState, square);
       // setBoardState(updatedBoardState);
     } else {
+
+      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState)) {
+        console.log("major major we have a check");
+
+        const clonedBoardState = _.cloneDeep(updatedBoardState);
+        // check if game is over
+        if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
+          console.log("game over chump");
+        } else {
+          console.log("the show goes on");
+        }
+
+        // save check status to generate valid moves for escaping check
+        setInCheckStatus(true);
+      }
+
+      // only for testing, remove later
+      // if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
+      // }
       setBoardState(updatedBoardState);
     }
 
