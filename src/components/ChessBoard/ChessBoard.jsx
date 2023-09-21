@@ -185,6 +185,66 @@ const ChessBoard = () => {
     return isGameOver;
   };
 
+  const isPieceProtected = (square, piece, updatedBoardState) => {
+    let isPieceProtected = false;
+    let possibleMoves;
+
+        // get all moves
+        for (let position in updatedBoardState.board) {
+          if (updatedBoardState.board[position].player === updatedBoardState.currentPlayer) {
+            possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
+    
+            console.log("possible moves", possibleMoves);
+    
+            // check if piece can be captured
+            if (possibleMoves?.captures && possibleMoves.captures.includes(square)) {
+              console.log("piece can be captured");
+              isGameOver = false;
+              break;
+            }
+    
+            // check if move can block check
+            if (possibleMoves?.moves) {
+              for (let move of possibleMoves.moves) {
+                let previousSquare = position;
+                // console.log("piece making the move", possibleMoves.piece);
+                // console.log("possible move to avoid mate", move);
+                // console.log("previous square", previousSquare);
+    
+                // create test board state modeling the move as made
+                let previousBoardState = _.cloneDeep(updatedBoardState);
+                //remove previous square
+                delete previousBoardState.board[previousSquare];
+                // add new move
+                let testBoardState = {
+                  ...previousBoardState,
+                  currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
+                };
+                testBoardState.board[move] = possibleMoves.piece;
+    
+                // console.log("new board state with test move:", testBoardState);
+    
+                // use test board state to see if it blocks check
+                // find legal moves for piece that made the check
+                // check if it can still capture the king
+                const checkPieceMoves = getPieceMoves(square, piece, testBoardState);
+    
+                // console.log("king position", kingPosition);
+                // console.log("checkPieceMoves:", checkPieceMoves);
+    
+                // if (!checkPieceMoves.captures.includes(kingPosition)) {
+                //   isGameOver = false;
+                //   break;
+                // }
+              }
+            }
+            possibleMoves = {};
+          }
+        }
+    
+        return isGameOver;
+  }
+
   const getKingPosition = (boardState, player) => {
     for (let key in boardState.board) {
       if (boardState.board[key].piece === "king" && boardState.board[key].player !== player) {
@@ -242,6 +302,14 @@ const ChessBoard = () => {
           piece: pieceObj,
         };
         break;
+      case "king":
+        let kingMoves = getKingMoves(square, pieceObj, pieceObj.player, boardState);
+
+        possibleMoves = {
+          ...kingMoves,
+          piece: pieceObj,
+        };
+        break;
     }
 
     return possibleMoves;
@@ -276,7 +344,7 @@ const ChessBoard = () => {
 
     console.log("king position", kingPosition);
 
-    if (nextMoves.captures.includes(kingPosition)) {
+    if (nextMoves.captures && nextMoves.captures.includes(kingPosition)) {
       return true;
     } else {
       return false;
@@ -288,39 +356,71 @@ const ChessBoard = () => {
     const row = square[1];
     const moves = [];
     const captures = [];
-
+    const selfCaptures = [];
+  
     if (player === "white") {
-      //check for valid move
+      // Check for valid move
       if (!boardState.board.hasOwnProperty(col + (Number(row) + 1))) {
         moves.push(col + (Number(row) + 1));
         if (!boardState.board.hasOwnProperty(col + (Number(row) + 2)) && row == 2) {
           moves.push(col + (Number(row) + 2));
         }
       }
-      // check for valid capture
-      if (boardState.board.hasOwnProperty(Number(`${Number(col) + 1}` + `${Number(row) + 1}`)) && boardState.board[Number(`${Number(col) + 1}` + `${Number(row) + 1}`)].player != "white") {
-        captures.push(`${Number(col) + 1}` + `${Number(row) + 1}`);
+  
+      // Check for valid capture in front of the pawn
+      if (
+        boardState.board.hasOwnProperty(Number(`${Number(col) + 1}` + `${Number(row) + 1}`))
+      ) {
+        if (boardState.board[Number(`${Number(col) + 1}` + `${Number(row) + 1}`)].player !== "white") {
+          captures.push(`${Number(col) + 1}` + `${Number(row) + 1}`);
+        } else {
+          selfCaptures.push(`${Number(col) + 1}` + `${Number(row) + 1}`);
+        }
       }
-      if (boardState.board.hasOwnProperty(Number(`${Number(col) - 1}` + `${Number(row) + 1}`)) && boardState.board[Number(`${Number(col) - 1}` + `${Number(row) + 1}`)].player != "white") {
-        captures.push(`${Number(col) - 1}` + `${Number(row) + 1}`);
+  
+      if (
+        boardState.board.hasOwnProperty(Number(`${Number(col) - 1}` + `${Number(row) + 1}`))
+      ) {
+        if (boardState.board[Number(`${Number(col) - 1}` + `${Number(row) + 1}`)].player !== "white") {
+          captures.push(`${Number(col) - 1}` + `${Number(row) + 1}`);
+        } else {
+          selfCaptures.push(`${Number(col) - 1}` + `${Number(row) + 1}`);
+        }
       }
     }
+  
     if (player === "black") {
+      // Check for valid move
       if (!boardState.board.hasOwnProperty(col + (Number(row) - 1))) {
         moves.push(col + (Number(row) - 1));
         if (!boardState.board.hasOwnProperty(col + (Number(row) - 2)) && row == 7) {
           moves.push(col + (Number(row) - 2));
         }
       }
-      // check for valid capture
-      if (boardState.board.hasOwnProperty(Number(`${Number(col) + 1}` + `${Number(row) - 1}`)) && boardState.board[Number(`${Number(col) + 1}` + `${Number(row) - 1}`)].player != "black") {
-        captures.push(`${Number(col) + 1}` + `${Number(row) - 1}`);
+  
+      // Check for valid capture in front of the pawn
+      if (
+        boardState.board.hasOwnProperty(Number(`${Number(col) + 1}` + `${Number(row) - 1}`))
+      ) {
+        if (boardState.board[Number(`${Number(col) + 1}` + `${Number(row) - 1}`)].player !== "black") {
+          captures.push(`${Number(col) + 1}` + `${Number(row) - 1}`);
+        } else {
+          selfCaptures.push(`${Number(col) + 1}` + `${Number(row) - 1}`);
+        }
       }
-      if (boardState.board.hasOwnProperty(Number(`${Number(col) - 1}` + `${Number(row) - 1}`)) && boardState.board[Number(`${Number(col) - 1}` + `${Number(row) - 1}`)].player != "black") {
-        captures.push(`${Number(col) - 1}` + `${Number(row) - 1}`);
+  
+      if (
+        boardState.board.hasOwnProperty(Number(`${Number(col) - 1}` + `${Number(row) - 1}`))
+      ) {
+        if (boardState.board[Number(`${Number(col) - 1}` + `${Number(row) - 1}`)].player !== "black") {
+          captures.push(`${Number(col) - 1}` + `${Number(row) - 1}`);
+        } else {
+          selfCaptures.push(`${Number(col) - 1}` + `${Number(row) - 1}`);
+        }
       }
     }
-    return { moves, captures };
+  
+    return { moves, captures, selfCaptures };
   };
 
   const getRookMoves = (square, piece, boardState) => {
@@ -328,58 +428,69 @@ const ChessBoard = () => {
     const row = square[1];
     const moves = [];
     const captures = [];
-
+    const selfCaptures = [];
+  
     // Find valid moves and captures moving forward
     for (let i = Number(row) + 1; i <= 8; i++) {
-      if (boardState.board.hasOwnProperty(col + i) && boardState.board[col + i].player === piece.player) {
-        break;
+      const targetSquare = col + i;
+      if (boardState.board.hasOwnProperty(targetSquare)) {
+        if (boardState.board[targetSquare].player === piece.player) {
+          selfCaptures.push(targetSquare);
+          break;
+        } else {
+          captures.push(targetSquare);
+          break;
+        }
       }
-      if (boardState.board.hasOwnProperty(col + i) && boardState.board[col + i].player !== piece.player) {
-        captures.push(col + i);
-        break;
-      }
-      moves.push(col + i);
+      moves.push(targetSquare);
     }
-
-    //find valid moves and captures moving back
+  
+    // Find valid moves and captures moving back
     for (let i = Number(row) - 1; i >= 1; i--) {
-      if (boardState.board.hasOwnProperty(col + i) && boardState.board[col + i].player === piece.player) {
-        break;
+      const targetSquare = col + i;
+      if (boardState.board.hasOwnProperty(targetSquare)) {
+        if (boardState.board[targetSquare].player === piece.player) {
+          selfCaptures.push(targetSquare);
+          break;
+        } else {
+          captures.push(targetSquare);
+          break;
+        }
       }
-      if (boardState.board.hasOwnProperty(col + i) && boardState.board[col + i].player !== piece.player) {
-        captures.push(col + i);
-        break;
-      }
-      moves.push(col + i);
+      moves.push(targetSquare);
     }
-
+  
     // Find valid moves and captures moving right
     for (let i = Number(col) + 1; i <= 8; i++) {
-      // console.log(i + row);
-      if (boardState.board.hasOwnProperty(i + row) && boardState.board[i + row].player === piece.player) {
-        break;
+      const targetSquare = i + row;
+      if (boardState.board.hasOwnProperty(targetSquare)) {
+        if (boardState.board[targetSquare].player === piece.player) {
+          selfCaptures.push(targetSquare);
+          break;
+        } else {
+          captures.push(targetSquare);
+          break;
+        }
       }
-      if (boardState.board.hasOwnProperty(i + row) && boardState.board[i + row].player !== piece.player) {
-        captures.push(i + row);
-        break;
-      }
-      moves.push(i + row);
+      moves.push(targetSquare);
     }
-
+  
     // Find valid moves and captures moving left
     for (let i = Number(col) - 1; i >= 1; i--) {
-      // console.log(i + row);
-      if (boardState.board.hasOwnProperty(i + row) && boardState.board[i + row].player === piece.player) {
-        break;
+      const targetSquare = i + row;
+      if (boardState.board.hasOwnProperty(targetSquare)) {
+        if (boardState.board[targetSquare].player === piece.player) {
+          selfCaptures.push(targetSquare);
+          break;
+        } else {
+          captures.push(targetSquare);
+          break;
+        }
       }
-      if (boardState.board.hasOwnProperty(i + row) && boardState.board[i + row].player !== piece.player) {
-        captures.push(i + row);
-        break;
-      }
-      moves.push(i + row);
+      moves.push(targetSquare);
     }
-
-    return { moves, captures };
+  
+    return { moves, captures, selfCaptures };
   };
 
   const getBishopMoves = (square, piece, boardState) => {
@@ -387,6 +498,7 @@ const ChessBoard = () => {
     const row = square[1];
     const moves = [];
     const captures = [];
+    const selfCaptures = [];
 
     // Find valid moves and captures moving up/right
     for (let i = 1; i <= 8; i++) {
@@ -400,6 +512,7 @@ const ChessBoard = () => {
 
       if (boardState.board.hasOwnProperty(nextSquare)) {
         if (boardState.board[nextSquare].player === piece.player) {
+          selfCaptures.push(nextSquare);
           break;
         } else {
           captures.push(nextSquare);
@@ -422,6 +535,7 @@ const ChessBoard = () => {
 
       if (boardState.board.hasOwnProperty(nextSquare)) {
         if (boardState.board[nextSquare].player === piece.player) {
+          selfCaptures.push(nextSquare);
           break;
         } else {
           captures.push(nextSquare);
@@ -444,6 +558,7 @@ const ChessBoard = () => {
 
       if (boardState.board.hasOwnProperty(nextSquare)) {
         if (boardState.board[nextSquare].player === piece.player) {
+          selfCaptures.push(nextSquare);
           break;
         } else {
           captures.push(nextSquare);
@@ -466,6 +581,7 @@ const ChessBoard = () => {
 
       if (boardState.board.hasOwnProperty(nextSquare)) {
         if (boardState.board[nextSquare].player === piece.player) {
+          selfCaptures.push(nextSquare);
           break;
         } else {
           captures.push(nextSquare);
@@ -476,7 +592,7 @@ const ChessBoard = () => {
       }
     }
 
-    return { moves, captures };
+    return { moves, captures, selfCaptures };
   };
 
   const getKnightMoves = (square, piece, boardState) => {
@@ -484,39 +600,44 @@ const ChessBoard = () => {
     const row = square[1];
     const moves = [];
     const captures = [];
+    const selfCaptures = [];
     const potentialMoves = [];
-
-    //moves up
+  
+    // Moves up
     potentialMoves.push(`${Number(col) + 1}${Number(row) + 2}`);
     potentialMoves.push(`${Number(col) - 1}${Number(row) + 2}`);
     potentialMoves.push(`${Number(col) + 2}${Number(row) + 1}`);
     potentialMoves.push(`${Number(col) - 2}${Number(row) + 1}`);
-    //moves down
+  
+    // Moves down
     potentialMoves.push(`${Number(col) - 1}${Number(row) - 2}`);
     potentialMoves.push(`${Number(col) + 1}${Number(row) - 2}`);
     potentialMoves.push(`${Number(col) - 2}${Number(row) - 1}`);
     potentialMoves.push(`${Number(col) + 2}${Number(row) - 1}`);
-
+  
     const validMoves = potentialMoves.filter((move) => Number(move) >= 10 && Number(move) <= 88 && !move.includes("0"));
-
+  
     for (let move of validMoves) {
       if (boardState.board.hasOwnProperty(move) && boardState.board[move].player !== piece.player) {
         captures.push(move);
       } else if (!boardState.board.hasOwnProperty(move)) {
         moves.push(move);
+      } else {
+        selfCaptures.push(move);
       }
     }
-
-    return { moves, captures };
-  };
+  
+    return { moves, captures, selfCaptures };
+  }; 
 
   const getQueenMoves = (square, piece, boardState) => {
     const diagonalMoves = getBishopMoves(square, piece, boardState);
     const horizontalAndVerticalMoves = getRookMoves(square, piece, boardState);
     const moves = [...diagonalMoves.moves, ...horizontalAndVerticalMoves.moves];
     const captures = [...diagonalMoves.captures, ...horizontalAndVerticalMoves.captures];
+    const selfCaptures = [...diagonalMoves.selfCaptures, ...horizontalAndVerticalMoves.selfCaptures];
 
-    return { moves, captures };
+    return { moves, captures, selfCaptures };
   };
 
   const getKingMoves = (square, piece, color, boardState) => {
