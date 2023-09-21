@@ -93,23 +93,20 @@ const ChessBoard = () => {
     } else {
       // check for check
       if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState)) {
+        // save check status to generate valid moves for escaping check
+        setInCheckStatus(true);
         console.log("major major we have a check");
 
         const clonedBoardState = _.cloneDeep(updatedBoardState);
         // check if game is over
-        if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
+        const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
+        console.log("is this checkmate val", isThisCheckmate);
+        if (isThisCheckmate) {
           console.log("game over chump");
         } else {
           console.log("the show goes on");
         }
-
-        // save check status to generate valid moves for escaping check
-        setInCheckStatus(true);
       }
-
-      // only for testing, remove later
-      // if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
-      // }
 
       updatedBoardState.validMoves.possibleMoves = [];
       updatedBoardState.validMoves.possibleCaptures = [];
@@ -121,9 +118,6 @@ const ChessBoard = () => {
 
   const isGameOver = (squareCausingCheck, pieceCausingCheck, updatedBoardState) => {
     let isGameOver = true;
-    // console.log("piece in is game over", pieceCausingCheck);
-    // console.log("board state in isgameover", updatedBoardState);
-    // console.log("square cuasing check", squareCausingCheck);
     let possibleMoves;
 
     // get all moves
@@ -144,9 +138,6 @@ const ChessBoard = () => {
         if (possibleMoves?.moves) {
           for (let move of possibleMoves.moves) {
             let previousSquare = position;
-            // console.log("piece making the move", possibleMoves.piece);
-            // console.log("possible move to avoid mate", move);
-            // console.log("previous square", previousSquare);
 
             // create test board state modeling the move as made
             let previousBoardState = _.cloneDeep(updatedBoardState);
@@ -168,9 +159,6 @@ const ChessBoard = () => {
 
             // get correct king
             const kingPosition = getKingPosition(testBoardState, pieceCausingCheck.player);
-
-            // console.log("king position", kingPosition);
-            // console.log("checkPieceMoves:", checkPieceMoves);
 
             if (!checkPieceMoves.captures.includes(kingPosition)) {
               isGameOver = false;
@@ -618,7 +606,9 @@ const ChessBoard = () => {
     potentialMoves.push(`${Number(col) - 1}` + `${Number(row) + 1}`);
     potentialMoves.push(`${Number(col) - 1}` + `${Number(row) - 1}`);
 
-    const validMoves = potentialMoves.filter((move) => Number(move) >= 10 && Number(move) <= 88 && !move.includes("0"));
+    const validMoves = potentialMoves.filter(
+      (move) => Number(move) >= 10 && Number(move) <= 88 && !move.includes("0") && !move.includes("9")
+    );
 
     for (let move of validMoves) {
       if (boardState.board.hasOwnProperty(move) && boardState.board[move].player !== piece.player) {
