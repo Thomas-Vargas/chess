@@ -185,7 +185,7 @@ const Piece = ({
       // setBoardState(updatedBoardState);
     } else {
 
-      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState)) {
+      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
         console.log("major major we have a check");
 
         const clonedBoardState = _.cloneDeep(updatedBoardState);
@@ -198,16 +198,16 @@ const Piece = ({
 
         // save check status to generate valid moves for escaping check
         setInCheckStatus(true);
+      } else {
+        setInCheckStatus(false);
       }
 
-      // only for testing, remove later
-      // if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
-      // }
+      updatedBoardState.validMoves.possibleMoves = [];
+      updatedBoardState.validMoves.possibleCaptures = [];
+      
       setBoardState(updatedBoardState);
     }
 
-    updatedBoardState.validMoves.possibleMoves = [];
-    updatedBoardState.validMoves.possibleCaptures = [];
   };
 
   const pieceStyle = pieceStyles[piece.player][piece.piece];

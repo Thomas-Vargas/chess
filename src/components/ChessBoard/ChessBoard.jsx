@@ -55,8 +55,10 @@ const ChessBoard = () => {
   const [open, setOpen] = useState(false);
   const [promotionSquare, setPromotionSquare] = useState(null);
   const [inCheckStatus, setInCheckStatus] = useState(false);
+  const [checkmate, setCheckmate] = useState(false);
 
-  console.log(boardState);
+  console.log("board state", boardState);
+  console.log("inCheckStatus", inCheckStatus);
 
   useEffect(() => {
     // console.log("Board state updated:", boardState);
@@ -65,55 +67,57 @@ const ChessBoard = () => {
   const makeMove = (square) => {
     // Create a copy of the boardState object
     let previousBoardState = { ...boardState };
-
+  
     // Remove the key from the copied boardState object
     const previousPieceSquare = boardState.validMoves.pieceSquare;
     delete previousBoardState.board[previousPieceSquare];
-
+  
     let updatedBoardState = {
       ...previousBoardState,
       currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
     };
     updatedBoardState.board[square] = boardState.validMoves.piece;
-
+  
     // the piece - yes
     console.log("piece making the move?", updatedBoardState.board[square]);
     // the square it is now on
-    console.log("square after move is made?", square);
-
-    // change first move property to false on first move
+    console.log("square after the move is made?", square);
+  
+    // change first move property to false on the first move
     if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
       updatedBoardState.board[square].firstMove = false;
     }
-
+  
     // check for pawn promotion
     if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
       promotePawn(updatedBoardState, square);
       // setBoardState(updatedBoardState);
     } else {
       // check for check
-      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState)) {
+      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
         // save check status to generate valid moves for escaping check
         setInCheckStatus(true);
         console.log("major major we have a check");
-
+  
         const clonedBoardState = _.cloneDeep(updatedBoardState);
-        // check if game is over
+        // check if the game is over
         const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
         console.log("is this checkmate val", isThisCheckmate);
+  
         if (isThisCheckmate) {
           console.log("game over chump");
         } else {
           console.log("the show goes on");
         }
+      } else {
+        setInCheckStatus(false);
       }
-
-      updatedBoardState.validMoves.possibleMoves = [];
-      updatedBoardState.validMoves.possibleCaptures = [];
-
-      // update board state with new move
-      setBoardState(updatedBoardState);
     }
+  
+    updatedBoardState.validMoves.possibleMoves = [];
+    updatedBoardState.validMoves.possibleCaptures = [];
+  
+    setBoardState(updatedBoardState);
   };
 
   const isGameOver = (squareCausingCheck, pieceCausingCheck, updatedBoardState) => {
