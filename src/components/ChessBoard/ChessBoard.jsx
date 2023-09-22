@@ -150,8 +150,6 @@ const ChessBoard = () => {
             };
             testBoardState.board[move] = possibleMoves.piece;
 
-            // console.log("new board state with test move:", testBoardState);
-
             // use test board state to see if it blocks check
             // find legal moves for piece that made the check
             // check if it can still capture the king
@@ -160,6 +158,7 @@ const ChessBoard = () => {
             // get correct king
             const kingPosition = getKingPosition(testBoardState, pieceCausingCheck.player);
 
+            // check can be blocked
             if (!checkPieceMoves.captures.includes(kingPosition)) {
               isGameOver = false;
               break;
@@ -306,243 +305,291 @@ const ChessBoard = () => {
     }
   };
 
-  const getPawnMoves = (square, player, boardState) => {
+  const amIStillInCheck = (updatedBoardState, currentPlayer, isRecursive = false) => {
+    // Find the position of the current player's king
+    const kingPosition = getKingPosition(updatedBoardState, getOpponent(currentPlayer));
+
+    console.log("king position", kingPosition);
+
+    // Get all possible moves for the opponent
+    const opponentMoves = getAllPossibleMovesForPlayer(getOpponent(currentPlayer), updatedBoardState, true);
+
+    console.log("opponent moves", opponentMoves);
+
+    // Check if the opponent can capture the king
+    if (opponentMoves.includes(kingPosition)) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const getAllPossibleMovesForPlayer = (currentPlayer, boardState, isCheckingForCheck = false) => {
+    const allPossibleMoves = [];
+
+    // Iterate through the board to find pieces of the current player
+    for (const square in boardState.board) {
+      const piece = boardState.board[square];
+
+      // Check if the piece belongs to the current player
+      if (piece.player === currentPlayer) {
+        console.log("current player", currentPlayer);
+        // Use the piece-specific move function to get its moves
+        const pieceMoves = getPieceMoves(square, piece, boardState, isCheckingForCheck);
+
+        // Add the moves to the list of all possible moves
+        allPossibleMoves.push(...pieceMoves.moves, ...pieceMoves.captures);
+      }
+    }
+    return allPossibleMoves;
+  };
+
+  const getOpponent = (currentPlayer) => {
+    return currentPlayer === "white" ? "black" : "white";
+  };
+
+  const getPawnMoves = (square, player, boardState, isCheckingForCheck = false) => {
     const col = square[0];
     const row = square[1];
     const moves = [];
     const captures = [];
     const selfCaptures = [];
-
+  
     if (player === "white") {
       // Check for valid move
       if (!boardState.board.hasOwnProperty(col + (Number(row) + 1))) {
-        moves.push(col + (Number(row) + 1));
+        const targetSquare1 = col + (Number(row) + 1);
+        const tempBoardState1 = _.cloneDeep(boardState);
+  
+        // Apply the move to the temporary board state
+        tempBoardState1.board[targetSquare1] = { type: "pawn", player: "white" };
+        delete tempBoardState1.board[square]; // Remove the pawn from its original position
+  
+        if (!isCheckingForCheck || !amIStillInCheck(tempBoardState1, boardState.currentPlayer, true)) {
+          moves.push(targetSquare1);
+        }
+  
         if (!boardState.board.hasOwnProperty(col + (Number(row) + 2)) && row == 2) {
-          moves.push(col + (Number(row) + 2));
+          const targetSquare2 = col + (Number(row) + 2);
+          const tempBoardState2 = _.cloneDeep(boardState);
+  
+          // Apply the move to the temporary board state
+          tempBoardState2.board[targetSquare2] = { type: "pawn", player: "white" };
+          delete tempBoardState2.board[square]; // Remove the pawn from its original position
+  
+          if (!isCheckingForCheck || !amIStillInCheck(tempBoardState2, boardState.currentPlayer, true)) {
+            moves.push(targetSquare2);
+          }
         }
       }
-
+  
       // Check for valid capture in front of the pawn
       if (boardState.board.hasOwnProperty(Number(`${Number(col) + 1}` + `${Number(row) + 1}`))) {
         if (boardState.board[Number(`${Number(col) + 1}` + `${Number(row) + 1}`)].player !== "white") {
-          captures.push(`${Number(col) + 1}` + `${Number(row) + 1}`);
+          const targetSquareCapture1 = `${Number(col) + 1}` + `${Number(row) + 1}`;
+          const tempBoardStateCapture1 = _.cloneDeep(boardState);
+  
+          // Apply the capture to the temporary board state
+          delete tempBoardStateCapture1.board[square];
+          
+          if (!isCheckingForCheck || !amIStillInCheck(tempBoardStateCapture1, boardState.currentPlayer, true)) {
+            captures.push(targetSquareCapture1);
+          }
         } else {
           selfCaptures.push(`${Number(col) + 1}` + `${Number(row) + 1}`);
         }
       }
-
+  
       if (boardState.board.hasOwnProperty(Number(`${Number(col) - 1}` + `${Number(row) + 1}`))) {
         if (boardState.board[Number(`${Number(col) - 1}` + `${Number(row) + 1}`)].player !== "white") {
-          captures.push(`${Number(col) - 1}` + `${Number(row) + 1}`);
+          const targetSquareCapture2 = `${Number(col) - 1}` + `${Number(row) + 1}`;
+          const tempBoardStateCapture2 = _.cloneDeep(boardState);
+  
+          // Apply the capture to the temporary board state
+          delete tempBoardStateCapture2.board[square];
+  
+          if (!isCheckingForCheck || !amIStillInCheck(tempBoardStateCapture2, boardState.currentPlayer, true)) {
+            captures.push(targetSquareCapture2);
+          }
         } else {
           selfCaptures.push(`${Number(col) - 1}` + `${Number(row) + 1}`);
         }
       }
     }
-
+  
     if (player === "black") {
       // Check for valid move
       if (!boardState.board.hasOwnProperty(col + (Number(row) - 1))) {
-        moves.push(col + (Number(row) - 1));
+        const targetSquare1 = col + (Number(row) - 1);
+        const tempBoardState1 = _.cloneDeep(boardState);
+  
+        // Apply the move to the temporary board state
+        tempBoardState1.board[targetSquare1] = { type: "pawn", player: "black" };
+        delete tempBoardState1.board[square]; // Remove the pawn from its original position
+  
+        if (!isCheckingForCheck || !amIStillInCheck(tempBoardState1, boardState.currentPlayer, true)) {
+          moves.push(targetSquare1);
+        }
+  
         if (!boardState.board.hasOwnProperty(col + (Number(row) - 2)) && row == 7) {
-          moves.push(col + (Number(row) - 2));
+          const targetSquare2 = col + (Number(row) - 2);
+          const tempBoardState2 = _.cloneDeep(boardState);
+  
+          // Apply the move to the temporary board state
+          tempBoardState2.board[targetSquare2] = { type: "pawn", player: "black" };
+          delete tempBoardState2.board[square]; // Remove the pawn from its original position
+  
+          if (!isCheckingForCheck || !amIStillInCheck(tempBoardState2, boardState.currentPlayer, true)) {
+            moves.push(targetSquare2);
+          }
         }
       }
-
+  
       // Check for valid capture in front of the pawn
       if (boardState.board.hasOwnProperty(Number(`${Number(col) + 1}` + `${Number(row) - 1}`))) {
         if (boardState.board[Number(`${Number(col) + 1}` + `${Number(row) - 1}`)].player !== "black") {
-          captures.push(`${Number(col) + 1}` + `${Number(row) - 1}`);
+          const targetSquareCapture1 = `${Number(col) + 1}` + `${Number(row) - 1}`;
+          const tempBoardStateCapture1 = _.cloneDeep(boardState);
+  
+          // Apply the capture to the temporary board state
+          delete tempBoardStateCapture1.board[square];
+  
+          if (!isCheckingForCheck || !amIStillInCheck(tempBoardStateCapture1, boardState.currentPlayer, true)) {
+            captures.push(targetSquareCapture1);
+          }
         } else {
           selfCaptures.push(`${Number(col) + 1}` + `${Number(row) - 1}`);
         }
       }
-
+  
       if (boardState.board.hasOwnProperty(Number(`${Number(col) - 1}` + `${Number(row) - 1}`))) {
         if (boardState.board[Number(`${Number(col) - 1}` + `${Number(row) - 1}`)].player !== "black") {
-          captures.push(`${Number(col) - 1}` + `${Number(row) - 1}`);
+          const targetSquareCapture2 = `${Number(col) - 1}` + `${Number(row) - 1}`;
+          const tempBoardStateCapture2 = _.cloneDeep(boardState);
+  
+          // Apply the capture to the temporary board state
+          delete tempBoardStateCapture2.board[square];
+  
+          if (!isCheckingForCheck || !amIStillInCheck(tempBoardStateCapture2, boardState.currentPlayer, true)) {
+            captures.push(targetSquareCapture2);
+          }
         } else {
           selfCaptures.push(`${Number(col) - 1}` + `${Number(row) - 1}`);
         }
       }
     }
+  
+    return { moves, captures, selfCaptures };
+  };
+  
 
+  const getRookMoves = (square, piece, boardState, isCheckingForCheck = false) => {
+    const col = square[0];
+    const row = square[1];
+    const moves = [];
+    const captures = [];
+    const selfCaptures = [];
+  
+    // Define the possible directions a rook can move
+    const directions = [
+      { col: 0, row: 1 }, // Up
+      { col: 0, row: -1 }, // Down
+      { col: 1, row: 0 }, // Right
+      { col: -1, row: 0 }, // Left
+    ];
+  
+    // Calculate potential moves for each direction
+    directions.forEach((direction) => {
+      for (let i = 1; i <= 8; i++) {
+        const nextCol = Number(col) + direction.col * i;
+        const nextRow = Number(row) + direction.row * i;
+        const nextSquare = `${nextCol}${nextRow}`;
+  
+        if (nextCol < 1 || nextCol > 8 || nextRow < 1 || nextRow > 8) {
+          break;
+        }
+  
+        const tempBoardState = _.cloneDeep(boardState);
+  
+        // Apply the move to the temporary board state
+        tempBoardState.board[nextSquare] = piece;
+        delete tempBoardState.board[square]; // Remove the piece from its original position
+  
+        if (boardState.board.hasOwnProperty(nextSquare)) {
+          if (boardState.board[nextSquare].player === piece.player) {
+            selfCaptures.push(nextSquare);
+            break;
+          } else {
+            if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
+              captures.push(nextSquare);
+            }
+          }
+          break; // Stop checking in this direction after capturing an opponent's piece
+        } else {
+          if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
+            moves.push(nextSquare);
+          }
+        }
+      }
+    });
+  
     return { moves, captures, selfCaptures };
   };
 
-  const getRookMoves = (square, piece, boardState) => {
+  const getBishopMoves = (square, piece, boardState, isCheckingForCheck = false) => {
     const col = square[0];
     const row = square[1];
     const moves = [];
     const captures = [];
     const selfCaptures = [];
 
-    // Find valid moves and captures moving forward
-    for (let i = Number(row) + 1; i <= 8; i++) {
-      const targetSquare = col + i;
-      if (boardState.board.hasOwnProperty(targetSquare)) {
-        if (boardState.board[targetSquare].player === piece.player) {
-          selfCaptures.push(targetSquare);
-          break;
-        } else {
-          captures.push(targetSquare);
-          break;
-        }
-      }
-      moves.push(targetSquare);
-    }
+    // Define the possible directions a bishop can move
+    const directions = [
+      { col: 1, row: 1 }, // Up-right
+      { col: -1, row: 1 }, // Up-left
+      { col: -1, row: -1 }, // Down-left
+      { col: 1, row: -1 }, // Down-right
+    ];
 
-    // Find valid moves and captures moving back
-    for (let i = Number(row) - 1; i >= 1; i--) {
-      const targetSquare = col + i;
-      if (boardState.board.hasOwnProperty(targetSquare)) {
-        if (boardState.board[targetSquare].player === piece.player) {
-          selfCaptures.push(targetSquare);
-          break;
-        } else {
-          captures.push(targetSquare);
-          break;
-        }
-      }
-      moves.push(targetSquare);
-    }
+    // Calculate potential moves for each direction
+    directions.forEach((direction) => {
+      for (let i = 1; i <= 8; i++) {
+        const nextCol = Number(col) + direction.col * i;
+        const nextRow = Number(row) + direction.row * i;
+        const nextSquare = `${nextCol}${nextRow}`;
 
-    // Find valid moves and captures moving right
-    for (let i = Number(col) + 1; i <= 8; i++) {
-      const targetSquare = i + row;
-      if (boardState.board.hasOwnProperty(targetSquare)) {
-        if (boardState.board[targetSquare].player === piece.player) {
-          selfCaptures.push(targetSquare);
-          break;
-        } else {
-          captures.push(targetSquare);
+        if (nextCol < 1 || nextCol > 8 || nextRow < 1 || nextRow > 8) {
           break;
         }
-      }
-      moves.push(targetSquare);
-    }
 
-    // Find valid moves and captures moving left
-    for (let i = Number(col) - 1; i >= 1; i--) {
-      const targetSquare = i + row;
-      if (boardState.board.hasOwnProperty(targetSquare)) {
-        if (boardState.board[targetSquare].player === piece.player) {
-          selfCaptures.push(targetSquare);
-          break;
+        const tempBoardState = _.cloneDeep(boardState);
+
+        // Apply the move to the temporary board state
+        tempBoardState.board[nextSquare] = piece;
+        delete tempBoardState.board[square]; // Remove the piece from its original position
+
+        if (boardState.board.hasOwnProperty(nextSquare)) {
+          if (boardState.board[nextSquare].player === piece.player) {
+            selfCaptures.push(nextSquare);
+            break;
+          } else {
+            if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
+              captures.push(nextSquare);
+            }
+          }
+          break; // Stop checking in this direction after capturing an opponent's piece
         } else {
-          captures.push(targetSquare);
-          break;
+          if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
+            moves.push(nextSquare);
+          }
         }
       }
-      moves.push(targetSquare);
-    }
+    });
 
     return { moves, captures, selfCaptures };
   };
 
-  const getBishopMoves = (square, piece, boardState) => {
-    const col = square[0];
-    const row = square[1];
-    const moves = [];
-    const captures = [];
-    const selfCaptures = [];
-
-    // Find valid moves and captures moving up/right
-    for (let i = 1; i <= 8; i++) {
-      const nextCol = Number(col) + i;
-      const nextRow = Number(row) + i;
-      const nextSquare = `${nextCol}${nextRow}`;
-
-      if (nextCol > 8 || nextRow > 8) {
-        break;
-      }
-
-      if (boardState.board.hasOwnProperty(nextSquare)) {
-        if (boardState.board[nextSquare].player === piece.player) {
-          selfCaptures.push(nextSquare);
-          break;
-        } else {
-          captures.push(nextSquare);
-          break;
-        }
-      } else {
-        moves.push(nextSquare);
-      }
-    }
-
-    // Find valid moves and captures moving up/left
-    for (let i = 1; i <= 8; i++) {
-      const nextCol = Number(col) - i;
-      const nextRow = Number(row) + i;
-      const nextSquare = `${nextCol}${nextRow}`;
-
-      if (nextCol < 1 || nextRow > 8) {
-        break;
-      }
-
-      if (boardState.board.hasOwnProperty(nextSquare)) {
-        if (boardState.board[nextSquare].player === piece.player) {
-          selfCaptures.push(nextSquare);
-          break;
-        } else {
-          captures.push(nextSquare);
-          break;
-        }
-      } else {
-        moves.push(nextSquare);
-      }
-    }
-
-    // Find valid moves and captures moving down/left
-    for (let i = 1; i <= 8; i++) {
-      const nextCol = Number(col) - i;
-      const nextRow = Number(row) - i;
-      const nextSquare = `${nextCol}${nextRow}`;
-
-      if (nextCol < 1 || nextRow < 1) {
-        break;
-      }
-
-      if (boardState.board.hasOwnProperty(nextSquare)) {
-        if (boardState.board[nextSquare].player === piece.player) {
-          selfCaptures.push(nextSquare);
-          break;
-        } else {
-          captures.push(nextSquare);
-          break;
-        }
-      } else {
-        moves.push(nextSquare);
-      }
-    }
-
-    // Find valid moves and captures moving down/right
-    for (let i = 1; i <= 8; i++) {
-      const nextCol = Number(col) + i;
-      const nextRow = Number(row) - i;
-      const nextSquare = `${nextCol}${nextRow}`;
-
-      if (nextCol > 8 || nextRow < 1) {
-        break;
-      }
-
-      if (boardState.board.hasOwnProperty(nextSquare)) {
-        if (boardState.board[nextSquare].player === piece.player) {
-          selfCaptures.push(nextSquare);
-          break;
-        } else {
-          captures.push(nextSquare);
-          break;
-        }
-      } else {
-        moves.push(nextSquare);
-      }
-    }
-
-    return { moves, captures, selfCaptures };
-  };
-
-  const getKnightMoves = (square, piece, boardState) => {
+  const getKnightMoves = (square, piece, boardState, isCheckingForCheck = false) => {
     const col = square[0];
     const row = square[1];
     const moves = [];
@@ -565,10 +612,20 @@ const ChessBoard = () => {
     const validMoves = potentialMoves.filter((move) => Number(move) >= 10 && Number(move) <= 88 && !move.includes("0"));
 
     for (let move of validMoves) {
+      const tempBoardState = _.cloneDeep(boardState);
+
+      // Apply the move to the temporary board state
+      tempBoardState.board[move] = piece;
+      delete tempBoardState.board[square]; // Remove the piece from its original position
+
       if (boardState.board.hasOwnProperty(move) && boardState.board[move].player !== piece.player) {
-        captures.push(move);
+        if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
+          captures.push(move);
+        }
       } else if (!boardState.board.hasOwnProperty(move)) {
-        moves.push(move);
+        if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
+          moves.push(move);
+        }
       } else {
         selfCaptures.push(move);
       }
@@ -577,14 +634,31 @@ const ChessBoard = () => {
     return { moves, captures, selfCaptures };
   };
 
-  const getQueenMoves = (square, piece, boardState) => {
-    const diagonalMoves = getBishopMoves(square, piece, boardState);
-    const horizontalAndVerticalMoves = getRookMoves(square, piece, boardState);
+  // !! I can likely refactor this once rook and bishop moves are refactored because all validation will be done by the time moves get here
+  const getQueenMoves = (square, piece, boardState, isCheckingForCheck = false) => {
+    const diagonalMoves = getBishopMoves(square, piece, boardState, isCheckingForCheck);
+    const horizontalAndVerticalMoves = getRookMoves(square, piece, boardState, isCheckingForCheck);
     const moves = [...diagonalMoves.moves, ...horizontalAndVerticalMoves.moves];
     const captures = [...diagonalMoves.captures, ...horizontalAndVerticalMoves.captures];
     const selfCaptures = [...diagonalMoves.selfCaptures, ...horizontalAndVerticalMoves.selfCaptures];
+    let validMoves = [];
 
-    return { moves, captures, selfCaptures };
+    // Iterate through all possible moves
+    for (let move of moves) {
+      // Clone the current board state to create a temporary board state
+      const tempBoardState = _.cloneDeep(boardState);
+
+      // Apply the move to the temporary board state
+      tempBoardState.board[move] = piece;
+      delete tempBoardState.board[square]; // Remove the piece from its original position
+
+      // Check if the move results in the current player being in check
+      if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
+        validMoves.push(move);
+      }
+    }
+
+    return { moves: validMoves, captures, selfCaptures };
   };
 
   const getKingMoves = (square, piece, color, boardState) => {
@@ -821,6 +895,7 @@ const ChessBoard = () => {
         setInCheckStatus={setInCheckStatus}
         isGameOver={isGameOver}
         isThisMoveACheck={isThisMoveACheck}
+        inCheckStatus={inCheckStatus}
       />
     );
   };

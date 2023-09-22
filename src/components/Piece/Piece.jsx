@@ -18,7 +18,8 @@ const Piece = ({
   getQueenMoves,
   isThisMoveACheck,
   isGameOver,
-  setInCheckStatus
+  setInCheckStatus,
+  inCheckStatus
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -75,7 +76,7 @@ const Piece = ({
   const onPieceClick = () => {
     if (piece && piece.player === boardState.currentPlayer) {
       if (piece.piece === "pawn") {
-        const possibleMoves = getPawnMoves(square, piece.player, boardState);
+        const possibleMoves = getPawnMoves(square, piece.player, boardState, inCheckStatus);
         console.log("Possible Pawn moves:", possibleMoves);
         setBoardState({
           ...boardState,
@@ -89,7 +90,7 @@ const Piece = ({
         });
       }
       if (piece.piece === "rook") {
-        const possibleMoves = getRookMoves(square, piece, boardState);
+        const possibleMoves = getRookMoves(square, piece, boardState, inCheckStatus);
         console.log("Possible Rook moves:", possibleMoves);
         setBoardState({
           ...boardState,
@@ -103,7 +104,7 @@ const Piece = ({
         });
       }
       if (piece.piece === "bishop") {
-        const possibleMoves = getBishopMoves(square, piece, boardState);
+        const possibleMoves = getBishopMoves(square, piece, boardState, inCheckStatus);
         console.log("Possible Bishop moves:", possibleMoves);
         setBoardState({
           ...boardState,
@@ -117,7 +118,7 @@ const Piece = ({
         });
       }
       if (piece.piece === "knight") {
-        const possibleMoves = getKnightMoves(square, piece, boardState);
+        const possibleMoves = getKnightMoves(square, piece, boardState, inCheckStatus);
         console.log("Possible Knight moves:", possibleMoves);
         setBoardState({
           ...boardState,
@@ -131,7 +132,7 @@ const Piece = ({
         });
       }
       if (piece.piece === "queen") {
-        const possibleMoves = getQueenMoves(square, piece, boardState);
+        const possibleMoves = getQueenMoves(square, piece, boardState, inCheckStatus);
         console.log("Possible Queen moves:", possibleMoves);
         setBoardState({
           ...boardState,
@@ -145,7 +146,7 @@ const Piece = ({
         });
       }
       if (piece.piece === "king") {
-        const possibleMoves = getKingMoves(square, piece, color, boardState);
+        const possibleMoves = getKingMoves(square, piece, color, boardState, inCheckStatus);
         console.log("Possible King moves:", possibleMoves);
         setBoardState({
           ...boardState,
