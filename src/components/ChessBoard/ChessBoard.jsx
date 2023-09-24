@@ -644,24 +644,8 @@ const ChessBoard = () => {
     const moves = [...diagonalMoves.moves, ...horizontalAndVerticalMoves.moves];
     const captures = [...diagonalMoves.captures, ...horizontalAndVerticalMoves.captures];
     const selfCaptures = [...diagonalMoves.selfCaptures, ...horizontalAndVerticalMoves.selfCaptures];
-    let validMoves = [];
 
-    // Iterate through all possible moves
-    for (let move of moves) {
-      // Clone the current board state to create a temporary board state
-      const tempBoardState = _.cloneDeep(boardState);
-
-      // Apply the move to the temporary board state
-      tempBoardState.board[move] = piece;
-      delete tempBoardState.board[square]; // Remove the piece from its original position
-
-      // Check if the move results in the current player being in check
-      if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
-        validMoves.push(move);
-      }
-    }
-
-    return { moves: validMoves, captures, selfCaptures };
+    return { moves, captures, selfCaptures };
   };
 
   const getKingMoves = (square, piece, color, boardState, isCheckingForCheck = false) => {
@@ -764,7 +748,7 @@ const ChessBoard = () => {
     setPromotionSquare(null);
   };
 
-  const promotePawn = (updatedBoardState, square) => {
+  const promotePawn = (square) => {
     console.log(square);
     setPromotionSquare(square);
     setOpen(true);
