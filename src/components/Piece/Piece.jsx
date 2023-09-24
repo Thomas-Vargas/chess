@@ -19,7 +19,8 @@ const Piece = ({
   isThisMoveACheck,
   isGameOver,
   setInCheckStatus,
-  inCheckStatus
+  inCheckStatus,
+  setCheckmate
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -185,16 +186,13 @@ const Piece = ({
       // setBoardState(updatedBoardState);
     } else {
 
-      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+      const clonedBoardState = _.cloneDeep(updatedBoardState);
+      // check if game is over
+      if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
+        console.log("game over chump");
+        setCheckmate(true);
+      } else if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
         console.log("major major we have a check");
-
-        const clonedBoardState = _.cloneDeep(updatedBoardState);
-        // check if game is over
-        if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
-          console.log("game over chump");
-        } else {
-          console.log("the show goes on");
-        }
 
         // save check status to generate valid moves for escaping check
         setInCheckStatus(true);

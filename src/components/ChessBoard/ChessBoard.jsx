@@ -93,22 +93,18 @@ const ChessBoard = () => {
       promotePawn(updatedBoardState, square);
       // setBoardState(updatedBoardState);
     } else {
-      // check for check
-      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+      const clonedBoardState = _.cloneDeep(updatedBoardState);
+      // check if the game is over
+      const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
+      console.log("is this checkmate val", isThisCheckmate);
+
+      if (isThisCheckmate) {
+        console.log("game over chump");
+        setCheckmate(true);
+      } else if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
         // save check status to generate valid moves for escaping check
         setInCheckStatus(true);
         console.log("major major we have a check");
-  
-        const clonedBoardState = _.cloneDeep(updatedBoardState);
-        // check if the game is over
-        const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
-        console.log("is this checkmate val", isThisCheckmate);
-  
-        if (isThisCheckmate) {
-          console.log("game over chump");
-        } else {
-          console.log("the show goes on");
-        }
       } else {
         setInCheckStatus(false);
       }
@@ -897,6 +893,7 @@ const ChessBoard = () => {
         isGameOver={isGameOver}
         isThisMoveACheck={isThisMoveACheck}
         inCheckStatus={inCheckStatus}
+        setCheckmate={setCheckmate}
       />
     );
   };
@@ -928,6 +925,11 @@ const ChessBoard = () => {
       {inCheckStatus && (
         <Typography variant="h5" textAlign="center">
           Check!
+        </Typography>
+      )}
+      {checkmate && (
+        <Typography variant="h5" textAlign="center">
+          Checkmate! {getOpponent(boardState.currentPlayer)} wins!
         </Typography>
       )}
       {renderBoard()}
