@@ -894,6 +894,7 @@ const ChessBoard = () => {
         isThisMoveACheck={isThisMoveACheck}
         inCheckStatus={inCheckStatus}
         setCheckmate={setCheckmate}
+        checkmate={checkmate}
       />
     );
   };

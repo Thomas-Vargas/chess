@@ -20,7 +20,8 @@ const Piece = ({
   isGameOver,
   setInCheckStatus,
   inCheckStatus,
-  setCheckmate
+  setCheckmate,
+  checkmate
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -75,7 +76,7 @@ const Piece = ({
   };
 
   const onPieceClick = () => {
-    if (piece && piece.player === boardState.currentPlayer) {
+    if (piece && piece.player === boardState.currentPlayer && !checkmate) {
       if (piece.piece === "pawn") {
         const possibleMoves = getPawnMoves(square, piece.player, boardState, inCheckStatus);
         console.log("Possible Pawn moves:", possibleMoves);
