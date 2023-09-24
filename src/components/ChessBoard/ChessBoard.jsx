@@ -13,9 +13,9 @@ const ChessBoard = () => {
       11: { piece: "rook", player: "white", firstMove: true },
       21: { piece: "knight", player: "white" },
       31: { piece: "bishop", player: "white" },
-      41: { piece: "queen", player: "white" },
+      63: { piece: "queen", player: "white" },
       51: { piece: "king", player: "white", firstMove: true },
-      61: { piece: "bishop", player: "white" },
+      34: { piece: "bishop", player: "white" },
       71: { piece: "knight", player: "white" },
       81: { piece: "rook", player: "white", firstMove: true },
       12: { piece: "pawn", player: "white" },
@@ -162,8 +162,11 @@ const ChessBoard = () => {
             // get correct king
             const kingPosition = getKingPosition(testBoardState, pieceCausingCheck.player);
 
+            console.log("king position in isgameover:", kingPosition)
+
             // check can be blocked
             if (!checkPieceMoves.captures.includes(kingPosition)) {
+              console.log("check can be blocked");
               isGameOver = false;
               break;
             }
@@ -184,7 +187,9 @@ const ChessBoard = () => {
 
     // get all moves
     for (let position in updatedBoardState.board) {
-      if (updatedBoardState.board[position].player === updatedBoardState.currentPlayer) {
+      if (updatedBoardState.board[position].player !== updatedBoardState.currentPlayer) {
+        // am i trying to make sure the king is not protected?
+        // chanded to !== king 9/24, seems to fix the is piece protected functionality
         if (updatedBoardState.board[position].piece !== "king") {
           possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
         }
@@ -193,7 +198,7 @@ const ChessBoard = () => {
 
         // check if piece is protected
         if (possibleMoves?.selfCaptures && possibleMoves.selfCaptures.includes(square)) {
-          console.log("piece can be captured");
+          console.log("piece cannot be captured");
           isPieceProtected = true;
           break;
         }
@@ -637,7 +642,6 @@ const ChessBoard = () => {
     return { moves, captures, selfCaptures };
   };
 
-  // !! I can likely refactor this once rook and bishop moves are refactored because all validation will be done by the time moves get here
   const getQueenMoves = (square, piece, boardState, isCheckingForCheck = false) => {
     const diagonalMoves = getBishopMoves(square, piece, boardState, isCheckingForCheck);
     const horizontalAndVerticalMoves = getRookMoves(square, piece, boardState, isCheckingForCheck);
@@ -678,8 +682,9 @@ const ChessBoard = () => {
       delete tempBoardState.board[square];
       if (boardState.board.hasOwnProperty(move) && boardState.board[move].player !== piece.player) {
         if (isPieceProtected(move, boardState)) {
-          console.log("this piece is protected")
+          console.log("this piece is protected, cannot capture with king")
         } else {
+          console.log("piece is not protected in king moves")
           if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
             captures.push(move);
           }
