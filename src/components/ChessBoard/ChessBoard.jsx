@@ -13,9 +13,9 @@ const ChessBoard = () => {
       11: { piece: "rook", player: "white", firstMove: true },
       21: { piece: "knight", player: "white" },
       31: { piece: "bishop", player: "white" },
-      63: { piece: "queen", player: "white" },
+      41: { piece: "queen", player: "white" },
       51: { piece: "king", player: "white", firstMove: true },
-      34: { piece: "bishop", player: "white" },
+      61: { piece: "bishop", player: "white" },
       71: { piece: "knight", player: "white" },
       81: { piece: "rook", player: "white", firstMove: true },
       12: { piece: "pawn", player: "white" },
@@ -59,6 +59,7 @@ const ChessBoard = () => {
 
   console.log("board state", boardState);
   console.log("inCheckStatus", inCheckStatus);
+  console.log("checkmate status", checkmate)
 
   useEffect(() => {
     // console.log("Board state updated:", boardState);
@@ -67,27 +68,27 @@ const ChessBoard = () => {
   const makeMove = (square) => {
     // Create a copy of the boardState object
     let previousBoardState = { ...boardState };
-  
+
     // Remove the key from the copied boardState object
     const previousPieceSquare = boardState.validMoves.pieceSquare;
     delete previousBoardState.board[previousPieceSquare];
-  
+
     let updatedBoardState = {
       ...previousBoardState,
       currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
     };
     updatedBoardState.board[square] = boardState.validMoves.piece;
-  
+
     // the piece - yes
     console.log("piece making the move?", updatedBoardState.board[square]);
     // the square it is now on
     console.log("square after the move is made?", square);
-  
+
     // change first move property to false on the first move
     if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
       updatedBoardState.board[square].firstMove = false;
     }
-  
+
     // check for pawn promotion
     if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
       promotePawn(updatedBoardState, square);
@@ -109,10 +110,10 @@ const ChessBoard = () => {
         setInCheckStatus(false);
       }
     }
-  
+
     updatedBoardState.validMoves.possibleMoves = [];
     updatedBoardState.validMoves.possibleCaptures = [];
-  
+
     setBoardState(updatedBoardState);
   };
 
@@ -127,8 +128,8 @@ const ChessBoard = () => {
 
         console.log("possible moves", possibleMoves);
 
-        // check if piece can be captured
-        if (possibleMoves?.captures && possibleMoves.captures.includes(squareCausingCheck)) {
+        // check if piece can be captured, make sure piece is not protected
+        if (possibleMoves?.captures && possibleMoves.captures.includes(squareCausingCheck) && !isPieceProtected(squareCausingCheck, updatedBoardState)) {
           console.log("piece can be captured");
           isGameOver = false;
           break;
@@ -158,7 +159,7 @@ const ChessBoard = () => {
             // get correct king
             const kingPosition = getKingPosition(testBoardState, pieceCausingCheck.player);
 
-            console.log("king position in isgameover:", kingPosition)
+            console.log("king position in isgameover:", kingPosition);
 
             // check can be blocked
             if (!checkPieceMoves.captures.includes(kingPosition)) {
@@ -186,9 +187,9 @@ const ChessBoard = () => {
       if (updatedBoardState.board[position].player !== updatedBoardState.currentPlayer) {
         // am i trying to make sure the king is not protected?
         // chanded to !== king 9/24, seems to fix the is piece protected functionality
-        if (updatedBoardState.board[position].piece !== "king") {
-          possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
-        }
+        // if (updatedBoardState.board[position].piece !== "king") {
+        possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
+        // }
 
         console.log("possible moves", possibleMoves);
 
@@ -655,6 +656,7 @@ const ChessBoard = () => {
     const captures = [];
     const castle = [];
     const potentialMoves = [];
+    const selfCaptures = [];
 
     // console.log(boardState.board['81'].firstMove);
 
@@ -676,21 +678,21 @@ const ChessBoard = () => {
 
       tempBoardState.board[move] = piece;
       delete tempBoardState.board[square];
+
       if (boardState.board.hasOwnProperty(move) && boardState.board[move].player !== piece.player) {
-        if (isPieceProtected(move, boardState)) {
-          console.log("this piece is protected, cannot capture with king")
-        } else {
-          console.log("piece is not protected in king moves")
+          // Check if capturing would put the king in check
           if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
-            captures.push(move);
+              captures.push(move);
           }
-        }
       } else if (!boardState.board.hasOwnProperty(move)) {
-        if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
-          moves.push(move);
-        }
+          // Check if moving would put the king in check
+          if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
+              moves.push(move);
+          }
+      } else {
+          selfCaptures.push(move);
       }
-    }
+  }
 
     // castle logic
     if (color === "white") {
@@ -732,8 +734,7 @@ const ChessBoard = () => {
       }
     }
 
-    console.log(castle);
-    return { moves, captures, castle };
+    return { moves, captures, castle, selfCaptures };
   };
 
   const selectPromotionPiece = (piece) => {

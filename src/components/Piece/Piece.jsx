@@ -148,7 +148,7 @@ const Piece = ({
         });
       }
       if (piece.piece === "king") {
-        const possibleMoves = getKingMoves(square, piece, color, boardState, inCheckStatus);
+        const possibleMoves = getKingMoves(square, piece, color, boardState, true);
         console.log("Possible King moves:", possibleMoves);
         setBoardState({
           ...boardState,
@@ -203,7 +203,7 @@ const Piece = ({
 
       updatedBoardState.validMoves.possibleMoves = [];
       updatedBoardState.validMoves.possibleCaptures = [];
-      
+
       setBoardState(updatedBoardState);
     }
 
