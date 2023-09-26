@@ -26,7 +26,7 @@ const ChessBoard = () => {
       32: { piece: "pawn", player: "white" },
       42: { piece: "pawn", player: "white" },
       52: { piece: "pawn", player: "white" },
-      76: { piece: "pawn", player: "white" },
+      62: { piece: "pawn", player: "white" },
       72: { piece: "pawn", player: "white" },
       82: { piece: "pawn", player: "white" },
       18: { piece: "rook", player: "black", firstMove: true },
@@ -45,6 +45,40 @@ const ChessBoard = () => {
       67: { piece: "pawn", player: "black" },
       77: { piece: "pawn", player: "black" },
       87: { piece: "pawn", player: "black" },
+
+      //test for draw
+      // 11: { piece: "rook", player: "white", firstMove: false },
+      // 21: { piece: "knight", player: "white" },
+      // 31: { piece: "bishop", player: "white" },
+      // 47: { piece: "queen", player: "white" },
+      // 16: { piece: "king", player: "white", firstMove: true },
+      // 61: { piece: "bishop", player: "white" },
+      // 71: { piece: "knight", player: "white" },
+      // 81: { piece: "rook", player: "white", firstMove: true },
+      // 12: { piece: "pawn", player: "white" },
+      // 22: { piece: "pawn", player: "white" },
+      // 32: { piece: "pawn", player: "white" },
+      // 42: { piece: "pawn", player: "white" },
+      // 52: { piece: "pawn", player: "white" },
+      // 62: { piece: "pawn", player: "white" },
+      // 72: { piece: "pawn", player: "white" },
+      // 82: { piece: "pawn", player: "white" },
+      // 18: { piece: "rook", player: "black", firstMove: true },
+      // 28: { piece: "knight", player: "black" },
+      // 38: { piece: "bishop", player: "black" },
+      // 48: { piece: "queen", player: "black" },
+      // 18: { piece: "king", player: "black", firstMove: true },
+      // 68: { piece: "bishop", player: "black" },
+      // 78: { piece: "knight", player: "black" },
+      // 88: { piece: "rook", player: "black", firstMove: true },
+      // 17: { piece: "pawn", player: "black" },
+      // 27: { piece: "pawn", player: "black" },
+      // 37: { piece: "pawn", player: "black" },
+      // 47: { piece: "pawn", player: "black" },
+      // 57: { piece: "pawn", player: "black" },
+      // 67: { piece: "pawn", player: "black" },
+      // 77: { piece: "pawn", player: "black" },
+      // 87: { piece: "pawn", player: "black" },
     },
     currentPlayer: "white",
     validMoves: {
@@ -97,24 +131,23 @@ const ChessBoard = () => {
 
     // check for pawn promotion
     if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
-      console.log("promoting pawn")
       promotePawn(updatedBoardState, square);
     } else {
-      console.log("not promoting pawn")
-      const clonedBoardState = _.cloneDeep(updatedBoardState);
-      // check if the game is over
-      const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
-      console.log("is this checkmate val", isThisCheckmate);
+      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+        const clonedBoardState = _.cloneDeep(updatedBoardState);
+        // check if the game is over
+        const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
+        if (isThisCheckmate) {
+          console.log("game over chump");
+          setBoardState(updatedBoardState);
+          setCheckmate(true);
+        } else {
+          setInCheckStatus(true);
+          setBoardState(updatedBoardState);
+          console.log("major major we have a check");
+        }
+      } else if (isGameADraw(updatedBoardState)) {
 
-      if (isThisCheckmate) {
-        console.log("game over chump");
-        setBoardState(updatedBoardState);
-        setCheckmate(true);
-      } else if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
-        // save check status to generate valid moves for escaping check
-        setInCheckStatus(true);
-        setBoardState(updatedBoardState);
-        console.log("major major we have a check");
       } else {
         setInCheckStatus(false);
         setBoardState(updatedBoardState);
@@ -168,6 +201,14 @@ const ChessBoard = () => {
     return isGameOver;
   };
 
+  const isGameADraw = (updatedBoardState) => {
+    const availableMoves  = getAllPossibleMovesForPlayer(updatedBoardState.currentPlayer, updatedBoardState, true);
+    console.log("available moves", availableMoves)
+    const validMoves = [];
+
+    console.log("valid moves", validMoves)
+  }
+
   const isPieceProtected = (square, updatedBoardState) => {
     let isPieceProtected = false;
     let possibleMoves;
@@ -206,13 +247,13 @@ const ChessBoard = () => {
     }
   };
 
-  const getPieceMoves = (square, pieceObj, boardState) => {
+  const getPieceMoves = (square, pieceObj, boardState, isCheckingForCheck = false) => {
     // console.log("square", square);
     // console.log(pieceObj)
     let possibleMoves;
     switch (pieceObj.piece) {
       case "queen":
-        let queenMoves = getQueenMoves(square, pieceObj, boardState);
+        let queenMoves = getQueenMoves(square, pieceObj, boardState, isCheckingForCheck);
 
         // added piece to make sense of moves being created, may need to remove it
         possibleMoves = {
@@ -221,7 +262,7 @@ const ChessBoard = () => {
         };
         break;
       case "rook":
-        let rookMoves = getRookMoves(square, pieceObj, boardState);
+        let rookMoves = getRookMoves(square, pieceObj, boardState, isCheckingForCheck);
 
         possibleMoves = {
           ...rookMoves,
@@ -229,7 +270,7 @@ const ChessBoard = () => {
         };
         break;
       case "knight":
-        let knightMoves = getKnightMoves(square, pieceObj, boardState);
+        let knightMoves = getKnightMoves(square, pieceObj, boardState, isCheckingForCheck);
 
         knightMoves.moves = knightMoves.moves.filter((move) => move[1] !== "9");
 
@@ -239,7 +280,7 @@ const ChessBoard = () => {
         };
         break;
       case "bishop":
-        let bishopMoves = getBishopMoves(square, pieceObj, boardState);
+        let bishopMoves = getBishopMoves(square, pieceObj, boardState, isCheckingForCheck);
 
         possibleMoves = {
           ...bishopMoves,
@@ -247,7 +288,7 @@ const ChessBoard = () => {
         };
         break;
       case "pawn":
-        let pawnMoves = getPawnMoves(square, pieceObj.player, boardState);
+        let pawnMoves = getPawnMoves(square, pieceObj.player, boardState, isCheckingForCheck);
 
         possibleMoves = {
           ...pawnMoves,
@@ -255,7 +296,7 @@ const ChessBoard = () => {
         };
         break;
       case "king":
-        let kingMoves = getKingMoves(square, pieceObj, pieceObj.player, boardState);
+        let kingMoves = getKingMoves(square, pieceObj, pieceObj.player, boardState, isCheckingForCheck);
 
         possibleMoves = {
           ...kingMoves,
@@ -311,7 +352,7 @@ const ChessBoard = () => {
     console.log("king position", kingPosition);
 
     // Get all possible moves for the opponent
-    const opponentMoves = getAllPossibleMovesForPlayer(getOpponent(currentPlayer), updatedBoardState, true);
+    const opponentMoves = getAllPossibleMovesForPlayer(getOpponent(currentPlayer), updatedBoardState);
 
     console.log("opponent moves", opponentMoves);
 
@@ -332,7 +373,7 @@ const ChessBoard = () => {
 
       // Check if the piece belongs to the current player
       if (piece.player === currentPlayer) {
-        console.log("current player", currentPlayer);
+        // console.log("current player", currentPlayer);
         // Use the piece-specific move function to get its moves
         const pieceMoves = getPieceMoves(square, piece, boardState, isCheckingForCheck);
 
@@ -688,44 +729,44 @@ const ChessBoard = () => {
     }
 
     // castle logic
-    if (color === "white" && !inCheckStatus) {
-      // check for possible castle right and left
-      if (
-        !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
-        !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
-        piece.firstMove === true &&
-        boardState.board["81"].firstMove === true
-      ) {
-        castle.push(`${Number(col) + 2}` + row);
-      }
-      if (
-        !boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) &&
-        !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
-        !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
-        piece.firstMove === true &&
-        boardState.board["11"].firstMove === true
-      ) {
-        castle.push(`${Number(col) - 2}` + row);
-      }
-    } else if (color === "black" && !inCheckStatus) {
-      if (
-        !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
-        !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
-        piece.firstMove === true &&
-        boardState.board["88"].firstMove === true
-      ) {
-        castle.push(`${Number(col) + 2}` + row);
-      }
-      if (
-        !boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) &&
-        !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
-        !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
-        piece.firstMove === true &&
-        boardState.board["18"].firstMove === true
-      ) {
-        castle.push(`${Number(col) - 2}` + row);
-      }
-    }
+    // if (color === "white" && !inCheckStatus) {
+    //   // check for possible castle right and left
+    //   if (
+    //     !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
+    //     !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
+    //     piece.firstMove === true &&
+    //     boardState.board["81"].firstMove === true
+    //   ) {
+    //     castle.push(`${Number(col) + 2}` + row);
+    //   }
+    //   if (
+    //     !boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) &&
+    //     !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
+    //     !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
+    //     piece.firstMove === true &&
+    //     boardState.board["11"].firstMove === true
+    //   ) {
+    //     castle.push(`${Number(col) - 2}` + row);
+    //   }
+    // } else if (color === "black" && !inCheckStatus) {
+    //   if (
+    //     !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
+    //     !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
+    //     piece.firstMove === true &&
+    //     boardState.board["88"].firstMove === true
+    //   ) {
+    //     castle.push(`${Number(col) + 2}` + row);
+    //   }
+    //   if (
+    //     !boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) &&
+    //     !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
+    //     !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
+    //     piece.firstMove === true &&
+    //     boardState.board["18"].firstMove === true
+    //   ) {
+    //     castle.push(`${Number(col) - 2}` + row);
+    //   }
+    // }
 
     return { moves, captures, castle, selfCaptures };
   };

@@ -174,23 +174,45 @@ const Piece = ({
     }
 
     // check for pawn promotion
+    // if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+    //   console.log("promoting pawn")
+    //   const clonedBoardState = _.cloneDeep(updatedBoardState);
+    //   promotePawn(clonedBoardState, square);
+    // } else {
+    //   console.log("not promoting pawn")
+    //   const clonedBoardState = _.cloneDeep(updatedBoardState);
+    //   // check if game is over
+    //   if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
+    //     console.log("game over chump");
+    //     setBoardState(updatedBoardState);
+    //     setCheckmate(true);
+    //   } else if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+    //     console.log("major major we have a check");
+    //     // save check status to generate valid moves for escaping check
+    //     setInCheckStatus(true);
+    //     setBoardState(updatedBoardState);
+    //   } else {
+    //     setInCheckStatus(false);
+    //     setBoardState(updatedBoardState);
+    //   }
+    // }
+    // check for pawn promotion
     if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
-      console.log("promoting pawn")
-      const clonedBoardState = _.cloneDeep(updatedBoardState);
-      promotePawn(clonedBoardState, square);
+      promotePawn(updatedBoardState, square);
     } else {
-      console.log("not promoting pawn")
-      const clonedBoardState = _.cloneDeep(updatedBoardState);
-      // check if game is over
-      if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
-        console.log("game over chump");
-        setBoardState(updatedBoardState);
-        setCheckmate(true);
-      } else if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
-        console.log("major major we have a check");
-        // save check status to generate valid moves for escaping check
-        setInCheckStatus(true);
-        setBoardState(updatedBoardState);
+      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+        const clonedBoardState = _.cloneDeep(updatedBoardState);
+        // check if the game is over
+        const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
+        if (isThisCheckmate) {
+          console.log("game over chump");
+          setBoardState(updatedBoardState);
+          setCheckmate(true);
+        } else {
+          setInCheckStatus(true);
+          setBoardState(updatedBoardState);
+          console.log("major major we have a check");
+        }
       } else {
         setInCheckStatus(false);
         setBoardState(updatedBoardState);
