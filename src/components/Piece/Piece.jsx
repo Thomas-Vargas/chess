@@ -169,6 +169,8 @@ const Piece = ({
     updatedBoardState.board[square] = boardState.validMoves.piece;
     updatedBoardState.validMoves.possibleMoves = [];
     updatedBoardState.validMoves.possibleCaptures = [];
+    updatedBoardState.validMoves.piece = "";
+    updatedBoardState.validMoves.pieceSquare = "";
 
     // change first move property to false on first move
     if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
