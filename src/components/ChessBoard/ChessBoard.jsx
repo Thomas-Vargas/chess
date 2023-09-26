@@ -305,7 +305,6 @@ const ChessBoard = () => {
 
   const isEnPassantPossible = (square, boardState) => {
     let possibleEnPassantSquares = [];
-    let direction = boardState.currentPlayer === "white" ? -1 : 1;
     possibleEnPassantSquares.push(Number(square[0]) + 1 + `${square[1]}`);
     possibleEnPassantSquares.push(Number(square[0]) - 1 + `${square[1]}`);
 
@@ -316,7 +315,7 @@ const ChessBoard = () => {
         pieceSquareToCapture: possibleEnPassantSquares.find(
           (square) => square === boardState.lastMove.destinationSquare
         ),
-        squareToMoveTo: `${Number(boardState.lastMove.destinationSquare) + 1}`,
+        squareToMoveTo: boardState.currentPlayer === 'white' ? `${Number(boardState.lastMove.destinationSquare) + 1}` : `${Number(boardState.lastMove.destinationSquare) - 1}`,
       };
       return result;
     } else {
