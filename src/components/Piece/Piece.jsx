@@ -22,6 +22,8 @@ const Piece = ({
   inCheckStatus,
   setCheckmate,
   checkmate,
+  isGameADraw,
+  setDraw,
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -196,8 +198,10 @@ const Piece = ({
     //     setBoardState(updatedBoardState);
     //   }
     // }
-    // check for pawn promotion
-    if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+    let isGameADrawResult = isGameADraw(updatedBoardState);
+
+     // check for pawn promotion
+     if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
       promotePawn(updatedBoardState, square);
     } else {
       if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
@@ -213,6 +217,11 @@ const Piece = ({
           setBoardState(updatedBoardState);
           console.log("major major we have a check");
         }
+      } else if (isGameADrawResult.draw) {
+        console.log("game is a draw", isGameADrawResult)       
+        setInCheckStatus(false);
+        setDraw(true);
+        setBoardState(updatedBoardState);
       } else {
         setInCheckStatus(false);
         setBoardState(updatedBoardState);

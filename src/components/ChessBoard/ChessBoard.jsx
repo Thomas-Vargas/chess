@@ -13,45 +13,12 @@ import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 const ChessBoard = () => {
   const [boardState, setBoardState] = useState({
     board: {
-      11: { piece: "rook", player: "white", firstMove: false },
-      21: { piece: "knight", player: "white" },
-      31: { piece: "bishop", player: "white" },
-      41: { piece: "queen", player: "white" },
-      51: { piece: "king", player: "white", firstMove: true },
-      61: { piece: "bishop", player: "white" },
-      71: { piece: "knight", player: "white" },
-      81: { piece: "rook", player: "white", firstMove: true },
-      12: { piece: "pawn", player: "white" },
-      22: { piece: "pawn", player: "white" },
-      32: { piece: "pawn", player: "white" },
-      42: { piece: "pawn", player: "white" },
-      52: { piece: "pawn", player: "white" },
-      62: { piece: "pawn", player: "white" },
-      72: { piece: "pawn", player: "white" },
-      82: { piece: "pawn", player: "white" },
-      18: { piece: "rook", player: "black", firstMove: true },
-      28: { piece: "knight", player: "black" },
-      38: { piece: "bishop", player: "black" },
-      48: { piece: "queen", player: "black" },
-      58: { piece: "king", player: "black", firstMove: true },
-      68: { piece: "bishop", player: "black" },
-      78: { piece: "knight", player: "black" },
-      88: { piece: "rook", player: "black", firstMove: true },
-      17: { piece: "pawn", player: "black" },
-      27: { piece: "pawn", player: "black" },
-      37: { piece: "pawn", player: "black" },
-      47: { piece: "pawn", player: "black" },
-      57: { piece: "pawn", player: "black" },
-      67: { piece: "pawn", player: "black" },
-      77: { piece: "pawn", player: "black" },
-      87: { piece: "pawn", player: "black" },
-
-      //test for draw
+      // base setup
       // 11: { piece: "rook", player: "white", firstMove: false },
       // 21: { piece: "knight", player: "white" },
       // 31: { piece: "bishop", player: "white" },
-      // 47: { piece: "queen", player: "white" },
-      // 16: { piece: "king", player: "white", firstMove: true },
+      // 41: { piece: "queen", player: "white" },
+      // 51: { piece: "king", player: "white", firstMove: true },
       // 61: { piece: "bishop", player: "white" },
       // 71: { piece: "knight", player: "white" },
       // 81: { piece: "rook", player: "white", firstMove: true },
@@ -67,7 +34,7 @@ const ChessBoard = () => {
       // 28: { piece: "knight", player: "black" },
       // 38: { piece: "bishop", player: "black" },
       // 48: { piece: "queen", player: "black" },
-      // 18: { piece: "king", player: "black", firstMove: true },
+      // 58: { piece: "king", player: "black", firstMove: true },
       // 68: { piece: "bishop", player: "black" },
       // 78: { piece: "knight", player: "black" },
       // 88: { piece: "rook", player: "black", firstMove: true },
@@ -79,6 +46,14 @@ const ChessBoard = () => {
       // 67: { piece: "pawn", player: "black" },
       // 77: { piece: "pawn", player: "black" },
       // 87: { piece: "pawn", player: "black" },
+
+      //test for draw
+      47: { piece: "queen", player: "white" },
+      16: { piece: "king", player: "white", firstMove: true },
+
+      18: { piece: "king", player: "black", firstMove: true },
+
+
     },
     currentPlayer: "white",
     validMoves: {
@@ -94,6 +69,7 @@ const ChessBoard = () => {
   const [promotionSquare, setPromotionSquare] = useState(null);
   const [inCheckStatus, setInCheckStatus] = useState(false);
   const [checkmate, setCheckmate] = useState(false);
+  const [draw, setDraw] = useState(false);
 
   console.log("board state", boardState);
   console.log("inCheckStatus", inCheckStatus);
@@ -129,6 +105,8 @@ const ChessBoard = () => {
       updatedBoardState.board[square].firstMove = false;
     }
 
+    let isGameADrawResult = isGameADraw(updatedBoardState);
+
     // check for pawn promotion
     if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
       promotePawn(updatedBoardState, square);
@@ -146,8 +124,11 @@ const ChessBoard = () => {
           setBoardState(updatedBoardState);
           console.log("major major we have a check");
         }
-      } else if (isGameADraw(updatedBoardState)) {
-
+      } else if (isGameADrawResult.draw) {
+        console.log("game is a draw", isGameADrawResult);
+        setInCheckStatus(false);
+        setDraw(true);
+        setBoardState(updatedBoardState);
       } else {
         setInCheckStatus(false);
         setBoardState(updatedBoardState);
@@ -202,12 +183,29 @@ const ChessBoard = () => {
   };
 
   const isGameADraw = (updatedBoardState) => {
-    const availableMoves  = getAllPossibleMovesForPlayer(updatedBoardState.currentPlayer, updatedBoardState, true);
-    console.log("available moves", availableMoves)
-    const validMoves = [];
-
-    console.log("valid moves", validMoves)
-  }
+    let isDraw = true;
+    let insufficientMaterial = true;
+    const availableMoves = getAllPossibleMovesForPlayer(updatedBoardState.currentPlayer, updatedBoardState, true);
+  
+    if (availableMoves.length > 0) {
+      isDraw = false;
+    }
+  
+    // Check for insufficient material (only kings left)
+    const piecesOnBoard = Object.values(updatedBoardState.board);
+    const nonKingPieces = piecesOnBoard.filter((piece) => piece.piece !== "king");
+  
+    if (nonKingPieces.length > 0) {
+      insufficientMaterial = false;
+    }
+  
+    let result = {
+      draw: isDraw || insufficientMaterial,
+      insufficientMaterial: insufficientMaterial,
+    };
+  
+    return result;
+  };
 
   const isPieceProtected = (square, updatedBoardState) => {
     let isPieceProtected = false;
@@ -952,6 +950,8 @@ const ChessBoard = () => {
         inCheckStatus={inCheckStatus}
         setCheckmate={setCheckmate}
         checkmate={checkmate}
+        isGameADraw={isGameADraw}
+        setDraw={setDraw}
       />
     );
   };
@@ -988,6 +988,11 @@ const ChessBoard = () => {
       {checkmate && (
         <Typography variant="h5" textAlign="center">
           Checkmate! {getOpponent(boardState.currentPlayer)} wins!
+        </Typography>
+      )}
+      {draw && (
+        <Typography variant="h5" textAlign="center">
+          Draw!
         </Typography>
       )}
       {renderBoard()}
