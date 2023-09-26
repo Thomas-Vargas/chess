@@ -7,6 +7,9 @@ import _ from "lodash";
 
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 
+// to do:
+// test pawn promotion to check
+
 const ChessBoard = () => {
   const [boardState, setBoardState] = useState({
     board: {
@@ -23,7 +26,7 @@ const ChessBoard = () => {
       32: { piece: "pawn", player: "white" },
       42: { piece: "pawn", player: "white" },
       52: { piece: "pawn", player: "white" },
-      62: { piece: "pawn", player: "white" },
+      76: { piece: "pawn", player: "white" },
       72: { piece: "pawn", player: "white" },
       82: { piece: "pawn", player: "white" },
       18: { piece: "rook", player: "black", firstMove: true },
@@ -53,19 +56,20 @@ const ChessBoard = () => {
     },
   });
   const [open, setOpen] = useState(false);
+  const [promotionBoardState, setPromotionBoardState] = useState({});
   const [promotionSquare, setPromotionSquare] = useState(null);
   const [inCheckStatus, setInCheckStatus] = useState(false);
   const [checkmate, setCheckmate] = useState(false);
 
   console.log("board state", boardState);
   console.log("inCheckStatus", inCheckStatus);
-  console.log("checkmate status", checkmate)
+  console.log("checkmate status", checkmate);
 
   useEffect(() => {
     // console.log("Board state updated:", boardState);
-  }, [boardState.validMoves]);
+  }, [boardState.validMoves,]);
 
-  const makeMove = (square) => {
+  const makeMove = async (square) => {
     // Create a copy of the boardState object
     let previousBoardState = { ...boardState };
 
@@ -78,6 +82,8 @@ const ChessBoard = () => {
       currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
     };
     updatedBoardState.board[square] = boardState.validMoves.piece;
+    updatedBoardState.validMoves.possibleMoves = [];
+    updatedBoardState.validMoves.possibleCaptures = [];
 
     // the piece - yes
     console.log("piece making the move?", updatedBoardState.board[square]);
@@ -91,9 +97,10 @@ const ChessBoard = () => {
 
     // check for pawn promotion
     if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+      console.log("promoting pawn")
       promotePawn(updatedBoardState, square);
-      // setBoardState(updatedBoardState);
     } else {
+      console.log("not promoting pawn")
       const clonedBoardState = _.cloneDeep(updatedBoardState);
       // check if the game is over
       const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
@@ -101,20 +108,22 @@ const ChessBoard = () => {
 
       if (isThisCheckmate) {
         console.log("game over chump");
+        setBoardState(updatedBoardState);
         setCheckmate(true);
       } else if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
         // save check status to generate valid moves for escaping check
         setInCheckStatus(true);
+        setBoardState(updatedBoardState);
         console.log("major major we have a check");
       } else {
         setInCheckStatus(false);
+        setBoardState(updatedBoardState);
       }
     }
 
+    // this makes no sense?
     updatedBoardState.validMoves.possibleMoves = [];
     updatedBoardState.validMoves.possibleCaptures = [];
-
-    setBoardState(updatedBoardState);
   };
 
   const isGameOver = (squareCausingCheck, pieceCausingCheck, updatedBoardState) => {
@@ -129,7 +138,11 @@ const ChessBoard = () => {
         console.log("possible moves", possibleMoves);
 
         // check if piece can be captured, make sure piece is not protected
-        if (possibleMoves?.captures && possibleMoves.captures.includes(squareCausingCheck) && !isPieceProtected(squareCausingCheck, updatedBoardState)) {
+        if (
+          possibleMoves?.captures &&
+          possibleMoves.captures.includes(squareCausingCheck) &&
+          !isPieceProtected(squareCausingCheck, updatedBoardState)
+        ) {
           console.log("piece can be captured");
           isGameOver = false;
           break;
@@ -680,19 +693,19 @@ const ChessBoard = () => {
       delete tempBoardState.board[square];
 
       if (boardState.board.hasOwnProperty(move) && boardState.board[move].player !== piece.player) {
-          // Check if capturing would put the king in check
-          if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
-              captures.push(move);
-          }
+        // Check if capturing would put the king in check
+        if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
+          captures.push(move);
+        }
       } else if (!boardState.board.hasOwnProperty(move)) {
-          // Check if moving would put the king in check
-          if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
-              moves.push(move);
-          }
+        // Check if moving would put the king in check
+        if (!isCheckingForCheck || !amIStillInCheck(tempBoardState, boardState.currentPlayer, true)) {
+          moves.push(move);
+        }
       } else {
-          selfCaptures.push(move);
+        selfCaptures.push(move);
       }
-  }
+    }
 
     // castle logic
     if (color === "white") {
@@ -737,22 +750,27 @@ const ChessBoard = () => {
     return { moves, captures, castle, selfCaptures };
   };
 
-  const selectPromotionPiece = (piece) => {
-    // Update the board state with the promoted piece
-    const updatedBoardState = {
-      ...boardState,
-      currentPlayer: boardState.currentPlayer === "white" ? "black" : "white",
-    };
-    updatedBoardState.board[promotionSquare] = piece;
+  const selectPromotionPiece = (piece, square, promotionBoardState) => {
+    console.log(piece);
+    console.log(square);
+    console.log(promotionBoardState);
 
-    setBoardState(updatedBoardState);
-    setOpen(false);
+    // Update the copy of board state
+    delete promotionBoardState.board[Number(square)];
+    promotionBoardState.board[Number(square)] = piece;
+
+    console.log("!!!!! promotionBoardState before setting new state", promotionBoardState);
+
+    setBoardState(promotionBoardState);
+    setPromotionBoardState({});
     setPromotionSquare(null);
+    setOpen(false);
   };
 
-  const promotePawn = (square) => {
-    console.log(square);
+  const promotePawn = (updatedBoardState, square) => {
+    setPromotionBoardState(updatedBoardState);
     setPromotionSquare(square);
+    // Open the modal and wait for user interaction
     setOpen(true);
   };
 
@@ -935,7 +953,13 @@ const ChessBoard = () => {
         </Typography>
       )}
       {renderBoard()}
-      <PawnPromotionModal boardState={boardState} selectPromotionPiece={selectPromotionPiece} open={open} />
+      <PawnPromotionModal
+        boardState={boardState}
+        selectPromotionPiece={selectPromotionPiece}
+        open={open}
+        promotionBoardState={promotionBoardState}
+        promotionSquare={promotionSquare}
+      />
     </div>
   );
 };

@@ -21,7 +21,7 @@ const Piece = ({
   setInCheckStatus,
   inCheckStatus,
   setCheckmate,
-  checkmate
+  checkmate,
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -36,14 +36,10 @@ const Piece = ({
         content: <img src="/chess-pieces/white-rook.png" alt="White Rook" />,
       },
       knight: {
-        content: (
-          <img src="/chess-pieces/white-knight.png" alt="White Knight" />
-        ),
+        content: <img src="/chess-pieces/white-knight.png" alt="White Knight" />,
       },
       bishop: {
-        content: (
-          <img src="/chess-pieces/white-bishop.png" alt="White Bishop" />
-        ),
+        content: <img src="/chess-pieces/white-bishop.png" alt="White Bishop" />,
       },
       pawn: {
         content: <img src="/chess-pieces/white-pawn.png" alt="White Pawn" />,
@@ -60,14 +56,10 @@ const Piece = ({
         content: <img src="/chess-pieces/black-rook.png" alt="Black Rook" />,
       },
       knight: {
-        content: (
-          <img src="/chess-pieces/black-knight.png" alt="Black Knight" />
-        ),
+        content: <img src="/chess-pieces/black-knight.png" alt="Black Knight" />,
       },
       bishop: {
-        content: (
-          <img src="/chess-pieces/black-bishop.png" alt="Black Bishop" />
-        ),
+        content: <img src="/chess-pieces/black-bishop.png" alt="Black Bishop" />,
       },
       pawn: {
         content: <img src="/chess-pieces/black-pawn.png" alt="Black Pawn" />,
@@ -87,7 +79,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
-            possibleCastles: []
+            possibleCastles: [],
           },
         });
       }
@@ -101,7 +93,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
-            possibleCastles: []
+            possibleCastles: [],
           },
         });
       }
@@ -115,7 +107,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
-            possibleCastles: []
+            possibleCastles: [],
           },
         });
       }
@@ -129,7 +121,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
-            possibleCastles: []
+            possibleCastles: [],
           },
         });
       }
@@ -143,7 +135,7 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
-            possibleCastles: []
+            possibleCastles: [],
           },
         });
       }
@@ -157,56 +149,53 @@ const Piece = ({
             possibleMoves: possibleMoves.moves,
             possibleCaptures: possibleMoves.captures,
             piece,
-            possibleCastles: possibleMoves.castle
+            possibleCastles: possibleMoves.castle,
           },
         });
       }
     }
   };
 
-  const capturePiece = () => {
+  const capturePiece = async () => {
     let previousBoardState = { ...boardState };
     delete previousBoardState.board[square];
     delete previousBoardState.board[boardState.validMoves.pieceSquare];
     let updatedBoardState = {
       ...previousBoardState,
-      currentPlayer:
-      previousBoardState.currentPlayer === "white" ? "black" : "white",
+      currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
     };
     updatedBoardState.board[square] = boardState.validMoves.piece;
+    updatedBoardState.validMoves.possibleMoves = [];
+    updatedBoardState.validMoves.possibleCaptures = [];
 
     // change first move property to false on first move
-    if (updatedBoardState.board[square].hasOwnProperty('firstMove')) {
+    if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
       updatedBoardState.board[square].firstMove = false;
     }
 
-    // check for pawn promotion 
-    // check for pawn promotion 
-    if (updatedBoardState.board[square].piece === 'pawn' && (square[1] == 8 || square[1] == 1)) {
-      promotePawn(updatedBoardState, square);
-      // setBoardState(updatedBoardState);
+    // check for pawn promotion
+    if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+      console.log("promoting pawn")
+      const clonedBoardState = _.cloneDeep(updatedBoardState);
+      promotePawn(clonedBoardState, square);
     } else {
-
+      console.log("not promoting pawn")
       const clonedBoardState = _.cloneDeep(updatedBoardState);
       // check if game is over
       if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
         console.log("game over chump");
+        setBoardState(updatedBoardState);
         setCheckmate(true);
       } else if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
         console.log("major major we have a check");
-
         // save check status to generate valid moves for escaping check
         setInCheckStatus(true);
+        setBoardState(updatedBoardState);
       } else {
         setInCheckStatus(false);
+        setBoardState(updatedBoardState);
       }
-
-      updatedBoardState.validMoves.possibleMoves = [];
-      updatedBoardState.validMoves.possibleCaptures = [];
-
-      setBoardState(updatedBoardState);
     }
-
   };
 
   const pieceStyle = pieceStyles[piece.player][piece.piece];
@@ -214,23 +203,13 @@ const Piece = ({
   return (
     <>
       {isValidCapture ? (
-        <div
-          className={`piece ${color}-piece ${className}`}
-          onClick={capturePiece}
-        >
-          <span className={`chess-piece ${pieceColor} ${square}`}>
-            {pieceStyle.content}
-          </span>
+        <div className={`piece ${color}-piece ${className}`} onClick={capturePiece}>
+          <span className={`chess-piece ${pieceColor} ${square}`}>{pieceStyle.content}</span>
           {isValidCapture && <div className="valid-capture-ring" />}
         </div>
       ) : (
-        <div
-          className={`piece ${color}-piece ${className}`}
-          onClick={onPieceClick}
-        >
-          <span className={`chess-piece ${pieceColor} ${square}`}>
-            {pieceStyle.content}
-          </span>
+        <div className={`piece ${color}-piece ${className}`} onClick={onPieceClick}>
+          <span className={`chess-piece ${pieceColor} ${square}`}>{pieceStyle.content}</span>
         </div>
       )}
     </>
