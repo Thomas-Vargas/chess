@@ -81,63 +81,123 @@ const ChessBoard = () => {
   const makeMove = async (square) => {
     // Create a copy of the boardState object
     let previousBoardState = { ...boardState };
+    if (
+      !previousBoardState.enPassantCapture &&
+      previousBoardState.validMoves.enPassantCapture?.squareToMoveTo !== square
+    ) {
+      // Remove the key from the copied boardState object
+      const previousPieceSquare = boardState.validMoves.pieceSquare;
+      delete previousBoardState.board[previousPieceSquare];
 
-    // Remove the key from the copied boardState object
-    const previousPieceSquare = boardState.validMoves.pieceSquare;
-    delete previousBoardState.board[previousPieceSquare];
-
-    let updatedBoardState = {
-      ...previousBoardState,
-      currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
-    };
-    updatedBoardState.lastMove = {
-      sourceSquare: previousPieceSquare,
-      destinationSquare: square,
-      piece: boardState.validMoves.piece,
-    };
-    updatedBoardState.board[square] = boardState.validMoves.piece;
-    updatedBoardState.validMoves.possibleMoves = [];
-    updatedBoardState.validMoves.possibleCaptures = [];
-    updatedBoardState.validMoves.piece = "";
-    updatedBoardState.validMoves.pieceSquare = "";
-
-    // the piece - yes
-    console.log("piece making the move?", updatedBoardState.board[square]);
-    // the square it is now on
-    console.log("square after the move is made?", square);
-
-    // change first move property to false on the first move
-    if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
-      updatedBoardState.board[square].firstMove = false;
-    }
-
-    let isGameADrawResult = isGameADraw(updatedBoardState);
-
-    // check for pawn promotion
-    if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
-      promotePawn(updatedBoardState, square);
-    } else {
-      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
-        const clonedBoardState = _.cloneDeep(updatedBoardState);
-        // check if the game is over
-        const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
-        if (isThisCheckmate) {
-          console.log("game over chump");
-          setBoardState(updatedBoardState);
-          setCheckmate(true);
-        } else {
-          setInCheckStatus(true);
-          setBoardState(updatedBoardState);
-          console.log("major major we have a check");
-        }
-      } else if (isGameADrawResult.draw) {
-        console.log("game is a draw", isGameADrawResult);
-        setInCheckStatus(false);
-        setDraw(true);
-        setBoardState(updatedBoardState);
+      let updatedBoardState = {
+        ...previousBoardState,
+        currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
+      };
+      if (
+        boardState.validMoves.piece.piece === "pawn" &&
+        Math.abs(parseInt(square[1]) - parseInt(previousPieceSquare[1])) === 2
+      ) {
+        // Set the last move for en passant captures
+        updatedBoardState.lastMove = {
+          sourceSquare: previousPieceSquare,
+          destinationSquare: square,
+        };
       } else {
-        setInCheckStatus(false);
-        setBoardState(updatedBoardState);
+        updatedBoardState.lastMove = null;
+      }
+
+      updatedBoardState.board[square] = boardState.validMoves.piece;
+      updatedBoardState.validMoves.possibleMoves = [];
+      updatedBoardState.validMoves.possibleCaptures = [];
+      updatedBoardState.validMoves.piece = "";
+      updatedBoardState.validMoves.pieceSquare = "";
+
+      // the piece - yes
+      console.log("piece making the move?", updatedBoardState.board[square]);
+      // the square it is now on
+      console.log("square after the move is made?", square);
+
+      // change first move property to false on the first move
+      if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
+        updatedBoardState.board[square].firstMove = false;
+      }
+
+      let isGameADrawResult = isGameADraw(updatedBoardState);
+
+      // check for pawn promotion
+      if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+        promotePawn(updatedBoardState, square);
+      } else {
+        if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+          const clonedBoardState = _.cloneDeep(updatedBoardState);
+          // check if the game is over
+          const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
+          if (isThisCheckmate) {
+            console.log("game over chump");
+            setBoardState(updatedBoardState);
+            setCheckmate(true);
+          } else {
+            setInCheckStatus(true);
+            setBoardState(updatedBoardState);
+            console.log("major major we have a check");
+          }
+        } else if (isGameADrawResult.draw) {
+          console.log("game is a draw", isGameADrawResult);
+          setInCheckStatus(false);
+          setDraw(true);
+          setBoardState(updatedBoardState);
+        } else {
+          setInCheckStatus(false);
+          setBoardState(updatedBoardState);
+        }
+      }
+    } else {
+      // handle en passant move
+      // Remove the key from the copied boardState object
+      const previousPieceSquare = boardState.validMoves.enPassantCapture.pieceSquareToCapture;
+      delete previousBoardState.board[previousPieceSquare];
+      delete previousBoardState.board[boardState.validMoves.pieceSquare];
+
+      let updatedBoardState = {
+        ...previousBoardState,
+        currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
+      };
+
+      updatedBoardState.lastMove = null;
+      updatedBoardState.board[square] = boardState.validMoves.piece;
+      updatedBoardState.validMoves.possibleMoves = [];
+      updatedBoardState.validMoves.possibleCaptures = [];
+      updatedBoardState.validMoves.piece = "";
+      updatedBoardState.validMoves.pieceSquare = "";
+
+      let isGameADrawResult = isGameADraw(updatedBoardState);
+
+      // check for pawn promotion
+      if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+        promotePawn(updatedBoardState, square);
+      } else {
+        if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+          const clonedBoardState = _.cloneDeep(updatedBoardState);
+          // check if the game is over
+          const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
+          if (isThisCheckmate) {
+            console.log("game over chump");
+            setBoardState(updatedBoardState);
+            setCheckmate(true);
+          } else {
+            setInCheckStatus(true);
+            setBoardState(updatedBoardState);
+            console.log("major major we have a check");
+          }
+        } else if (isGameADrawResult.draw) {
+          console.log("game is a draw", isGameADrawResult);
+          setInCheckStatus(false);
+          setDraw(true);
+          setBoardState(updatedBoardState);
+        } else {
+          setInCheckStatus(false);
+          setBoardState(updatedBoardState);
+        }
       }
     }
   };
@@ -241,6 +301,27 @@ const ChessBoard = () => {
     }
 
     return isPieceProtected;
+  };
+
+  const isEnPassantPossible = (square, boardState) => {
+    let possibleEnPassantSquares = [];
+    let direction = boardState.currentPlayer === "white" ? -1 : 1;
+    possibleEnPassantSquares.push(Number(square[0]) + 1 + `${square[1]}`);
+    possibleEnPassantSquares.push(Number(square[0]) - 1 + `${square[1]}`);
+
+    console.log("possible en passant squares", possibleEnPassantSquares);
+    if (possibleEnPassantSquares.includes(boardState.lastMove.destinationSquare)) {
+      let result = {
+        result: true,
+        pieceSquareToCapture: possibleEnPassantSquares.find(
+          (square) => square === boardState.lastMove.destinationSquare
+        ),
+        squareToMoveTo: `${Number(boardState.lastMove.destinationSquare) + 1}`,
+      };
+      return result;
+    } else {
+      return { result: false };
+    }
   };
 
   const getKingPosition = (boardState, player) => {
@@ -398,6 +479,7 @@ const ChessBoard = () => {
     const moves = [];
     const captures = [];
     const selfCaptures = [];
+    let enPassantCapture;
 
     if (player === "white") {
       // Check for valid move
@@ -523,7 +605,21 @@ const ChessBoard = () => {
       }
     }
 
-    return { moves, captures, selfCaptures };
+    let isEnPassantPossibleResult;
+
+    if (boardState.lastMove) {
+      isEnPassantPossibleResult = isEnPassantPossible(square, boardState);
+    }
+
+    if (boardState.lastMove && isEnPassantPossibleResult.result) {
+      console.log("en passant possible", isEnPassantPossibleResult);
+      enPassantCapture = isEnPassantPossibleResult;
+    } else {
+      console.log("en passant not possible");
+      enPassantCapture = null;
+    }
+
+    return { moves, captures, selfCaptures, enPassantCapture };
   };
 
   const getRookMoves = (square, piece, boardState, isCheckingForCheck = false) => {
@@ -915,12 +1011,13 @@ const ChessBoard = () => {
     const isValidMove = boardState.validMoves.possibleMoves.includes(square);
     const isValidCapture = boardState.validMoves.possibleCaptures.includes(square);
     const isValidCastle = boardState.validMoves.possibleCastles.includes(square);
+    const isValidEnPassant = boardState.validMoves.enPassantCapture?.squareToMoveTo === square;
 
     // Check if the square is empty
     if (!piece) {
       return (
         <>
-          {isValidMove ? (
+          {isValidMove || isValidEnPassant ? (
             <div className={`square ${isDark ? "dark" : "light"}-square ${square}`} onClick={() => makeMove(square)}>
               <div className="valid-move-dot" />
             </div>
