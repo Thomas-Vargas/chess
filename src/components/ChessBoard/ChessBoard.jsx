@@ -167,7 +167,6 @@ const ChessBoard = () => {
   
     return isGameOver;
   };
-  
 
   const isPieceProtected = (square, updatedBoardState) => {
     let isPieceProtected = false;
@@ -305,6 +304,7 @@ const ChessBoard = () => {
   };
 
   const amIStillInCheck = (updatedBoardState, currentPlayer, isRecursive = false) => {
+    console.log("checking if player still in check")
     // Find the position of the current player's king
     const kingPosition = getKingPosition(updatedBoardState, getOpponent(currentPlayer));
 

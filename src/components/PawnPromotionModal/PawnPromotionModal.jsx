@@ -21,8 +21,8 @@ const PawnPromotionModal = ({ boardState, selectPromotionPiece, open, promotionB
     p: 4,
   };
 
-  console.log("promotion square", promotionSquare);
-  console.log("promotion board state", promotionBoardState)
+  // console.log("promotion square", promotionSquare);
+  // console.log("promotion board state", promotionBoardState)
 
   return (
     <Modal

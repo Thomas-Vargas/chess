@@ -70,7 +70,7 @@ const Piece = ({
   const onPieceClick = () => {
     if (piece && piece.player === boardState.currentPlayer && !checkmate) {
       if (piece.piece === "pawn") {
-        const possibleMoves = getPawnMoves(square, piece.player, boardState, inCheckStatus);
+        const possibleMoves = getPawnMoves(square, piece.player, boardState, true);
         console.log("Possible Pawn moves:", possibleMoves);
         setBoardState({
           ...boardState,
@@ -84,7 +84,7 @@ const Piece = ({
         });
       }
       if (piece.piece === "rook") {
-        const possibleMoves = getRookMoves(square, piece, boardState, inCheckStatus);
+        const possibleMoves = getRookMoves(square, piece, boardState, true);
         console.log("Possible Rook moves:", possibleMoves);
         setBoardState({
           ...boardState,
@@ -98,7 +98,7 @@ const Piece = ({
         });
       }
       if (piece.piece === "bishop") {
-        const possibleMoves = getBishopMoves(square, piece, boardState, inCheckStatus);
+        const possibleMoves = getBishopMoves(square, piece, boardState, true);
         console.log("Possible Bishop moves:", possibleMoves);
         setBoardState({
           ...boardState,
@@ -112,7 +112,7 @@ const Piece = ({
         });
       }
       if (piece.piece === "knight") {
-        const possibleMoves = getKnightMoves(square, piece, boardState, inCheckStatus);
+        const possibleMoves = getKnightMoves(square, piece, boardState, true);
         console.log("Possible Knight moves:", possibleMoves);
         setBoardState({
           ...boardState,
@@ -126,7 +126,7 @@ const Piece = ({
         });
       }
       if (piece.piece === "queen") {
-        const possibleMoves = getQueenMoves(square, piece, boardState, inCheckStatus);
+        const possibleMoves = getQueenMoves(square, piece, boardState, true);
         console.log("Possible Queen moves:", possibleMoves);
         setBoardState({
           ...boardState,
