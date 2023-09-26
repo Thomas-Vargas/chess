@@ -160,11 +160,17 @@ const Piece = ({
 
   const capturePiece = async () => {
     let previousBoardState = { ...boardState };
+
     delete previousBoardState.board[square];
     delete previousBoardState.board[boardState.validMoves.pieceSquare];
     let updatedBoardState = {
       ...previousBoardState,
       currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
+    };
+    updatedBoardState.lastMove = {
+      sourceSquare: previousBoardState.validMoves.pieceSquare,
+      destinationSquare: square,
+      piece: boardState.validMoves.piece,
     };
     updatedBoardState.board[square] = boardState.validMoves.piece;
     updatedBoardState.validMoves.possibleMoves = [];

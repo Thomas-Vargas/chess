@@ -61,7 +61,7 @@ const ChessBoard = () => {
       possibleCaptures: [],
       possibleCastles: [],
     },
-    lastMove: null
+    lastMove: null,
   });
   const [open, setOpen] = useState(false);
   const [promotionBoardState, setPromotionBoardState] = useState({});
@@ -76,7 +76,7 @@ const ChessBoard = () => {
 
   useEffect(() => {
     // console.log("Board state updated:", boardState);
-  }, [boardState.validMoves,]);
+  }, [boardState.validMoves]);
 
   const makeMove = async (square) => {
     // Create a copy of the boardState object
@@ -89,6 +89,11 @@ const ChessBoard = () => {
     let updatedBoardState = {
       ...previousBoardState,
       currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
+    };
+    updatedBoardState.lastMove = {
+      sourceSquare: previousPieceSquare,
+      destinationSquare: square,
+      piece: boardState.validMoves.piece,
     };
     updatedBoardState.board[square] = boardState.validMoves.piece;
     updatedBoardState.validMoves.possibleMoves = [];
@@ -140,14 +145,14 @@ const ChessBoard = () => {
   const isGameOver = (squareCausingCheck, pieceCausingCheck, updatedBoardState) => {
     let isGameOver = true;
     let possibleMoves;
-  
+
     // get all moves
     for (let position in updatedBoardState.board) {
       if (updatedBoardState.board[position].player === updatedBoardState.currentPlayer) {
         possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
-  
+
         console.log("all possible moves", possibleMoves);
-  
+
         // check if piece can be captured, make sure piece is not protected
         if (
           possibleMoves?.captures &&
@@ -158,7 +163,7 @@ const ChessBoard = () => {
           isGameOver = false;
           break;
         }
-  
+
         // check if move can block check
         if (possibleMoves?.moves) {
           for (let move of possibleMoves.moves) {
@@ -179,7 +184,7 @@ const ChessBoard = () => {
         possibleMoves = {};
       }
     }
-  
+
     return isGameOver;
   };
 
@@ -187,24 +192,24 @@ const ChessBoard = () => {
     let isDraw = true;
     let insufficientMaterial = true;
     const availableMoves = getAllPossibleMovesForPlayer(updatedBoardState.currentPlayer, updatedBoardState, true);
-  
+
     if (availableMoves.length > 0) {
       isDraw = false;
     }
-  
+
     // Check for insufficient material (only kings left)
     const piecesOnBoard = Object.values(updatedBoardState.board);
     const nonKingPieces = piecesOnBoard.filter((piece) => piece.piece !== "king");
-  
+
     if (nonKingPieces.length > 0) {
       insufficientMaterial = false;
     }
-  
+
     let result = {
       draw: isDraw || insufficientMaterial,
       insufficientMaterial: insufficientMaterial,
     };
-  
+
     return result;
   };
 
@@ -344,7 +349,7 @@ const ChessBoard = () => {
   };
 
   const amIStillInCheck = (updatedBoardState, currentPlayer, isRecursive = false) => {
-    console.log("checking if player still in check")
+    console.log("checking if player still in check");
     // Find the position of the current player's king
     const kingPosition = getKingPosition(updatedBoardState, getOpponent(currentPlayer));
 
