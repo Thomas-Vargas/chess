@@ -7,7 +7,6 @@ import {
   IconButton,
   Divider,
 } from "@mui/material";
-import { useEffect } from "react";
 
 const PawnPromotionModal = ({ boardState, selectPromotionPiece, open, promotionBoardState, promotionSquare }) => {
   const style = {

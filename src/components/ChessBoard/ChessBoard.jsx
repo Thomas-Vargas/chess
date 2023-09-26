@@ -13,7 +13,7 @@ import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 const ChessBoard = () => {
   const [boardState, setBoardState] = useState({
     board: {
-      11: { piece: "rook", player: "white", firstMove: true },
+      11: { piece: "rook", player: "white", firstMove: false },
       21: { piece: "knight", player: "white" },
       31: { piece: "bishop", player: "white" },
       41: { piece: "queen", player: "white" },
@@ -120,23 +120,19 @@ const ChessBoard = () => {
         setBoardState(updatedBoardState);
       }
     }
-
-    // this makes no sense?
-    updatedBoardState.validMoves.possibleMoves = [];
-    updatedBoardState.validMoves.possibleCaptures = [];
   };
 
   const isGameOver = (squareCausingCheck, pieceCausingCheck, updatedBoardState) => {
     let isGameOver = true;
     let possibleMoves;
-
+  
     // get all moves
     for (let position in updatedBoardState.board) {
       if (updatedBoardState.board[position].player === updatedBoardState.currentPlayer) {
         possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
-
-        console.log("possible moves", possibleMoves);
-
+  
+        console.log("all possible moves", possibleMoves);
+  
         // check if piece can be captured, make sure piece is not protected
         if (
           possibleMoves?.captures &&
@@ -147,35 +143,18 @@ const ChessBoard = () => {
           isGameOver = false;
           break;
         }
-
+  
         // check if move can block check
         if (possibleMoves?.moves) {
           for (let move of possibleMoves.moves) {
-            let previousSquare = position;
-
-            // create test board state modeling the move as made
-            let previousBoardState = _.cloneDeep(updatedBoardState);
-            //remove previous square
-            delete previousBoardState.board[previousSquare];
-            // add new move
-            let testBoardState = {
-              ...previousBoardState,
-              currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
-            };
+            // Create test board state modeling the move as made
+            let testBoardState = _.cloneDeep(updatedBoardState);
+            // Remove the previous square
+            delete testBoardState.board[position];
+            // Add the new move
             testBoardState.board[move] = possibleMoves.piece;
-
-            // use test board state to see if it blocks check
-            // find legal moves for piece that made the check
-            // check if it can still capture the king
-            const checkPieceMoves = getPieceMoves(squareCausingCheck, pieceCausingCheck, testBoardState);
-
-            // get correct king
-            const kingPosition = getKingPosition(testBoardState, pieceCausingCheck.player);
-
-            console.log("king position in isgameover:", kingPosition);
-
-            // check can be blocked
-            if (!checkPieceMoves.captures.includes(kingPosition)) {
+            // Use test board state to see if it blocks check
+            if (!amIStillInCheck(testBoardState, updatedBoardState.currentPlayer, true)) {
               console.log("check can be blocked");
               isGameOver = false;
               break;
@@ -185,9 +164,10 @@ const ChessBoard = () => {
         possibleMoves = {};
       }
     }
-
+  
     return isGameOver;
   };
+  
 
   const isPieceProtected = (square, updatedBoardState) => {
     let isPieceProtected = false;
@@ -708,7 +688,7 @@ const ChessBoard = () => {
     }
 
     // castle logic
-    if (color === "white") {
+    if (color === "white" && !inCheckStatus) {
       // check for possible castle right and left
       if (
         !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
@@ -727,7 +707,7 @@ const ChessBoard = () => {
       ) {
         castle.push(`${Number(col) - 2}` + row);
       }
-    } else if (color === "black") {
+    } else if (color === "black" && !inCheckStatus) {
       if (
         !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
         !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
@@ -761,7 +741,24 @@ const ChessBoard = () => {
 
     console.log("!!!!! promotionBoardState before setting new state", promotionBoardState);
 
-    setBoardState(promotionBoardState);
+    const clonedBoardState = _.cloneDeep(promotionBoardState);
+
+    // check if the game is over
+    const isThisCheckmate = isGameOver(square, clonedBoardState.board[square], clonedBoardState);
+
+    if (isThisCheckmate) {
+      console.log("game over chump");
+      setBoardState(clonedBoardState);
+      setCheckmate(true);
+    } else if (isThisMoveACheck(square, clonedBoardState.board[square], promotionBoardState) && !inCheckStatus) {
+      setInCheckStatus(true);
+      setBoardState(clonedBoardState);
+      console.log("major major we have a check");
+    } else {
+      setInCheckStatus(false);
+      setBoardState(clonedBoardState);
+    }
+    // setBoardState(promotionBoardState);
     setPromotionBoardState({});
     setPromotionSquare(null);
     setOpen(false);
