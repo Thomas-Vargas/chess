@@ -178,6 +178,8 @@ const Piece = ({
       if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
         updatedBoardState.board[square].firstMove = false;
       }
+      
+      // kept in case i need to revert to old logic
 
       // check for pawn promotion
       // if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {

@@ -75,7 +75,7 @@ const ChessBoard = () => {
   console.log("checkmate status", checkmate);
 
   useEffect(() => {
-    // console.log("Board state updated:", boardState);
+    // re-render page when validmoves updates.
   }, [boardState.validMoves]);
 
   const makeMove = async (square) => {
@@ -202,7 +202,7 @@ const ChessBoard = () => {
     }
   };
 
-  const isGameOver = (squareCausingCheck, pieceCausingCheck, updatedBoardState) => {
+  const isGameOver = (squareCausingCheck, updatedBoardState) => {
     let isGameOver = true;
     let possibleMoves;
 
