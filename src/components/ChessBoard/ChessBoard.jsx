@@ -828,44 +828,44 @@ const ChessBoard = () => {
     }
 
     // castle logic
-    // if (color === "white" && !inCheckStatus) {
-    //   // check for possible castle right and left
-    //   if (
-    //     !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
-    //     !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
-    //     piece.firstMove === true &&
-    //     boardState.board["81"].firstMove === true
-    //   ) {
-    //     castle.push(`${Number(col) + 2}` + row);
-    //   }
-    //   if (
-    //     !boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) &&
-    //     !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
-    //     !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
-    //     piece.firstMove === true &&
-    //     boardState.board["11"].firstMove === true
-    //   ) {
-    //     castle.push(`${Number(col) - 2}` + row);
-    //   }
-    // } else if (color === "black" && !inCheckStatus) {
-    //   if (
-    //     !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
-    //     !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
-    //     piece.firstMove === true &&
-    //     boardState.board["88"].firstMove === true
-    //   ) {
-    //     castle.push(`${Number(col) + 2}` + row);
-    //   }
-    //   if (
-    //     !boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) &&
-    //     !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
-    //     !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
-    //     piece.firstMove === true &&
-    //     boardState.board["18"].firstMove === true
-    //   ) {
-    //     castle.push(`${Number(col) - 2}` + row);
-    //   }
-    // }
+    if (color === "white" && !inCheckStatus) {
+      // check for possible castle right and left
+      if (
+        !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
+        piece.firstMove === true &&
+        boardState.board["81"].firstMove === true
+      ) {
+        castle.push(`${Number(col) + 2}` + row);
+      }
+      if (
+        !boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
+        piece.firstMove === true &&
+        boardState.board["11"].firstMove === true
+      ) {
+        castle.push(`${Number(col) - 2}` + row);
+      }
+    } else if (color === "black" && !inCheckStatus) {
+      if (
+        !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
+        piece.firstMove === true &&
+        boardState.board["88"].firstMove === true
+      ) {
+        castle.push(`${Number(col) + 2}` + row);
+      }
+      if (
+        !boardState.board.hasOwnProperty(`${Number(col) - 1}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
+        !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
+        piece.firstMove === true &&
+        boardState.board["18"].firstMove === true
+      ) {
+        castle.push(`${Number(col) - 2}` + row);
+      }
+    }
 
     return { moves, captures, castle, selfCaptures };
   };
