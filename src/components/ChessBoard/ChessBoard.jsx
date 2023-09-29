@@ -1,6 +1,6 @@
 import React from "react";
 import Piece from "../Piece/Piece";
-import { Divider, Grid, Typography } from "@mui/material";
+import { Divider, Grid, Typography, Button } from "@mui/material";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -63,7 +63,8 @@ const ChessBoard = () => {
       possibleCastles: [],
     },
     lastMove: null,
-    fen: false
+    fen: false,
+    puzzleMoves: []
   });
   const [currentPuzzle, setCurrentPuzzle] = useState(null);
   const [open, setOpen] = useState(false);
@@ -108,6 +109,69 @@ const ChessBoard = () => {
         console.log("error in getSinglePuzzle", error);
       });
   };
+
+  const sanToBoardStateMove = (sanSquare1, sanSquare2, sanMove) => {
+    let startSquare = getColumnNum(sanSquare1[0]) + `${sanSquare1[1]}`;
+    let endSquare = getColumnNum(sanSquare2[0]) + `${sanSquare2[1]}`;
+    let capture = false;
+
+    let piece = boardState.board[startSquare];
+
+    if (boardState.board[endSquare]) {
+      capture = true;
+    }
+
+    let validMoves = getPieceMoves(startSquare, piece, boardState);
+
+    let boardStateWithValidMoves = {
+      ...boardState,
+      validMoves: {
+        pieceSquare: startSquare,
+        possibleMoves: validMoves.moves,
+        possibleCaptures: validMoves.captures,
+        enPassantCapture: validMoves.enPassantCapture,
+        piece,
+        possibleCastles: validMoves.castle ? validMoves.possibleCastles : [],
+      },
+    }
+    boardStateWithValidMoves.puzzleMoves = [sanMove]
+
+    console.log(startSquare, endSquare, piece, capture, validMoves, boardStateWithValidMoves);
+    if (capture) {
+      delete boardStateWithValidMoves.board[endSquare];
+    }
+
+    makeMove(endSquare, boardStateWithValidMoves);
+  }
+
+  const startPuzzle = () => {
+    let startSquare = currentPuzzle.moves[0].substring(0, 2);
+    let endSquare = currentPuzzle.moves[0].substring(2, 4);
+
+    console.log(startSquare, endSquare)
+    sanToBoardStateMove(startSquare, endSquare, currentPuzzle.moves[0])
+  }
+
+  const getColumnNum = (char) => {
+    switch(char) {
+      case 'a': 
+        return 1;
+      case 'b': 
+        return 2;
+      case 'c': 
+        return 3;
+      case 'd': 
+        return 4;
+      case 'e': 
+        return 5;
+      case 'f': 
+        return 6;
+      case 'g': 
+        return 7;
+      default: 
+        return 8;
+    }
+  }
 
   const fenToBoardState = (fen) => {
     const boardState = {
@@ -183,7 +247,7 @@ const ChessBoard = () => {
   // const fenBoardState = fenToBoardState(fen);
   // console.log("fen board state", fenBoardState);
 
-  const makeMove = async (square) => {
+  const makeMove = async (square, boardState) => {
     // Create a copy of the boardState object
     let previousBoardState = { ...boardState };
     if (
@@ -1125,7 +1189,7 @@ const ChessBoard = () => {
       return (
         <>
           {isValidMove || isValidEnPassant ? (
-            <div className={`square ${isDark ? "dark" : "light"}-square ${square}`} onClick={() => makeMove(square)}>
+            <div className={`square ${isDark ? "dark" : "light"}-square ${square}`} onClick={() => makeMove(square, boardState)}>
               <div className="valid-move-dot" />
             </div>
           ) : (
@@ -1205,6 +1269,7 @@ const ChessBoard = () => {
           Draw!
         </Typography>
       )}
+      <Button variant="contained" onClick={() => startPuzzle()}>Start</Button>
       {renderBoard()}
       <PawnPromotionModal
         boardState={boardState}
