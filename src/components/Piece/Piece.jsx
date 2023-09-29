@@ -24,6 +24,8 @@ const Piece = ({
   checkmate,
   isGameADraw,
   setDraw,
+  internalMoveToSan,
+  isPuzzleMoveCorrect
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -162,77 +164,82 @@ const Piece = ({
   const capturePiece = () => {
     let previousBoardState = { ...boardState };
 
-      delete previousBoardState.board[square];
-      delete previousBoardState.board[boardState.validMoves.pieceSquare];
-      let updatedBoardState = {
-        ...previousBoardState,
-        currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
-      };
-      updatedBoardState.board[square] = boardState.validMoves.piece;
-      updatedBoardState.validMoves.possibleMoves = [];
-      updatedBoardState.validMoves.possibleCaptures = [];
-      updatedBoardState.validMoves.piece = "";
-      updatedBoardState.validMoves.pieceSquare = "";
+    let sanMove = internalMoveToSan(boardState.validMoves.pieceSquare, square);
 
-      // change first move property to false on first move
-      if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
-        updatedBoardState.board[square].firstMove = false;
-      }
-      
-      // kept in case i need to revert to old logic
+    console.log("san move in capture piece", sanMove)
 
-      // check for pawn promotion
-      // if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
-      //   console.log("promoting pawn")
-      //   const clonedBoardState = _.cloneDeep(updatedBoardState);
-      //   promotePawn(clonedBoardState, square);
-      // } else {
-      //   console.log("not promoting pawn")
-      //   const clonedBoardState = _.cloneDeep(updatedBoardState);
-      //   // check if game is over
-      //   if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
-      //     console.log("game over chump");
-      //     setBoardState(updatedBoardState);
-      //     setCheckmate(true);
-      //   } else if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
-      //     console.log("major major we have a check");
-      //     // save check status to generate valid moves for escaping check
-      //     setInCheckStatus(true);
-      //     setBoardState(updatedBoardState);
-      //   } else {
-      //     setInCheckStatus(false);
-      //     setBoardState(updatedBoardState);
-      //   }
-      // }
-      let isGameADrawResult = isGameADraw(updatedBoardState);
+    delete previousBoardState.board[square];
+    delete previousBoardState.board[boardState.validMoves.pieceSquare];
+    let updatedBoardState = {
+      ...previousBoardState,
+      currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
+    };
+    updatedBoardState.board[square] = boardState.validMoves.piece;
+    updatedBoardState.validMoves.possibleMoves = [];
+    updatedBoardState.validMoves.possibleCaptures = [];
+    updatedBoardState.validMoves.piece = "";
+    updatedBoardState.validMoves.pieceSquare = "";
+    updatedBoardState.puzzleMoves = [...updatedBoardState.puzzleMoves, sanMove]
 
-      // check for pawn promotion
-      if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
-        promotePawn(updatedBoardState, square);
-      } else {
-        if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
-          const clonedBoardState = _.cloneDeep(updatedBoardState);
-          // check if the game is over
-          const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
-          if (isThisCheckmate) {
-            console.log("game over chump");
-            setBoardState(updatedBoardState);
-            setCheckmate(true);
-          } else {
-            setInCheckStatus(true);
-            setBoardState(updatedBoardState);
-            console.log("major major we have a check");
-          }
-        } else if (isGameADrawResult.draw) {
-          console.log("game is a draw", isGameADrawResult);
-          setInCheckStatus(false);
-          setDraw(true);
+    // change first move property to false on first move
+    if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
+      updatedBoardState.board[square].firstMove = false;
+    }
+
+    // kept in case i need to revert to old logic
+
+    // check for pawn promotion
+    // if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+    //   console.log("promoting pawn")
+    //   const clonedBoardState = _.cloneDeep(updatedBoardState);
+    //   promotePawn(clonedBoardState, square);
+    // } else {
+    //   console.log("not promoting pawn")
+    //   const clonedBoardState = _.cloneDeep(updatedBoardState);
+    //   // check if game is over
+    //   if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
+    //     console.log("game over chump");
+    //     setBoardState(updatedBoardState);
+    //     setCheckmate(true);
+    //   } else if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+    //     console.log("major major we have a check");
+    //     // save check status to generate valid moves for escaping check
+    //     setInCheckStatus(true);
+    //     setBoardState(updatedBoardState);
+    //   } else {
+    //     setInCheckStatus(false);
+    //     setBoardState(updatedBoardState);
+    //   }
+    // }
+    let isGameADrawResult = isGameADraw(updatedBoardState);
+
+    // check for pawn promotion
+    if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+      promotePawn(updatedBoardState, square);
+    } else {
+      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+        const clonedBoardState = _.cloneDeep(updatedBoardState);
+        // check if the game is over
+        const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
+        if (isThisCheckmate) {
+          console.log("game over chump");
           setBoardState(updatedBoardState);
+          setCheckmate(true);
         } else {
-          setInCheckStatus(false);
+          setInCheckStatus(true);
           setBoardState(updatedBoardState);
+          console.log("major major we have a check");
         }
+      } else if (isGameADrawResult.draw) {
+        console.log("game is a draw", isGameADrawResult);
+        setInCheckStatus(false);
+        setDraw(true);
+        setBoardState(updatedBoardState);
+      } else {
+        setInCheckStatus(false);
+        setBoardState(updatedBoardState);
       }
+    }
   };
 
   const pieceStyle = pieceStyles[piece.player][piece.piece];

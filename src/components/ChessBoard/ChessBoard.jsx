@@ -4,7 +4,7 @@ import { Divider, Grid, Typography, Button } from "@mui/material";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-import _ from "lodash";
+import _, { endsWith } from "lodash";
 
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 
@@ -64,7 +64,7 @@ const ChessBoard = () => {
     },
     lastMove: null,
     fen: false,
-    puzzleMoves: []
+    puzzleMoves: [],
   });
   const [currentPuzzle, setCurrentPuzzle] = useState(null);
   const [open, setOpen] = useState(false);
@@ -73,6 +73,8 @@ const ChessBoard = () => {
   const [inCheckStatus, setInCheckStatus] = useState(false);
   const [checkmate, setCheckmate] = useState(false);
   const [draw, setDraw] = useState(false);
+  const [puzzleIncorrect, setPuzzleIncorrect] = useState(false);
+  const [puzzleFinished, setPuzzleFinished] = useState(false);
 
   console.log("board state", boardState);
   console.log("inCheckStatus", inCheckStatus);
@@ -83,11 +85,19 @@ const ChessBoard = () => {
     // re-render page when validmoves updates.
     console.log("useEffect triggered");
     if (currentPuzzle === null) {
-      getSinglePuzzle();
+      // getSinglePuzzle();
+      setCurrentPuzzle({
+        puzzleid: "HxxIU",
+        fen: "2r2rk1/3nqp1p/p3p1p1/np1p4/3P4/P1NBP3/1PQ2PPP/2R2RK1 w - - 0 18",
+        rating: 1683,
+        ratingdeviation: 74,
+        moves: ["c3d5", "e6d5", "c2c8", "f8c8"],
+        themes: ["advantage", "hangingPiece", "middlegame", "short"],
+      });
     }
 
     if (currentPuzzle && !boardState.fen) {
-      fenToBoardState(currentPuzzle.fen)
+      fenToBoardState(currentPuzzle.fen);
     }
   }, [boardState.validMoves, currentPuzzle]);
 
@@ -97,7 +107,7 @@ const ChessBoard = () => {
         "X-RapidAPI-Key": "bc3e9f93d4mshbf9fe407954f81bp177371jsn10342b9a24df",
         "X-RapidAPI-Host": "chess-puzzles.p.rapidapi.com",
       },
-      params: {id: 'HxxIU'}
+      params: { id: "HxxIU" },
     };
     axios
       .get(`https://chess-puzzles.p.rapidapi.com/`, config)
@@ -110,9 +120,31 @@ const ChessBoard = () => {
       });
   };
 
+  const isPuzzleMoveCorrect = (correctPuzzleMoves, currentPuzzleMoves) => {
+    console.log(correctPuzzleMoves, currentPuzzleMoves);
+  
+    if (JSON.stringify(correctPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
+      setPuzzleFinished(true);
+      return;
+    }
+  
+    let numberOfMoves = currentPuzzleMoves.length;
+    let shortenedCorrectPuzzleMoves = correctPuzzleMoves.slice(0, numberOfMoves);
+  
+    console.log("moves comparison", shortenedCorrectPuzzleMoves, currentPuzzleMoves);
+  
+    if (JSON.stringify(shortenedCorrectPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
+      return true;
+    } else {
+      console.log("not equal");
+      return false;
+    }
+  };
+  
+
   const sanToBoardStateMove = (sanSquare1, sanSquare2, sanMove) => {
-    let startSquare = getColumnNum(sanSquare1[0]) + `${sanSquare1[1]}`;
-    let endSquare = getColumnNum(sanSquare2[0]) + `${sanSquare2[1]}`;
+    let startSquare = getColumnNumOrChar(sanSquare1[0]) + `${sanSquare1[1]}`;
+    let endSquare = getColumnNumOrChar(sanSquare2[0]) + `${sanSquare2[1]}`;
     let capture = false;
 
     let piece = boardState.board[startSquare];
@@ -133,8 +165,7 @@ const ChessBoard = () => {
         piece,
         possibleCastles: validMoves.castle ? validMoves.possibleCastles : [],
       },
-    }
-    boardStateWithValidMoves.puzzleMoves = [sanMove]
+    };
 
     console.log(startSquare, endSquare, piece, capture, validMoves, boardStateWithValidMoves);
     if (capture) {
@@ -142,36 +173,59 @@ const ChessBoard = () => {
     }
 
     makeMove(endSquare, boardStateWithValidMoves);
-  }
+  };
+
+  const internalMoveToSan = (square1, square2) => {
+    const startSquare = getColumnNumOrChar(square1[0]) + square1[1];
+    const endSquare = getColumnNumOrChar(square2[0]) + square2[1];
+
+    return startSquare + endSquare;
+  };
 
   const startPuzzle = () => {
     let startSquare = currentPuzzle.moves[0].substring(0, 2);
     let endSquare = currentPuzzle.moves[0].substring(2, 4);
 
-    console.log(startSquare, endSquare)
-    sanToBoardStateMove(startSquare, endSquare, currentPuzzle.moves[0])
-  }
+    // console.log(startSquare, endSquare)
+    sanToBoardStateMove(startSquare, endSquare, currentPuzzle.moves[0]);
+  };
 
-  const getColumnNum = (char) => {
-    switch(char) {
-      case 'a': 
+  const getColumnNumOrChar = (char) => {
+    switch (char) {
+      case "a":
         return 1;
-      case 'b': 
+      case "b":
         return 2;
-      case 'c': 
+      case "c":
         return 3;
-      case 'd': 
+      case "d":
         return 4;
-      case 'e': 
+      case "e":
         return 5;
-      case 'f': 
+      case "f":
         return 6;
-      case 'g': 
+      case "g":
         return 7;
-      default: 
+      case "h":
         return 8;
+      case "1":
+        return "a";
+      case "2":
+        return "b";
+      case "3":
+        return "c";
+      case "4":
+        return "d";
+      case "5":
+        return "e";
+      case "6":
+        return "f";
+      case "7":
+        return "g";
+      default:
+        return "h";
     }
-  }
+  };
 
   const fenToBoardState = (fen) => {
     const boardState = {
@@ -187,22 +241,22 @@ const ChessBoard = () => {
       lastMove: null,
       fen: true,
     };
-  
+
     const [position, turn, castling, enPassant, halfMove, fullMove] = fen.split(" ");
-  
+
     // Update the current player based on the turn information
     boardState.currentPlayer = turn === "w" ? "white" : "black";
-  
+
     const rows = position.split("/");
     let rank = 8; // start from the top rank
-  
+
     rows.forEach((row) => {
       let file = 1; // files are 1-indexed
       row.split("").forEach((char) => {
         if (isNaN(char)) {
           const player = char === char.toUpperCase() ? "white" : "black";
           const piece = char.toLowerCase();
-  
+
           if (piece !== "p") {
             const pieceName = getPieceName(piece);
             const square = getSquare(file, rank);
@@ -219,7 +273,7 @@ const ChessBoard = () => {
       });
       rank--; // Move to the next rank
     });
-  
+
     return setBoardState(boardState);
   };
 
@@ -239,13 +293,10 @@ const ChessBoard = () => {
         return "pawn";
     }
   };
-  
+
   const getSquare = (file, rank) => {
     return rank + file * 10;
   };
-  // const fen = "6k1/ppp2p1p/r5p1/2PP4/3PB1P1/2PK4/P6P/8 b - - 0 29";
-  // const fenBoardState = fenToBoardState(fen);
-  // console.log("fen board state", fenBoardState);
 
   const makeMove = async (square, boardState) => {
     // Create a copy of the boardState object
@@ -262,6 +313,13 @@ const ChessBoard = () => {
         ...previousBoardState,
         currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
       };
+      let sanMove = internalMoveToSan(previousPieceSquare, square);
+      // updatedBoardState.puzzleMoves = [...updatedBoardState.puzzleMoves, sanMove];
+      if (!updatedBoardState.puzzleMoves) {
+        updatedBoardState.puzzleMoves = [];
+      }
+      updatedBoardState.puzzleMoves = [...updatedBoardState.puzzleMoves, sanMove];
+
       if (
         boardState.validMoves.piece.piece === "pawn" &&
         Math.abs(parseInt(square[1]) - parseInt(previousPieceSquare[1])) === 2
@@ -316,6 +374,10 @@ const ChessBoard = () => {
           setDraw(true);
           setBoardState(updatedBoardState);
         } else {
+          if (!isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves)) {
+            setPuzzleIncorrect(true);
+            alert("failed puzzle");
+          }
           setInCheckStatus(false);
           setBoardState(updatedBoardState);
         }
@@ -605,12 +667,12 @@ const ChessBoard = () => {
     // Find the position of the current player's king
     const kingPosition = getKingPosition(updatedBoardState, getOpponent(currentPlayer));
 
-    console.log("king position", kingPosition);
+    // console.log("king position", kingPosition);
 
     // Get all possible moves for the opponent
     const opponentMoves = getAllPossibleMovesForPlayer(getOpponent(currentPlayer), updatedBoardState);
 
-    console.log("opponent moves", opponentMoves);
+    // console.log("opponent moves", opponentMoves);
 
     // Check if the opponent can capture the king
     if (opponentMoves.includes(kingPosition)) {
@@ -786,7 +848,7 @@ const ChessBoard = () => {
       console.log("en passant possible", isEnPassantPossibleResult);
       enPassantCapture = isEnPassantPossibleResult;
     } else {
-      console.log("en passant not possible");
+      // console.log("en passant not possible");
       enPassantCapture = null;
     }
 
@@ -1189,7 +1251,10 @@ const ChessBoard = () => {
       return (
         <>
           {isValidMove || isValidEnPassant ? (
-            <div className={`square ${isDark ? "dark" : "light"}-square ${square}`} onClick={() => makeMove(square, boardState)}>
+            <div
+              className={`square ${isDark ? "dark" : "light"}-square ${square}`}
+              onClick={() => makeMove(square, boardState)}
+            >
               <div className="valid-move-dot" />
             </div>
           ) : (
@@ -1226,6 +1291,8 @@ const ChessBoard = () => {
         checkmate={checkmate}
         isGameADraw={isGameADraw}
         setDraw={setDraw}
+        internalMoveToSan={internalMoveToSan}
+        isPuzzleMoveCorrect={isPuzzleMoveCorrect}
       />
     );
   };
@@ -1269,7 +1336,9 @@ const ChessBoard = () => {
           Draw!
         </Typography>
       )}
-      <Button variant="contained" onClick={() => startPuzzle()}>Start</Button>
+      <Button variant="contained" onClick={() => startPuzzle()}>
+        Start
+      </Button>
       {renderBoard()}
       <PawnPromotionModal
         boardState={boardState}
