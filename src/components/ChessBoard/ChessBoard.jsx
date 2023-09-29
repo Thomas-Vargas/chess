@@ -2,6 +2,7 @@ import React from "react";
 import Piece from "../Piece/Piece";
 import { Divider, Grid, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 import _ from "lodash";
 
@@ -62,7 +63,9 @@ const ChessBoard = () => {
       possibleCastles: [],
     },
     lastMove: null,
+    fen: false
   });
+  const [currentPuzzle, setCurrentPuzzle] = useState(null);
   const [open, setOpen] = useState(false);
   const [promotionBoardState, setPromotionBoardState] = useState({});
   const [promotionSquare, setPromotionSquare] = useState(null);
@@ -73,10 +76,112 @@ const ChessBoard = () => {
   console.log("board state", boardState);
   console.log("inCheckStatus", inCheckStatus);
   console.log("checkmate status", checkmate);
+  console.log("current puzzle:", currentPuzzle);
 
   useEffect(() => {
     // re-render page when validmoves updates.
-  }, [boardState.validMoves]);
+    console.log("useEffect triggered");
+    if (currentPuzzle === null) {
+      getSinglePuzzle();
+    }
+
+    if (currentPuzzle && !boardState.fen) {
+      fenToBoardState(currentPuzzle.fen)
+    }
+  }, [boardState.validMoves, currentPuzzle]);
+
+  const getSinglePuzzle = () => {
+    const config = {
+      headers: {
+        "X-RapidAPI-Key": "bc3e9f93d4mshbf9fe407954f81bp177371jsn10342b9a24df",
+        "X-RapidAPI-Host": "chess-puzzles.p.rapidapi.com",
+      },
+      params: {id: 'HxxIU'}
+    };
+    axios
+      .get(`https://chess-puzzles.p.rapidapi.com/`, config)
+      .then((result) => {
+        console.log("result in getSinglePuzzle", result.data);
+        setCurrentPuzzle(result.data.puzzles[0]);
+      })
+      .catch((error) => {
+        console.log("error in getSinglePuzzle", error);
+      });
+  };
+
+  const fenToBoardState = (fen) => {
+    const boardState = {
+      board: {},
+      currentPlayer: "white",
+      validMoves: {
+        piece: "",
+        pieceSquare: "",
+        possibleMoves: [],
+        possibleCaptures: [],
+        possibleCastles: [],
+      },
+      lastMove: null,
+      fen: true,
+    };
+  
+    const [position, turn, castling, enPassant, halfMove, fullMove] = fen.split(" ");
+  
+    // Update the current player based on the turn information
+    boardState.currentPlayer = turn === "w" ? "white" : "black";
+  
+    const rows = position.split("/");
+    let rank = 8; // start from the top rank
+  
+    rows.forEach((row) => {
+      let file = 1; // files are 1-indexed
+      row.split("").forEach((char) => {
+        if (isNaN(char)) {
+          const player = char === char.toUpperCase() ? "white" : "black";
+          const piece = char.toLowerCase();
+  
+          if (piece !== "p") {
+            const pieceName = getPieceName(piece);
+            const square = getSquare(file, rank);
+            boardState.board[square] = { piece: pieceName, player };
+          } else {
+            // Handle pawn separately
+            const square = getSquare(file, rank);
+            boardState.board[square] = { piece: "pawn", player };
+          }
+          file++;
+        } else {
+          file += parseInt(char, 10);
+        }
+      });
+      rank--; // Move to the next rank
+    });
+  
+    return setBoardState(boardState);
+  };
+
+  const getPieceName = (piece) => {
+    switch (piece) {
+      case "r":
+        return "rook";
+      case "n":
+        return "knight";
+      case "b":
+        return "bishop";
+      case "q":
+        return "queen";
+      case "k":
+        return "king";
+      default:
+        return "pawn";
+    }
+  };
+  
+  const getSquare = (file, rank) => {
+    return rank + file * 10;
+  };
+  // const fen = "6k1/ppp2p1p/r5p1/2PP4/3PB1P1/2PK4/P6P/8 b - - 0 29";
+  // const fenBoardState = fenToBoardState(fen);
+  // console.log("fen board state", fenBoardState);
 
   const makeMove = async (square) => {
     // Create a copy of the boardState object
@@ -315,7 +420,10 @@ const ChessBoard = () => {
         pieceSquareToCapture: possibleEnPassantSquares.find(
           (square) => square === boardState.lastMove.destinationSquare
         ),
-        squareToMoveTo: boardState.currentPlayer === 'white' ? `${Number(boardState.lastMove.destinationSquare) + 1}` : `${Number(boardState.lastMove.destinationSquare) - 1}`,
+        squareToMoveTo:
+          boardState.currentPlayer === "white"
+            ? `${Number(boardState.lastMove.destinationSquare) + 1}`
+            : `${Number(boardState.lastMove.destinationSquare) - 1}`,
       };
       return result;
     } else {
