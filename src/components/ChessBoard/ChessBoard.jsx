@@ -122,25 +122,27 @@ const ChessBoard = () => {
 
   const isPuzzleMoveCorrect = (correctPuzzleMoves, currentPuzzleMoves) => {
     console.log(correctPuzzleMoves, currentPuzzleMoves);
-  
+
     if (JSON.stringify(correctPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
       setPuzzleFinished(true);
+      alert('puzzle complete! you go!');
       return;
     }
-  
+
     let numberOfMoves = currentPuzzleMoves.length;
     let shortenedCorrectPuzzleMoves = correctPuzzleMoves.slice(0, numberOfMoves);
-  
+
     console.log("moves comparison", shortenedCorrectPuzzleMoves, currentPuzzleMoves);
-  
+
     if (JSON.stringify(shortenedCorrectPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
       return true;
     } else {
       console.log("not equal");
+      setPuzzleIncorrect(true);
+      alert("failed puzzle");
       return false;
     }
   };
-  
 
   const sanToBoardStateMove = (sanSquare1, sanSquare2, sanMove) => {
     let startSquare = getColumnNumOrChar(sanSquare1[0]) + `${sanSquare1[1]}`;
@@ -314,7 +316,6 @@ const ChessBoard = () => {
         currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
       };
       let sanMove = internalMoveToSan(previousPieceSquare, square);
-      // updatedBoardState.puzzleMoves = [...updatedBoardState.puzzleMoves, sanMove];
       if (!updatedBoardState.puzzleMoves) {
         updatedBoardState.puzzleMoves = [];
       }
@@ -353,6 +354,7 @@ const ChessBoard = () => {
 
       // check for pawn promotion
       if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+        // move cause pawn promotion
         promotePawn(updatedBoardState, square);
       } else {
         if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
@@ -360,24 +362,28 @@ const ChessBoard = () => {
           // check if the game is over
           const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
           if (isThisCheckmate) {
+            // move causing checkmate
+            isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+
             console.log("game over chump");
             setBoardState(updatedBoardState);
             setCheckmate(true);
           } else {
+            // move cause check
+            isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
             setInCheckStatus(true);
             setBoardState(updatedBoardState);
             console.log("major major we have a check");
           }
         } else if (isGameADrawResult.draw) {
+          // move causing draw - no need to check if valid puzzle move because i am assuming no puzzle will result in a draw
           console.log("game is a draw", isGameADrawResult);
           setInCheckStatus(false);
           setDraw(true);
           setBoardState(updatedBoardState);
         } else {
-          if (!isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves)) {
-            setPuzzleIncorrect(true);
-            alert("failed puzzle");
-          }
+          // normal move
+          isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
           setInCheckStatus(false);
           setBoardState(updatedBoardState);
         }
@@ -1132,7 +1138,6 @@ const ChessBoard = () => {
       setInCheckStatus(false);
       setBoardState(clonedBoardState);
     }
-    // setBoardState(promotionBoardState);
     setPromotionBoardState({});
     setPromotionSquare(null);
     setOpen(false);
@@ -1293,6 +1298,7 @@ const ChessBoard = () => {
         setDraw={setDraw}
         internalMoveToSan={internalMoveToSan}
         isPuzzleMoveCorrect={isPuzzleMoveCorrect}
+        currentPuzzle={currentPuzzle}
       />
     );
   };

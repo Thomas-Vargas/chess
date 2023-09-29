@@ -25,7 +25,8 @@ const Piece = ({
   isGameADraw,
   setDraw,
   internalMoveToSan,
-  isPuzzleMoveCorrect
+  isPuzzleMoveCorrect,
+  currentPuzzle
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -166,7 +167,7 @@ const Piece = ({
 
     let sanMove = internalMoveToSan(boardState.validMoves.pieceSquare, square);
 
-    console.log("san move in capture piece", sanMove)
+    console.log("san move in capture piece", sanMove);
 
     delete previousBoardState.board[square];
     delete previousBoardState.board[boardState.validMoves.pieceSquare];
@@ -179,7 +180,11 @@ const Piece = ({
     updatedBoardState.validMoves.possibleCaptures = [];
     updatedBoardState.validMoves.piece = "";
     updatedBoardState.validMoves.pieceSquare = "";
-    updatedBoardState.puzzleMoves = [...updatedBoardState.puzzleMoves, sanMove]
+    // i dont think this is necessary
+    if (!updatedBoardState.puzzleMoves) {
+      updatedBoardState.puzzleMoves = [];
+    }
+    updatedBoardState.puzzleMoves = [...updatedBoardState.puzzleMoves, sanMove];
 
     // change first move property to false on first move
     if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
@@ -215,6 +220,7 @@ const Piece = ({
 
     // check for pawn promotion
     if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+      // capture with pawn promotion
       promotePawn(updatedBoardState, square);
     } else {
       if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
@@ -222,20 +228,27 @@ const Piece = ({
         // check if the game is over
         const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
         if (isThisCheckmate) {
+          // capture causing checkmate
+          isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
           console.log("game over chump");
           setBoardState(updatedBoardState);
           setCheckmate(true);
         } else {
+          // capture causing check
+          isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
           setInCheckStatus(true);
           setBoardState(updatedBoardState);
           console.log("major major we have a check");
         }
       } else if (isGameADrawResult.draw) {
+        // capture causing draw
         console.log("game is a draw", isGameADrawResult);
         setInCheckStatus(false);
         setDraw(true);
         setBoardState(updatedBoardState);
       } else {
+        // normal capture
+        isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
         setInCheckStatus(false);
         setBoardState(updatedBoardState);
       }
