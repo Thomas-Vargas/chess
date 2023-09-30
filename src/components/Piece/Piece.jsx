@@ -26,7 +26,8 @@ const Piece = ({
   setDraw,
   internalMoveToSan,
   isPuzzleMoveCorrect,
-  currentPuzzle
+  currentPuzzle,
+  mode,
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -165,9 +166,15 @@ const Piece = ({
   const capturePiece = () => {
     let previousBoardState = { ...boardState };
 
-    let sanMove = internalMoveToSan(boardState.validMoves.pieceSquare, square);
-
-    console.log("san move in capture piece", sanMove);
+    if (mode === "puzzle") {
+      let sanMove = internalMoveToSan(previousBoardState.validMoves.pieceSquare, square);
+      console.log("piece square", previousBoardState.validMoves.pieceSquare);
+      console.log("square", square);
+      if (!previousBoardState.puzzleMoves) {
+        previousBoardState.puzzleMoves = [];
+      }
+      previousBoardState.puzzleMoves = [...previousBoardState.puzzleMoves, sanMove];
+    }
 
     delete previousBoardState.board[square];
     delete previousBoardState.board[boardState.validMoves.pieceSquare];
@@ -180,11 +187,6 @@ const Piece = ({
     updatedBoardState.validMoves.possibleCaptures = [];
     updatedBoardState.validMoves.piece = "";
     updatedBoardState.validMoves.pieceSquare = "";
-    // i dont think this is necessary
-    if (!updatedBoardState.puzzleMoves) {
-      updatedBoardState.puzzleMoves = [];
-    }
-    updatedBoardState.puzzleMoves = [...updatedBoardState.puzzleMoves, sanMove];
 
     // change first move property to false on first move
     if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
@@ -229,13 +231,17 @@ const Piece = ({
         const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
         if (isThisCheckmate) {
           // capture causing checkmate
-          isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+          if (mode === "puzzle") {
+            isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+          }
           console.log("game over chump");
           setBoardState(updatedBoardState);
           setCheckmate(true);
         } else {
           // capture causing check
-          isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+          if (mode === "puzzle") {
+            isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+          }
           setInCheckStatus(true);
           setBoardState(updatedBoardState);
           console.log("major major we have a check");
@@ -248,7 +254,9 @@ const Piece = ({
         setBoardState(updatedBoardState);
       } else {
         // normal capture
-        isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+        if (mode === "puzzle") {
+          isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+        }
         setInCheckStatus(false);
         setBoardState(updatedBoardState);
       }
