@@ -9,7 +9,6 @@ import _, { endsWith } from "lodash";
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 
 // to do:
-// test pawn promotion to check
 
 const ChessBoard = () => {
   const [boardState, setBoardState] = useState({
@@ -83,7 +82,6 @@ const ChessBoard = () => {
 
   useEffect(() => {
     // re-render page when validmoves updates.
-    console.log("useEffect triggered");
     if (currentPuzzle === null) {
       // getSinglePuzzle();
       setCurrentPuzzle({
@@ -400,6 +398,13 @@ const ChessBoard = () => {
         currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
       };
 
+      // handle san move conversion 
+      let sanMove = internalMoveToSan(previousPieceSquare, square);
+      if (!updatedBoardState.puzzleMoves) {
+        updatedBoardState.puzzleMoves = [];
+      }
+      updatedBoardState.puzzleMoves = [...updatedBoardState.puzzleMoves, sanMove];
+
       updatedBoardState.lastMove = null;
       updatedBoardState.board[square] = boardState.validMoves.piece;
       updatedBoardState.validMoves.possibleMoves = [];
@@ -418,10 +423,12 @@ const ChessBoard = () => {
           // check if the game is over
           const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
           if (isThisCheckmate) {
+            isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
             console.log("game over chump");
             setBoardState(updatedBoardState);
             setCheckmate(true);
           } else {
+            isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
             setInCheckStatus(true);
             setBoardState(updatedBoardState);
             console.log("major major we have a check");
@@ -432,6 +439,7 @@ const ChessBoard = () => {
           setDraw(true);
           setBoardState(updatedBoardState);
         } else {
+          isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
           setInCheckStatus(false);
           setBoardState(updatedBoardState);
         }
@@ -1120,6 +1128,12 @@ const ChessBoard = () => {
     promotionBoardState.board[Number(square)] = piece;
 
     console.log("!!!!! promotionBoardState before setting new state", promotionBoardState);
+
+    let sanMove = internalMoveToSan(promotionBoardState.validMoves.pieceSquare, square);
+    if (!promotionBoardState.puzzleMoves) {
+      promotionBoardState.puzzleMoves = [];
+    }
+    promotionBoardState.puzzleMoves = [...promotionBoardState.puzzleMoves, sanMove];
 
     const clonedBoardState = _.cloneDeep(promotionBoardState);
 
