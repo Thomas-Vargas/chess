@@ -155,7 +155,7 @@ const ChessBoard = () => {
   const getSinglePuzzle = () => {
     const config = {
       headers: {
-        "X-RapidAPI-Key": "bc3e9f93d4mshbf9fe407954f81bp177371jsn10342b9a24df",
+        "X-RapidAPI-Key": "",
         "X-RapidAPI-Host": "chess-puzzles.p.rapidapi.com",
       },
       params: { id: "HxxIU" },
