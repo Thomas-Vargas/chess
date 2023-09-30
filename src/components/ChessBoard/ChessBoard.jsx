@@ -9,7 +9,7 @@ import _, { endsWith } from "lodash";
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 
 // to do:
-
+// automate non player moves in puzzle mode
 const ChessBoard = () => {
   const [boardState, setBoardState] = useState({
     board: {
@@ -195,6 +195,7 @@ const ChessBoard = () => {
     }
   };
 
+  // conversion function
   const sanToBoardStateMove = (sanSquare1, sanSquare2, sanMove) => {
     let startSquare = getColumnNumOrChar(sanSquare1[0]) + `${sanSquare1[1]}`;
     let endSquare = getColumnNumOrChar(sanSquare2[0]) + `${sanSquare2[1]}`;
@@ -226,6 +227,56 @@ const ChessBoard = () => {
     }
 
     makeMove(endSquare, boardStateWithValidMoves);
+  };
+
+  const fenToBoardState = (fen) => {
+    const boardState = {
+      board: {},
+      currentPlayer: "white",
+      validMoves: {
+        piece: "",
+        pieceSquare: "",
+        possibleMoves: [],
+        possibleCaptures: [],
+        possibleCastles: [],
+      },
+      lastMove: null,
+      fen: true,
+    };
+
+    const [position, turn, castling, enPassant, halfMove, fullMove] = fen.split(" ");
+
+    // Update the current player based on the turn information
+    boardState.currentPlayer = turn === "w" ? "white" : "black";
+
+    const rows = position.split("/");
+    let rank = 8; // start from the top rank
+
+    rows.forEach((row) => {
+      let file = 1; // files are 1-indexed
+      row.split("").forEach((char) => {
+        if (isNaN(char)) {
+          const player = char === char.toUpperCase() ? "white" : "black";
+          const piece = char.toLowerCase();
+
+          if (piece !== "p") {
+            const pieceName = getPieceName(piece);
+            const square = getSquare(file, rank);
+            boardState.board[square] = { piece: pieceName, player };
+          } else {
+            // Handle pawn separately
+            const square = getSquare(file, rank);
+            boardState.board[square] = { piece: "pawn", player };
+          }
+          file++;
+        } else {
+          file += parseInt(char, 10);
+        }
+      });
+      rank--; // Move to the next rank
+    });
+
+    return setBoardState(boardState);
   };
 
   const internalMoveToSan = (square1, square2) => {
@@ -280,56 +331,6 @@ const ChessBoard = () => {
     }
   };
 
-  const fenToBoardState = (fen) => {
-    const boardState = {
-      board: {},
-      currentPlayer: "white",
-      validMoves: {
-        piece: "",
-        pieceSquare: "",
-        possibleMoves: [],
-        possibleCaptures: [],
-        possibleCastles: [],
-      },
-      lastMove: null,
-      fen: true,
-    };
-
-    const [position, turn, castling, enPassant, halfMove, fullMove] = fen.split(" ");
-
-    // Update the current player based on the turn information
-    boardState.currentPlayer = turn === "w" ? "white" : "black";
-
-    const rows = position.split("/");
-    let rank = 8; // start from the top rank
-
-    rows.forEach((row) => {
-      let file = 1; // files are 1-indexed
-      row.split("").forEach((char) => {
-        if (isNaN(char)) {
-          const player = char === char.toUpperCase() ? "white" : "black";
-          const piece = char.toLowerCase();
-
-          if (piece !== "p") {
-            const pieceName = getPieceName(piece);
-            const square = getSquare(file, rank);
-            boardState.board[square] = { piece: pieceName, player };
-          } else {
-            // Handle pawn separately
-            const square = getSquare(file, rank);
-            boardState.board[square] = { piece: "pawn", player };
-          }
-          file++;
-        } else {
-          file += parseInt(char, 10);
-        }
-      });
-      rank--; // Move to the next rank
-    });
-
-    return setBoardState(boardState);
-  };
-
   const getPieceName = (piece) => {
     switch (piece) {
       case "r":
@@ -350,6 +351,17 @@ const ChessBoard = () => {
   const getSquare = (file, rank) => {
     return rank + file * 10;
   };
+
+  const getTenPuzzles = () => {
+    axios.get(`http://localhost:5000/api/chessPuzzles/`)
+      .then(result => {
+        console.log("result from getTenPuzzles", result);
+      })
+      .catch(error => {
+        console.log("error in getTenPuzzles");
+      })
+  }
+  getTenPuzzles()
 
   const makeMove = async (square, boardState) => {
     // Create a copy of the boardState object

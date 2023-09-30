@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+lichess_db_puzzle.csv(1)
+smallerpuzzlelist2.csv
+
+.env
