@@ -1,6 +1,6 @@
 import React from "react";
 import Piece from "../Piece/Piece";
-import { Divider, Grid, Typography, Button, Stack } from "@mui/material";
+import { Divider, Grid, Typography, Button, Stack, Box } from "@mui/material";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -1400,11 +1400,11 @@ const ChessBoard = () => {
       return (
         <>
           {isValidMove || isValidEnPassant ? (
-            <div className={`square ${isDark ? "dark" : "light"}-square ${square}`} onClick={() => makeMove(square, boardState)}>
-              <div className="valid-move-dot" />
-            </div>
+            <Box className={`square ${isDark ? "dark" : "light"}-square ${square}`} onClick={() => makeMove(square, boardState)}>
+              <Box className="valid-move-dot" />
+            </Box>
           ) : (
-            <div className={`square ${isDark ? "dark" : "light"}-square ${square}`}>{isValidCastle && <div className="valid-capture-ring" onClick={() => handleCastle(square)} />}</div>
+            <Box className={`square ${isDark ? "dark" : "light"}-square ${square}`}>{isValidCastle && <Box className="valid-capture-ring" onClick={() => handleCastle(square)} />}</Box>
           )}
         </>
       );
@@ -1448,7 +1448,7 @@ const ChessBoard = () => {
     return rowSquares.map((col, index) => {
       const square = `${col}${row}`;
       const isDark = (index + row) % 2 !== 0;
-      return <div key={square}>{renderSquare(square, isDark)}</div>;
+      return <Box key={square}>{renderSquare(square, isDark)}</Box>;
     });
   };
 
