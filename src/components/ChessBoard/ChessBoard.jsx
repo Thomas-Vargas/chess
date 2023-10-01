@@ -4,7 +4,7 @@ import { Divider, Grid, Typography, Button, Stack } from "@mui/material";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-import _, { endsWith } from "lodash";
+import _, { endsWith, random } from "lodash";
 
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 
@@ -75,11 +75,13 @@ const ChessBoard = () => {
   const [puzzleIncorrect, setPuzzleIncorrect] = useState(false);
   const [puzzleFinished, setPuzzleFinished] = useState(false);
   const [mode, setMode] = useState("chess");
+  const [tenRandomPuzzles, setTenRandomPuzzles] = useState(null);
 
   console.log("board state", boardState);
   console.log("inCheckStatus", inCheckStatus);
   console.log("checkmate status", checkmate);
   console.log("current puzzle:", currentPuzzle);
+  console.log("ten random puzzles in state", tenRandomPuzzles);
 
   useEffect(() => {
     // re-render page when validmoves updates.
@@ -96,7 +98,7 @@ const ChessBoard = () => {
     }
 
     if (mode === "chess" && currentPuzzle) {
-      setCurrentPuzzle(null)
+      setCurrentPuzzle(null);
       setBoardState({
         board: {
           // base setup
@@ -144,13 +146,17 @@ const ChessBoard = () => {
         lastMove: null,
         fen: false,
         puzzleMoves: [],
-      })
+      });
     }
 
     if (currentPuzzle && !boardState.fen & (mode === "puzzle")) {
       fenToBoardState(currentPuzzle.fen);
     }
-  }, [boardState.validMoves, currentPuzzle, mode]);
+
+    if (!tenRandomPuzzles) {
+      getTenPuzzles();
+    }
+  }, [boardState.validMoves, currentPuzzle, mode, tenRandomPuzzles]);
 
   const getSinglePuzzle = () => {
     const config = {
@@ -169,6 +175,46 @@ const ChessBoard = () => {
       .catch((error) => {
         console.log("error in getSinglePuzzle", error);
       });
+  };
+
+  const generateRandomPuzzleID = () => {
+    // Generate a random decimal between 0 (inclusive) and 1 (exclusive)
+    const randomDecimal = Math.random();
+
+    // Scale and shift the random decimal to fit the range [1, 103628]
+    const randomNumber = Math.floor(randomDecimal * 103628) + 1;
+
+    return randomNumber;
+  }
+
+  const getTenPuzzles = async () => {
+    const randomIDs = [];
+    const maxAttempts = 100;
+
+    while (randomIDs.length < 10 && randomIDs.length < maxAttempts) {
+      let id = generateRandomPuzzleID();
+
+      // Check if the generated ID is not already in the array
+      if (!randomIDs.includes(id)) {
+        randomIDs.push(id);
+      }
+    }
+    try {
+      const promises = randomIDs.map(id =>
+        axios.get(`http://localhost:5000/api/chessPuzzles/puzzleById/${id}`)
+      );
+  
+      const results = await Promise.all(promises);
+  
+      const randomPuzzles = results.map(result => result.data);
+  
+      console.log("ten random puzzles ids:", randomIDs);
+      console.log("ten random puzzles", randomPuzzles);
+  
+      setTenRandomPuzzles(randomPuzzles);
+    } catch (error) {
+      console.log("Error in getTenPuzzles", error);
+    }
   };
 
   const isPuzzleMoveCorrect = (correctPuzzleMoves, currentPuzzleMoves) => {
@@ -351,17 +397,6 @@ const ChessBoard = () => {
   const getSquare = (file, rank) => {
     return rank + file * 10;
   };
-
-  const getTenPuzzles = () => {
-    axios.get(`http://localhost:5000/api/chessPuzzles/`)
-      .then(result => {
-        console.log("result from getTenPuzzles", result);
-      })
-      .catch(error => {
-        console.log("error in getTenPuzzles");
-      })
-  }
-  getTenPuzzles()
 
   const makeMove = async (square, boardState) => {
     // Create a copy of the boardState object
