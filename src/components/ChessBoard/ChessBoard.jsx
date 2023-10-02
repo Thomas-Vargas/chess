@@ -150,7 +150,12 @@ const ChessBoard = () => {
     }
 
     if (currentPuzzle && !boardState.fen & (mode === "puzzle")) {
-      fenToBoardState(currentPuzzle.fen);
+      let fenBoardState = fenToBoardState(currentPuzzle.fen);
+
+      console.log("fen board state", fenBoardState);
+      setTimeout(() => {
+        startPuzzle(currentPuzzle, fenBoardState);
+      }, 500);
     }
 
     if (!tenRandomPuzzles) {
@@ -158,6 +163,7 @@ const ChessBoard = () => {
     }
   }, [boardState.validMoves, currentPuzzle, mode, tenRandomPuzzles]);
 
+  // old - rapid api request
   const getSinglePuzzle = () => {
     const config = {
       headers: {
@@ -242,21 +248,24 @@ const ChessBoard = () => {
   };
 
   // conversion function
-  const sanToBoardStateMove = (sanSquare1, sanSquare2, sanMove) => {
+  const sanToBoardStateMove = (sanSquare1, sanSquare2, fenBoardState) => {
     let startSquare = getColumnNumOrChar(sanSquare1[0]) + `${sanSquare1[1]}`;
     let endSquare = getColumnNumOrChar(sanSquare2[0]) + `${sanSquare2[1]}`;
     let capture = false;
 
-    let piece = boardState.board[startSquare];
+    console.log("start square for finding piece", startSquare);
+    console.log("board state in sanToBoardStateMove", fenBoardState);
 
-    if (boardState.board[endSquare]) {
+    let piece = fenBoardState.board[startSquare];
+
+    if (fenBoardState.board[endSquare]) {
       capture = true;
     }
 
-    let validMoves = getPieceMoves(startSquare, piece, boardState);
+    let validMoves = getPieceMoves(startSquare, piece, fenBoardState);
 
     let boardStateWithValidMoves = {
-      ...boardState,
+      ...fenBoardState,
       validMoves: {
         pieceSquare: startSquare,
         possibleMoves: validMoves.moves,
@@ -276,7 +285,7 @@ const ChessBoard = () => {
   };
 
   const fenToBoardState = (fen) => {
-    const boardState = {
+    const fenBoardState = {
       board: {},
       currentPlayer: "white",
       validMoves: {
@@ -293,7 +302,7 @@ const ChessBoard = () => {
     const [position, turn, castling, enPassant, halfMove, fullMove] = fen.split(" ");
 
     // Update the current player based on the turn information
-    boardState.currentPlayer = turn === "w" ? "white" : "black";
+    fenBoardState.currentPlayer = turn === "w" ? "white" : "black";
 
     const rows = position.split("/");
     let rank = 8; // start from the top rank
@@ -308,11 +317,11 @@ const ChessBoard = () => {
           if (piece !== "p") {
             const pieceName = getPieceName(piece);
             const square = getSquare(file, rank);
-            boardState.board[square] = { piece: pieceName, player };
+            fenBoardState.board[square] = { piece: pieceName, player };
           } else {
             // Handle pawn separately
             const square = getSquare(file, rank);
-            boardState.board[square] = { piece: "pawn", player };
+            fenBoardState.board[square] = { piece: "pawn", player };
           }
           file++;
         } else {
@@ -322,7 +331,9 @@ const ChessBoard = () => {
       rank--; // Move to the next rank
     });
 
-    return setBoardState(boardState);
+    setBoardState(fenBoardState);
+
+    return fenBoardState;
   };
 
   const internalMoveToSan = (square1, square2) => {
@@ -332,12 +343,12 @@ const ChessBoard = () => {
     return startSquare + endSquare;
   };
 
-  const startPuzzle = () => {
+  const startPuzzle = (currentPuzzle, fenBoardState) => {
     let startSquare = currentPuzzle.moves[0].substring(0, 2);
     let endSquare = currentPuzzle.moves[0].substring(2, 4);
 
     // console.log(startSquare, endSquare)
-    sanToBoardStateMove(startSquare, endSquare, currentPuzzle.moves[0]);
+    sanToBoardStateMove(startSquare, endSquare, fenBoardState);
   };
 
   const getColumnNumOrChar = (char) => {
@@ -1483,7 +1494,7 @@ const ChessBoard = () => {
         </Typography>
       )}
       <Stack direction="row" gap={3} mb={3}>
-        <Button variant="contained" onClick={() => startPuzzle()}>
+        <Button variant="contained" onClick={() => startPuzzle(currentPuzzle, boardState)}>
           First Move
         </Button>
 
