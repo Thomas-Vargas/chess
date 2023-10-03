@@ -238,17 +238,23 @@ const Piece = ({
           if (mode === "puzzle") {
             puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
           }
+
+          if (puzzleResult === false || puzzleResult === "finished") {
+            updatedBoardState.fen = false;
+            updatedBoardState.puzzleMoves = [];
+          }
+
           console.log("game over chump");
           setBoardState(updatedBoardState);
           setCheckmate(true);
 
-          if (puzzleResult === true) {
+          if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
             setTimeout(() => {
               let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
               let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
-              sanToBoardStateMove(startSquare, endSquare, updatedBoardState);
+              sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle);
             }, 1000);
-          }
+          } 
         } else {
           // capture causing check
           let puzzleResult;
@@ -256,16 +262,25 @@ const Piece = ({
           if (mode === "puzzle") {
             puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
           }
+
+          if (puzzleResult === false || puzzleResult === "finished") {
+            updatedBoardState.fen = false;
+            updatedBoardState.puzzleMoves = [];
+          }
+
           setInCheckStatus(true);
           setBoardState(updatedBoardState);
           console.log("major major we have a check");
 
-          if (puzzleResult === true) {
+          if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
             setTimeout(() => {
               let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
               let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
-              sanToBoardStateMove(startSquare, endSquare, updatedBoardState);
+              sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle);
             }, 1000);
+          }
+          else {
+            console.log("not automating move")
           }
         }
       } else if (isGameADrawResult.draw) {
@@ -281,15 +296,25 @@ const Piece = ({
         if (mode === "puzzle") {
           puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
         }
+
+        if (puzzleResult === false || puzzleResult === "finished") {
+          updatedBoardState.fen = false;
+          updatedBoardState.puzzleMoves = [];
+        }
+
         setInCheckStatus(false);
         setBoardState(updatedBoardState);
 
-        if (puzzleResult === true) {
+        if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
           setTimeout(() => {
             let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
             let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
-            sanToBoardStateMove(startSquare, endSquare, updatedBoardState);
+            sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle);
           }, 1000);
+        } else {
+          console.log("not automating move")
+          console.log("PUZZLE RESULT", puzzleResult);
+          console.log("board state puzzle moves", updatedBoardState.puzzleMoves)
         }
       }
     }
