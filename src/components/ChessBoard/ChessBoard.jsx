@@ -97,7 +97,23 @@ const ChessBoard = () => {
       //   moves: ["c3d5", "e6d5", "c2c8", "f8c8"],
       //   themes: ["advantage", "hangingPiece", "middlegame", "short"],
       // });
-      setCurrentPuzzle(tenRandomPuzzles[0])
+
+      // testing puzzle thast causes incorrect checkmate
+      setCurrentPuzzle({
+        PuzzleId: '7tSKR',
+        FEN: 'r4r1k/1bp3pp/1p1pB3/1n1Pp1b1/1PN1P3/5R1P/3N2P1/5RK1 b - - 8 30',
+        Moves: 'b5d4 f3f8 a8f8 f1f8',
+        Rating: 763,
+        RatingDeviation: 93,
+        Popularity: 63,
+        NbPlays: 96,
+        Themes: 'backRankMate mate mateIn2 middlegame short',
+        GameUrl: 'https://lichess.org/JhKSeLyG/black#60',
+        OpeningTags: '',
+        id: 75008,
+        moves: [ 'b5d4', 'f3f8', 'a8f8', 'f1f8' ]
+      })
+      // setCurrentPuzzle(tenRandomPuzzles[0])
     }
 
     // reset board state in chess mode
@@ -725,13 +741,23 @@ const ChessBoard = () => {
       if (updatedBoardState.board[position].player === updatedBoardState.currentPlayer) {
         possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
 
+        let currentPiece = updatedBoardState.board[position].piece;
+
         console.log("all possible moves", possibleMoves);
 
+        console.log("current piece in is game over", currentPiece);
+
         // check if piece can be captured, make sure piece is not protected
-        if (possibleMoves?.captures && possibleMoves.captures.includes(squareCausingCheck) && !isPieceProtected(squareCausingCheck, updatedBoardState)) {
-          console.log("piece can be captured by this position", position);
-          isGameOver = false;
-          break;
+        if (possibleMoves?.captures && possibleMoves.captures.includes(squareCausingCheck)) {
+          if (currentPiece === 'king' && !isPieceProtected(squareCausingCheck, updatedBoardState)) {
+            console.log("piece can be captured by this position", position);
+            isGameOver = false;
+            break;
+          } else if (currentPiece !== 'king') {
+            console.log("piece can be captured by this position", position);
+            isGameOver = false;
+            break;
+          }
         } else {
           console.log("piece cant be captured, here is the position", position);
         }
@@ -806,7 +832,7 @@ const ChessBoard = () => {
 
         // check if piece is protected
         if (possibleMoves?.selfCaptures && possibleMoves.selfCaptures.includes(square)) {
-          console.log("piece cannot be captured");
+          console.log("piece cannot be captured, piece is protected");
           isPieceProtected = true;
           break;
         }
