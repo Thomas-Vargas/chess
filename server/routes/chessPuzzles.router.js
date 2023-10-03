@@ -40,11 +40,16 @@ router.get("/puzzleByID/:id", async (req, res) => {
       return res.status(500).json({ error: "Internal Server Error" });
     }
 
+
+    let moves = chess_puzzles.Moves.split(" ");
+    let newPuzzleObj = { ...chess_puzzles };
+    newPuzzleObj.moves = moves;
+
     // Log the fetched data
-    console.log(chess_puzzles);
+    console.log(newPuzzleObj);
 
     // Send the data in the response
-    res.json(chess_puzzles);
+    res.json(newPuzzleObj);
   } catch (error) {
     console.error("Unexpected error in /puzzleByID route:", error);
     res.status(500).json({ error: "Internal Server Error" });

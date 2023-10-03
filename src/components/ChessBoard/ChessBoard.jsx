@@ -76,6 +76,7 @@ const ChessBoard = () => {
   const [puzzleFinished, setPuzzleFinished] = useState(false);
   const [mode, setMode] = useState("chess");
   const [tenRandomPuzzles, setTenRandomPuzzles] = useState(null);
+  const [startPuzzleFlag, setStartPuzzleFlag] = useState(false);
 
   console.log("board state", boardState);
   console.log("inCheckStatus", inCheckStatus);
@@ -85,18 +86,20 @@ const ChessBoard = () => {
 
   useEffect(() => {
     // re-render page when validmoves updates.
-    if (currentPuzzle === null && mode === "puzzle") {
+    if (currentPuzzle === null && mode === "puzzle" && tenRandomPuzzles[0]) {
       // getSinglePuzzle();
-      setCurrentPuzzle({
-        puzzleid: "HxxIU",
-        fen: "2r2rk1/3nqp1p/p3p1p1/np1p4/3P4/P1NBP3/1PQ2PPP/2R2RK1 w - - 0 18",
-        rating: 1683,
-        ratingdeviation: 74,
-        moves: ["c3d5", "e6d5", "c2c8", "f8c8"],
-        themes: ["advantage", "hangingPiece", "middlegame", "short"],
-      });
+      // setCurrentPuzzle({
+      //   puzzleid: "HxxIU",
+      //   fen: "2r2rk1/3nqp1p/p3p1p1/np1p4/3P4/P1NBP3/1PQ2PPP/2R2RK1 w - - 0 18",
+      //   rating: 1683,
+      //   ratingdeviation: 74,
+      //   moves: ["c3d5", "e6d5", "c2c8", "f8c8"],
+      //   themes: ["advantage", "hangingPiece", "middlegame", "short"],
+      // });
+      setCurrentPuzzle(tenRandomPuzzles[0])
     }
 
+    // reset board state in chess mode
     if (mode === "chess" && currentPuzzle) {
       setCurrentPuzzle(null);
       setBoardState({
@@ -149,19 +152,21 @@ const ChessBoard = () => {
       });
     }
 
+    // if current puzzle exists and no fen in board state and mode is puzzle - set boardstate to fen
     if (currentPuzzle && !boardState.fen & (mode === "puzzle")) {
-      let fenBoardState = fenToBoardState(currentPuzzle.fen);
+      console.log("useffect setting fen board state and starting puzzle has triggered")
+      let fenBoardState = fenToBoardState(currentPuzzle.FEN);
 
       console.log("fen board state", fenBoardState);
       setTimeout(() => {
         startPuzzle(currentPuzzle, fenBoardState);
-      }, 500);
+      }, 1000);
     }
 
     if (!tenRandomPuzzles) {
       getTenPuzzles();
     }
-  }, [boardState.validMoves, currentPuzzle, mode, tenRandomPuzzles]);
+  }, [boardState.validMoves, currentPuzzle, mode, tenRandomPuzzles, boardState.fen]);
 
   // old - rapid api request
   const getSinglePuzzle = () => {
@@ -216,6 +221,8 @@ const ChessBoard = () => {
   
       console.log("ten random puzzles ids:", randomIDs);
       console.log("ten random puzzles", randomPuzzles);
+
+
   
       setTenRandomPuzzles(randomPuzzles);
     } catch (error) {
@@ -223,12 +230,42 @@ const ChessBoard = () => {
     }
   };
 
+  const startNextPuzzle = () => {
+    // Remove the first element from tenRandomPuzzles
+    let puzzles = [...tenRandomPuzzles];
+    puzzles.shift();
+  
+    // Get the next puzzle (now at the first position)
+    let nextPuzzle = puzzles[0];
+  
+    console.log("next puzzle", nextPuzzle);
+  
+    // If there's a next puzzle, proceed
+    if (nextPuzzle) {
+      setCurrentPuzzle(nextPuzzle);
+      setTenRandomPuzzles(puzzles)
+      // let newBoardState = {...boardState, fen: false, puzzleMoves: []}
+      // setBoardState(newBoardState)
+      // let fenBoardState = fenToBoardState(nextPuzzle.FEN);
+
+      // console.log("fen board state:", fenBoardState);
+  
+      // setTimeout(() => {
+      //   startPuzzle(nextPuzzle, fenBoardState);
+      // }, 500);
+    } else {
+      // Handle the case when there are no more puzzles
+      console.log("No more puzzles");
+    }
+  }
+
   const isPuzzleMoveCorrect = (correctPuzzleMoves, currentPuzzleMoves) => {
-    console.log("correct puzzle moves vs currentPuzzle moves",correctPuzzleMoves, currentPuzzleMoves);
+    console.log("correct puzzle moves vs currentPuzzle moves", correctPuzzleMoves, currentPuzzleMoves);
 
     if (JSON.stringify(correctPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
       setPuzzleFinished(true);
       alert("puzzle complete! you go!");
+      startNextPuzzle();
       return "finished";
     }
 
@@ -243,12 +280,13 @@ const ChessBoard = () => {
       console.log("not equal");
       setPuzzleIncorrect(true);
       alert("failed puzzle");
+      startNextPuzzle();
       return false;
     }
   };
 
   // conversion function
-  const sanToBoardStateMove = (sanSquare1, sanSquare2, fenBoardState) => {
+  const sanToBoardStateMove = (sanSquare1, sanSquare2, fenBoardState, currentPuzzle) => {
     let startSquare = getColumnNumOrChar(sanSquare1[0]) + `${sanSquare1[1]}`;
     let endSquare = getColumnNumOrChar(sanSquare2[0]) + `${sanSquare2[1]}`;
     let capture = false;
@@ -281,7 +319,7 @@ const ChessBoard = () => {
       delete boardStateWithValidMoves.board[endSquare];
     }
 
-    makeMove(endSquare, boardStateWithValidMoves);
+    makeMove(endSquare, boardStateWithValidMoves, currentPuzzle);
   };
 
   const fenToBoardState = (fen) => {
@@ -297,6 +335,7 @@ const ChessBoard = () => {
       },
       lastMove: null,
       fen: true,
+      puzzleMoves: []
     };
 
     const [position, turn, castling, enPassant, halfMove, fullMove] = fen.split(" ");
@@ -347,8 +386,11 @@ const ChessBoard = () => {
     let startSquare = currentPuzzle.moves[0].substring(0, 2);
     let endSquare = currentPuzzle.moves[0].substring(2, 4);
 
+    console.log("start square in start puzzle", startSquare);
+    console.log("end square in start puzzle", endSquare);
+
     // console.log(startSquare, endSquare)
-    sanToBoardStateMove(startSquare, endSquare, fenBoardState);
+    sanToBoardStateMove(startSquare, endSquare, fenBoardState, currentPuzzle);
   };
 
   const getColumnNumOrChar = (char) => {
@@ -409,7 +451,7 @@ const ChessBoard = () => {
     return rank + file * 10;
   };
 
-  const makeMove = async (square, boardState) => {
+  const makeMove = async (square, boardState, currentPuzzle) => {
     // Create a copy of the boardState object
     let previousBoardState = { ...boardState };
     if (!previousBoardState.enPassantCapture && previousBoardState.validMoves.enPassantCapture?.squareToMoveTo !== square) {
@@ -514,6 +556,11 @@ const ChessBoard = () => {
           let puzzleResult;
           if (mode === "puzzle") {
             puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+          }
+          // !! new attempt - THIS SEEMS TO HAVE WORKED
+          if (puzzleResult === false || puzzleResult === "finished") {
+            updatedBoardState.fen = false;
+            updatedBoardState.puzzleMoves = [];
           }
           setInCheckStatus(false);
           setBoardState(updatedBoardState);
@@ -1468,7 +1515,7 @@ const ChessBoard = () => {
       return (
         <>
           {isValidMove || isValidEnPassant ? (
-            <Box className={`square ${isDark ? "dark" : "light"}-square ${square}`} onClick={() => makeMove(square, boardState)}>
+            <Box className={`square ${isDark ? "dark" : "light"}-square ${square}`} onClick={() => makeMove(square, boardState, currentPuzzle)}>
               <Box className="valid-move-dot" />
             </Box>
           ) : (
