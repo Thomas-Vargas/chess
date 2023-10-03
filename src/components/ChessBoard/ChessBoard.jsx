@@ -60,7 +60,7 @@ const ChessBoard = () => {
       possibleMoves: [],
       possibleCaptures: [],
       possibleCastles: [],
-      enPassantCapture: {}
+      enPassantCapture: {},
     },
     lastMove: null,
     fen: false,
@@ -70,6 +70,7 @@ const ChessBoard = () => {
   const [open, setOpen] = useState(false);
   const [promotionBoardState, setPromotionBoardState] = useState({});
   const [promotionSquare, setPromotionSquare] = useState(null);
+  const [promotionPreviousSquare, setPromotionPreviousSquare] = useState(null);
   const [inCheckStatus, setInCheckStatus] = useState(false);
   const [checkmate, setCheckmate] = useState(false);
   const [draw, setDraw] = useState(false);
@@ -77,7 +78,6 @@ const ChessBoard = () => {
   const [puzzleFinished, setPuzzleFinished] = useState(false);
   const [mode, setMode] = useState("chess");
   const [tenRandomPuzzles, setTenRandomPuzzles] = useState(null);
-  const [startPuzzleFlag, setStartPuzzleFlag] = useState(false);
 
   console.log("board state", boardState);
   console.log("inCheckStatus", inCheckStatus);
@@ -100,19 +100,19 @@ const ChessBoard = () => {
 
       // testing puzzle thast causes incorrect checkmate
       setCurrentPuzzle({
-        PuzzleId: '7tSKR',
-        FEN: 'r4r1k/1bp3pp/1p1pB3/1n1Pp1b1/1PN1P3/5R1P/3N2P1/5RK1 b - - 8 30',
-        Moves: 'b5d4 f3f8 a8f8 f1f8',
+        PuzzleId: "7LpIe",
+        FEN: "1rb2rk1/q5P1/4p2p/3p3p/3P1P2/2P5/2QK3P/3R2R1 b - - 0 29",
+        Moves: "f8f7 c2h7 g8h7 g7g8q",
         Rating: 763,
         RatingDeviation: 93,
         Popularity: 63,
         NbPlays: 96,
-        Themes: 'backRankMate mate mateIn2 middlegame short',
-        GameUrl: 'https://lichess.org/JhKSeLyG/black#60',
-        OpeningTags: '',
-        id: 75008,
-        moves: [ 'b5d4', 'f3f8', 'a8f8', 'f1f8' ]
-      })
+        Themes: "backRankMate mate mateIn2 middlegame short",
+        GameUrl: "https://lichess.org/JhKSeLyG/black#60",
+        OpeningTags: "",
+        id: 45085,
+        moves: ["f8f7", "c2h7", "g8h7", "g7g8q"],
+      });
       // setCurrentPuzzle(tenRandomPuzzles[0])
     }
 
@@ -162,7 +162,7 @@ const ChessBoard = () => {
           possibleMoves: [],
           possibleCaptures: [],
           possibleCastles: [],
-          enPassantCapture: {}
+          enPassantCapture: {},
         },
         lastMove: null,
         fen: false,
@@ -176,7 +176,7 @@ const ChessBoard = () => {
       setCheckmate(false);
       setInCheckStatus(false);
 
-      console.log("useffect setting fen board state and starting puzzle has triggered")
+      console.log("useffect setting fen board state and starting puzzle has triggered");
       let fenBoardState = fenToBoardState(currentPuzzle.FEN);
 
       console.log("fen board state", fenBoardState);
@@ -218,7 +218,7 @@ const ChessBoard = () => {
     const randomNumber = Math.floor(randomDecimal * 103628) + 1;
 
     return randomNumber;
-  }
+  };
 
   const getTenPuzzles = async () => {
     const randomIDs = [];
@@ -233,19 +233,15 @@ const ChessBoard = () => {
       }
     }
     try {
-      const promises = randomIDs.map(id =>
-        axios.get(`http://localhost:5000/api/chessPuzzles/puzzleById/${id}`)
-      );
-  
+      const promises = randomIDs.map((id) => axios.get(`http://localhost:5000/api/chessPuzzles/puzzleById/${id}`));
+
       const results = await Promise.all(promises);
-  
-      const randomPuzzles = results.map(result => result.data);
-  
+
+      const randomPuzzles = results.map((result) => result.data);
+
       console.log("ten random puzzles ids:", randomIDs);
       console.log("ten random puzzles", randomPuzzles);
 
-
-  
       setTenRandomPuzzles(randomPuzzles);
     } catch (error) {
       console.log("Error in getTenPuzzles", error);
@@ -256,30 +252,22 @@ const ChessBoard = () => {
     // Remove the first element from tenRandomPuzzles
     let puzzles = [...tenRandomPuzzles];
     puzzles.shift();
-  
+
     // Get the next puzzle (now at the first position)
     let nextPuzzle = puzzles[0];
-  
+
     console.log("next puzzle", nextPuzzle);
-  
+
     // If there's a next puzzle, proceed
     if (nextPuzzle) {
+      // reset state causing nextPuzzle functionality to trigger
       setCurrentPuzzle(nextPuzzle);
-      setTenRandomPuzzles(puzzles)
-      // let newBoardState = {...boardState, fen: false, puzzleMoves: []}
-      // setBoardState(newBoardState)
-      // let fenBoardState = fenToBoardState(nextPuzzle.FEN);
-
-      // console.log("fen board state:", fenBoardState);
-  
-      // setTimeout(() => {
-      //   startPuzzle(nextPuzzle, fenBoardState);
-      // }, 500);
+      setTenRandomPuzzles(puzzles);
     } else {
       // Handle the case when there are no more puzzles
       console.log("No more puzzles");
     }
-  }
+  };
 
   const isPuzzleMoveCorrect = (correctPuzzleMoves, currentPuzzleMoves) => {
     console.log("correct puzzle moves vs currentPuzzle moves", correctPuzzleMoves, currentPuzzleMoves);
@@ -308,15 +296,22 @@ const ChessBoard = () => {
   };
 
   // conversion function
-  const sanToBoardStateMove = (sanSquare1, sanSquare2, fenBoardState, currentPuzzle) => {
+  const sanToBoardStateMove = (sanSquare1, sanSquare2, fenBoardState, currentPuzzle, sanMove) => {
     let startSquare = getColumnNumOrChar(sanSquare1[0]) + `${sanSquare1[1]}`;
     let endSquare = getColumnNumOrChar(sanSquare2[0]) + `${sanSquare2[1]}`;
     let capture = false;
+    let promotion = false;
+    let promotionSanMove = null;
 
     console.log("start square for finding piece", startSquare);
     console.log("board state in sanToBoardStateMove", fenBoardState);
+    console.log("entire san move", sanMove);
 
     let piece = fenBoardState.board[startSquare];
+
+    if (sanMove && sanMove.length === 5) {
+      promotion = true;
+    }
 
     if (fenBoardState.board[endSquare]) {
       capture = true;
@@ -341,7 +336,22 @@ const ChessBoard = () => {
       delete boardStateWithValidMoves.board[endSquare];
     }
 
-    makeMove(endSquare, boardStateWithValidMoves, currentPuzzle);
+    if (promotion) {
+      // this assumes i will send the entire sanMove being made everytime this function is called
+      if (sanMove) {
+        promotionSanMove = sanMove;
+      }
+      // change the piece from pawn to promotion piece
+      let promotionPiece = { piece: getPieceName(sanMove[4]), player: boardStateWithValidMoves.currentPlayer };
+      boardStateWithValidMoves.validMoves.piece = promotionPiece;
+
+      // change board state by removing pawn and changing it to promoted piece
+      delete boardStateWithValidMoves.board[startSquare];
+      boardStateWithValidMoves.board[startSquare] = promotionPiece;
+    }
+
+    console.log("boardState before calling makeMove", boardStateWithValidMoves);
+    makeMove(endSquare, boardStateWithValidMoves, currentPuzzle, promotionSanMove);
   };
 
   const fenToBoardState = (fen) => {
@@ -354,11 +364,11 @@ const ChessBoard = () => {
         possibleMoves: [],
         possibleCaptures: [],
         possibleCastles: [],
-        enPassantCapture: {}
+        enPassantCapture: {},
       },
       lastMove: null,
       fen: true,
-      puzzleMoves: []
+      puzzleMoves: [],
     };
 
     const [position, turn, castling, enPassant, halfMove, fullMove] = fen.split(" ");
@@ -413,7 +423,7 @@ const ChessBoard = () => {
     console.log("end square in start puzzle", endSquare);
 
     // console.log(startSquare, endSquare)
-    sanToBoardStateMove(startSquare, endSquare, fenBoardState, currentPuzzle);
+    sanToBoardStateMove(startSquare, endSquare, fenBoardState, currentPuzzle, currentPuzzle.moves[0]);
   };
 
   const getColumnNumOrChar = (char) => {
@@ -474,10 +484,13 @@ const ChessBoard = () => {
     return rank + file * 10;
   };
 
-  const makeMove = async (square, boardState, currentPuzzle) => {
+  const makeMove = async (square, boardState, currentPuzzle, promotionSanMove) => {
     // Create a copy of the boardState object
     let previousBoardState = { ...boardState };
-    if (!previousBoardState.enPassantCapture && previousBoardState.validMoves.enPassantCapture?.squareToMoveTo !== square) {
+    if (
+      !previousBoardState.enPassantCapture &&
+      previousBoardState.validMoves.enPassantCapture?.squareToMoveTo !== square
+    ) {
       // Remove the key from the copied boardState object
       const previousPieceSquare = boardState.validMoves.pieceSquare;
       delete previousBoardState.board[previousPieceSquare];
@@ -488,14 +501,23 @@ const ChessBoard = () => {
       };
 
       if (mode === "puzzle") {
-        let sanMove = internalMoveToSan(previousPieceSquare, square);
+        let sanMove;
+        if (promotionSanMove) {
+          sanMove = promotionSanMove;
+        } else {
+          sanMove = internalMoveToSan(previousPieceSquare, square);
+        }
+
         if (!updatedBoardState.puzzleMoves) {
           updatedBoardState.puzzleMoves = [];
         }
         updatedBoardState.puzzleMoves = [...updatedBoardState.puzzleMoves, sanMove];
       }
 
-      if (boardState.validMoves.piece.piece === "pawn" && Math.abs(parseInt(square[1]) - parseInt(previousPieceSquare[1])) === 2) {
+      if (
+        boardState.validMoves.piece.piece === "pawn" &&
+        Math.abs(parseInt(square[1]) - parseInt(previousPieceSquare[1])) === 2
+      ) {
         // Set the last move for en passant captures
         updatedBoardState.lastMove = {
           sourceSquare: previousPieceSquare,
@@ -509,7 +531,7 @@ const ChessBoard = () => {
       updatedBoardState.validMoves.possibleMoves = [];
       updatedBoardState.validMoves.possibleCaptures = [];
       updatedBoardState.validMoves.piece = "";
-      updatedBoardState.validMoves.pieceSquare = "";
+      // updatedBoardState.validMoves.pieceSquare = "";
 
       // the piece - yes
       console.log("piece making the move?", updatedBoardState.board[square]);
@@ -590,7 +612,7 @@ const ChessBoard = () => {
           let puzzleResult;
           if (mode === "puzzle") {
             console.log("current puzzle moves", currentPuzzle.moves);
-            console.log("board state puzzle moves", updatedBoardState.puzzleMoves)
+            console.log("board state puzzle moves", updatedBoardState.puzzleMoves);
             puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
           }
           // !! new attempt - THIS SEEMS TO HAVE WORKED
@@ -604,7 +626,7 @@ const ChessBoard = () => {
           // check if even number of puzzle moves - which means next move should be automated
           // only need to check makeMove because sanToBoardState does not call capturePiece
           if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
-            console.log("odd puzzlemoves length")
+            console.log("odd puzzlemoves length");
             setTimeout(() => {
               let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
               let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
@@ -749,11 +771,11 @@ const ChessBoard = () => {
 
         // check if piece can be captured, make sure piece is not protected
         if (possibleMoves?.captures && possibleMoves.captures.includes(squareCausingCheck)) {
-          if (currentPiece === 'king' && !isPieceProtected(squareCausingCheck, updatedBoardState)) {
+          if (currentPiece === "king" && !isPieceProtected(squareCausingCheck, updatedBoardState)) {
             console.log("piece can be captured by this position", position);
             isGameOver = false;
             break;
-          } else if (currentPiece !== 'king') {
+          } else if (currentPiece !== "king") {
             console.log("piece can be captured by this position", position);
             isGameOver = false;
             break;
@@ -852,8 +874,13 @@ const ChessBoard = () => {
     if (possibleEnPassantSquares.includes(boardState.lastMove.destinationSquare)) {
       let result = {
         result: true,
-        pieceSquareToCapture: possibleEnPassantSquares.find((square) => square === boardState.lastMove.destinationSquare),
-        squareToMoveTo: boardState.currentPlayer === "white" ? `${Number(boardState.lastMove.destinationSquare) + 1}` : `${Number(boardState.lastMove.destinationSquare) - 1}`,
+        pieceSquareToCapture: possibleEnPassantSquares.find(
+          (square) => square === boardState.lastMove.destinationSquare
+        ),
+        squareToMoveTo:
+          boardState.currentPlayer === "white"
+            ? `${Number(boardState.lastMove.destinationSquare) + 1}`
+            : `${Number(boardState.lastMove.destinationSquare) - 1}`,
       };
       return result;
     } else {
@@ -1361,7 +1388,9 @@ const ChessBoard = () => {
     potentialMoves.push(`${Number(col) - 1}` + `${Number(row) + 1}`);
     potentialMoves.push(`${Number(col) - 1}` + `${Number(row) - 1}`);
 
-    const validMoves = potentialMoves.filter((move) => Number(move) >= 10 && Number(move) <= 88 && !move.includes("0") && !move.includes("9"));
+    const validMoves = potentialMoves.filter(
+      (move) => Number(move) >= 10 && Number(move) <= 88 && !move.includes("0") && !move.includes("9")
+    );
 
     for (let move of validMoves) {
       const tempBoardState = _.cloneDeep(boardState);
@@ -1427,10 +1456,11 @@ const ChessBoard = () => {
     return { moves, captures, castle, selfCaptures };
   };
 
-  const selectPromotionPiece = (piece, square, promotionBoardState) => {
+  const selectPromotionPiece = (piece, square, promotionBoardState, currentPuzzle) => {
     console.log(piece);
     console.log(square);
     console.log(promotionBoardState);
+    let sanMove;
 
     // Update the copy of board state
     delete promotionBoardState.board[Number(square)];
@@ -1438,28 +1468,111 @@ const ChessBoard = () => {
 
     console.log("!!!!! promotionBoardState before setting new state", promotionBoardState);
 
-    let sanMove = internalMoveToSan(promotionBoardState.validMoves.pieceSquare, square);
-    if (!promotionBoardState.puzzleMoves) {
-      promotionBoardState.puzzleMoves = [];
+    if (mode === "puzzle") {
+      sanMove = internalMoveToSan(promotionBoardState.validMoves.pieceSquare, square);
+      switch (piece.piece) {
+        case "queen":
+          sanMove += "q";
+          break;
+        case "rook":
+          sanMove += "r";
+          break;
+        case "bishop":
+          sanMove += "b";
+          break;
+        case "knight":
+          sanMove += "n";
+          break;
+      }
+      if (!promotionBoardState.puzzleMoves) {
+        promotionBoardState.puzzleMoves = [];
+      }
+      // remove last puzzleMove set by makeMove because it is missing the pawn promotion piece letter
+      promotionBoardState.puzzleMoves.pop();
+      promotionBoardState.puzzleMoves = [...promotionBoardState.puzzleMoves, sanMove];
     }
-    promotionBoardState.puzzleMoves = [...promotionBoardState.puzzleMoves, sanMove];
 
     const clonedBoardState = _.cloneDeep(promotionBoardState);
 
     // check if the game is over
     const isThisCheckmate = isGameOver(square, clonedBoardState.board[square], clonedBoardState);
 
+    // check if game is a draw
+    let isGameADrawResult = isGameADraw(clonedBoardState);
+
     if (isThisCheckmate) {
+      // if checkmate, execute this code
+      let puzzleResult;
+      if (mode === "puzzle") {
+        puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves);
+      }
+
+      if (puzzleResult === false || puzzleResult === "finished") {
+        clonedBoardState.fen = false;
+        clonedBoardState.puzzleMoves = [];
+      }
+
       console.log("game over chump");
       setBoardState(clonedBoardState);
       setCheckmate(true);
+
+      if (puzzleResult === true && clonedBoardState.puzzleMoves.length % 2 === 0) {
+        setTimeout(() => {
+          let startSquare = currentPuzzle.moves[clonedBoardState.puzzleMoves.length].substring(0, 2);
+          let endSquare = currentPuzzle.moves[clonedBoardState.puzzleMoves.length].substring(2, 4);
+          sanToBoardStateMove(startSquare, endSquare, clonedBoardState, currentPuzzle, sanMove);
+        }, 1000);
+      }
     } else if (isThisMoveACheck(square, clonedBoardState.board[square], promotionBoardState) && !inCheckStatus) {
+      // if check, execute this code
+      let puzzleResult;
+      if (mode === "puzzle") {
+        puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves);
+      }
+
+      if (puzzleResult === false || puzzleResult === "finished") {
+        clonedBoardState.fen = false;
+        clonedBoardState.puzzleMoves = [];
+      }
+
       setInCheckStatus(true);
       setBoardState(clonedBoardState);
       console.log("major major we have a check");
+
+      if (puzzleResult === true && clonedBoardState.puzzleMoves.length % 2 === 0) {
+        setTimeout(() => {
+          let startSquare = currentPuzzle.moves[clonedBoardState.puzzleMoves.length].substring(0, 2);
+          let endSquare = currentPuzzle.moves[clonedBoardState.puzzleMoves.length].substring(2, 4);
+          sanToBoardStateMove(startSquare, endSquare, clonedBoardState, currentPuzzle, sanMove);
+        }, 1000);
+      }
+    } else if (isGameADrawResult.draw) {
+      console.log("game is a draw", isGameADrawResult);
+      setInCheckStatus(false);
+      setDraw(true);
+      setBoardState(clonedBoardState);
     } else {
+      // otherwise its a normal promotion, execute this code
+      let puzzleResult;
+      if (mode === "puzzle") {
+        puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves);
+      }
+
+      if (puzzleResult === false || puzzleResult === "finished") {
+        clonedBoardState.fen = false;
+        clonedBoardState.puzzleMoves = [];
+      }
+
       setInCheckStatus(false);
       setBoardState(clonedBoardState);
+
+      if (puzzleResult === true && clonedBoardState.puzzleMoves.length % 2 === 0) {
+        setTimeout(() => {
+          let startSquare = currentPuzzle.moves[clonedBoardState.puzzleMoves.length].substring(0, 2);
+          let endSquare = currentPuzzle.moves[clonedBoardState.puzzleMoves.length].substring(2, 4);
+          sanToBoardStateMove(startSquare, endSquare, clonedBoardState, currentPuzzle, sanMove);
+        }, 1000);
+      }
     }
     setPromotionBoardState({});
     setPromotionSquare(null);
@@ -1583,11 +1696,16 @@ const ChessBoard = () => {
       return (
         <>
           {isValidMove || isValidEnPassant ? (
-            <Box className={`square ${isDark ? "dark" : "light"}-square ${square}`} onClick={() => makeMove(square, boardState, currentPuzzle)}>
+            <Box
+              className={`square ${isDark ? "dark" : "light"}-square ${square}`}
+              onClick={() => makeMove(square, boardState, currentPuzzle)}
+            >
               <Box className="valid-move-dot" />
             </Box>
           ) : (
-            <Box className={`square ${isDark ? "dark" : "light"}-square ${square}`}>{isValidCastle && <Box className="valid-capture-ring" onClick={() => handleCastle(square)} />}</Box>
+            <Box className={`square ${isDark ? "dark" : "light"}-square ${square}`}>
+              {isValidCastle && <Box className="valid-capture-ring" onClick={() => handleCastle(square)} />}
+            </Box>
           )}
         </>
       );
@@ -1682,7 +1800,15 @@ const ChessBoard = () => {
         </Button>
       </Stack>
       {renderBoard()}
-      <PawnPromotionModal boardState={boardState} selectPromotionPiece={selectPromotionPiece} open={open} promotionBoardState={promotionBoardState} promotionSquare={promotionSquare} />
+      <PawnPromotionModal
+        boardState={boardState}
+        selectPromotionPiece={selectPromotionPiece}
+        open={open}
+        promotionBoardState={promotionBoardState}
+        promotionSquare={promotionSquare}
+        currentPuzzle={currentPuzzle}
+        promotionPreviousSquare={promotionPreviousSquare}
+      />
     </div>
   );
 };

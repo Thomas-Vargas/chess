@@ -8,7 +8,7 @@ import {
   Divider,
 } from "@mui/material";
 
-const PawnPromotionModal = ({ boardState, selectPromotionPiece, open, promotionBoardState, promotionSquare }) => {
+const PawnPromotionModal = ({ boardState, selectPromotionPiece, open, promotionBoardState, promotionSquare, currentPuzzle, promotionPreviousSquare }) => {
   const style = {
     position: "absolute",
     top: "50%",
@@ -45,28 +45,28 @@ const PawnPromotionModal = ({ boardState, selectPromotionPiece, open, promotionB
           <Stack direction="row" justifyContent="center">
             <Button
               onClick={() =>
-                selectPromotionPiece({ piece: "queen", player: "white" }, promotionSquare, promotionBoardState)
+                selectPromotionPiece({ piece: "queen", player: "white" }, promotionSquare, promotionBoardState, currentPuzzle)
               }
             >
               <img src="/chess-pieces/white-queen.png" alt="White Queen" />
             </Button>
             <Button
               onClick={() =>
-                selectPromotionPiece({ piece: "rook", player: "white" }, promotionSquare, promotionBoardState)
+                selectPromotionPiece({ piece: "rook", player: "white" }, promotionSquare, promotionBoardState, currentPuzzle)
               }
             >
               <img src="/chess-pieces/white-rook.png" alt="White Rook" />
             </Button>
             <Button
               onClick={() =>
-                selectPromotionPiece({ piece: "knight", player: "white" }, promotionSquare, promotionBoardState)
+                selectPromotionPiece({ piece: "knight", player: "white" }, promotionSquare, promotionBoardState, currentPuzzle)
               }
             >
               <img src="/chess-pieces/white-knight.png" alt="White Knight" />
             </Button>
             <Button
               onClick={() =>
-                selectPromotionPiece({ piece: "bishop", player: "white" }, promotionSquare, promotionBoardState)
+                selectPromotionPiece({ piece: "bishop", player: "white" }, promotionSquare, promotionBoardState, currentPuzzle)
               }
             >
               <img src="/chess-pieces/white-bishop.png" alt="White Bishop" />
@@ -76,28 +76,28 @@ const PawnPromotionModal = ({ boardState, selectPromotionPiece, open, promotionB
           <Stack direction="row" justifyContent="center">
             <Button
               onClick={() =>
-                selectPromotionPiece({ piece: "queen", player: "black" }, promotionSquare, promotionBoardState)
+                selectPromotionPiece({ piece: "queen", player: "black" }, promotionSquare, promotionBoardState, currentPuzzle)
               }
             >
               <img src="/chess-pieces/black-queen.png" alt="Black Queen" />
             </Button>
             <Button
               onClick={() =>
-                selectPromotionPiece({ piece: "rook", player: "black" }, promotionSquare, promotionBoardState)
+                selectPromotionPiece({ piece: "rook", player: "black" }, promotionSquare, promotionBoardState, currentPuzzle)
               }
             >
               <img src="/chess-pieces/black-rook.png" alt="Black Rook" />
             </Button>
             <Button
               onClick={() =>
-                selectPromotionPiece({ piece: "knight", player: "black" }, promotionSquare, promotionBoardState)
+                selectPromotionPiece({ piece: "knight", player: "black" }, promotionSquare, promotionBoardState, currentPuzzle)
               }
             >
               <img src="/chess-pieces/black-knight.png" alt="Black Knight" />
             </Button>
             <Button
               onClick={() =>
-                selectPromotionPiece({ piece: "bishop", player: "black" }, promotionSquare, promotionBoardState)
+                selectPromotionPiece({ piece: "bishop", player: "black" }, promotionSquare, promotionBoardState, currentPuzzle)
               }
             >
               <img src="/chess-pieces/black-bishop.png" alt="Black Bishop" />
