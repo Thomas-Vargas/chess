@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, forwardRef } from "react";
 import { Paper, Stack, Typography, Button, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { supabaseClient } from "../../config/supabaseClient";
 import { useAuth } from "../AuthProvider/AuthProvider";
 import RegisterForm from "../RegisterForm/RegisterForm";
 
-const LoginCard = () => {
+const LoginCard = forwardRef((props, ref) => {
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -36,7 +36,7 @@ const LoginCard = () => {
   }, [user]);
 
   return (
-    <Stack direction="row" justifyContent="center" mt={8}>
+    <Stack direction="row" justifyContent="center" mt={8} ref={ref}>
       <Paper sx={{ padding: "20px" }} elevation={6}>
         <Stack direction="column" justifyContent="space-between" height="100%">
           <Stack gap={3}>
@@ -79,6 +79,6 @@ const LoginCard = () => {
       </Paper>
     </Stack>
   );
-};
+});
 
 export default LoginCard;

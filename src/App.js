@@ -47,19 +47,45 @@ function App() {
           primary: {
             main: "#8A3324",
           },
-          darkTest: {
-            main: "#3B3C36",
+          background: {
+            default: mode === "dark" ? "#3B3C36" : "#F5F5DC",
+            paper: mode === "dark" ? "#3B3C36" : "#F5F5DC",
           },
-          biege: {
-            main: "#F5F5DC",
+          text: {
+            primary: mode === "dark" ? "#fff" : "rgba(0, 0, 0, 0.87)",
           },
-          bone: {
-            main: "#E3DAC9",
+        },
+        overrides: {
+          MuiButton: {
+            root: {
+              color: mode === "dark" ? "#fff" : "rgba(0, 0, 0, 0.87)",
+            },
           },
         },
       }),
     [mode]
   );
+  
+
+          // palette: {
+        //   mode,
+        //   ...(mode === 'l')
+        //   primary: {
+        //     main: "#8A3324",
+        //   },
+        //   darkTest: {
+        //     main: "#3B3C36",
+        //   },
+        //   biege: {
+        //     main: "#F5F5DC",
+        //   },
+        //   bone: {
+        //     main: "#E3DAC9",
+        //   },
+        //   dark: {
+        //     background: "#3B3C36",
+        //   }
+        // },
 
   return (
     <ColorModeContext.Provider value={colorMode}>

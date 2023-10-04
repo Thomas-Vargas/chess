@@ -1,16 +1,14 @@
 import React from "react";
 import Piece from "../Piece/Piece";
 import { Divider, Grid, Typography, Button, Stack, Box } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import axios from "axios";
 
 import _, { endsWith, random } from "lodash";
 
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 
-// to do:
-// automate non player moves in puzzle mode
-const ChessBoard = () => {
+const ChessBoard = forwardRef((props, ref) => {
   const [boardState, setBoardState] = useState({
     board: {
       // base setup
@@ -1773,7 +1771,7 @@ const ChessBoard = () => {
   };
 
   return (
-    <div style={{ width: "484px" }}>
+    <div style={{ width: "484px" }} ref={ref}>
       {inCheckStatus && (
         <Typography variant="h5" textAlign="center">
           Check!
@@ -1814,6 +1812,6 @@ const ChessBoard = () => {
       />
     </div>
   );
-};
+});
 
 export default ChessBoard;
