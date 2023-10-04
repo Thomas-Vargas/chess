@@ -1684,12 +1684,9 @@ const ChessBoard = () => {
     const piece = boardState.board[square];
     const isValidMove = boardState.validMoves.possibleMoves.includes(square);
     const isValidCapture = boardState.validMoves.possibleCaptures.includes(square);
-    // something here is causing issues with some puzzles
-    // console.log("possible castles in renderSquare", boardState.validMoves.possibleCastles);
-    // console.log("square in renderSquare", square);
-    // console.log("board state validmoves enPassantCapture in renderSquare", boardState.validMoves.enPassantCapture)
     const isValidCastle = boardState.validMoves.possibleCastles.includes(square);
     const isValidEnPassant = boardState.validMoves.enPassantCapture?.squareToMoveTo === square;
+    let currentPlayer = boardState.currentPlayer;
 
     // Check if the square is empty
     if (!piece) {
@@ -1699,6 +1696,12 @@ const ChessBoard = () => {
             <Box
               className={`square ${isDark ? "dark" : "light"}-square ${square}`}
               onClick={() => makeMove(square, boardState, currentPuzzle)}
+              sx={{
+                "&:hover": {
+                  backgroundImage: "linear-gradient(rgb(0 0 0/10%) 0 0)",
+                  cursor: "pointer",
+                },
+              }}
             >
               <Box className="valid-move-dot" />
             </Box>

@@ -1,5 +1,6 @@
 import React from "react";
 import _ from "lodash";
+import { Box } from "@mui/material";
 
 const Piece = ({
   piece,
@@ -30,7 +31,7 @@ const Piece = ({
   mode,
   sanToBoardStateMove,
   puzzleFinished,
-  puzzleIncorrect
+  puzzleIncorrect,
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -81,87 +82,166 @@ const Piece = ({
       if (piece.piece === "pawn") {
         const possibleMoves = getPawnMoves(square, piece.player, boardState, true);
         console.log("Possible Pawn moves:", possibleMoves);
-        setBoardState({
-          ...boardState,
-          validMoves: {
-            pieceSquare: square,
-            possibleMoves: possibleMoves.moves,
-            possibleCaptures: possibleMoves.captures,
-            enPassantCapture: possibleMoves.enPassantCapture,
-            piece,
-            possibleCastles: [],
-          },
-        });
+        if (square !== boardState.validMoves.pieceSquare) {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: square,
+              possibleMoves: possibleMoves.moves,
+              possibleCaptures: possibleMoves.captures,
+              enPassantCapture: possibleMoves.enPassantCapture,
+              piece,
+              possibleCastles: [],
+            },
+          });
+        } else {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: "",
+              possibleMoves: [],
+              possibleCaptures: [],
+              enPassantCapture: [],
+              piece: "",
+              possibleCastles: [],
+            },
+          });
+        }
       }
       if (piece.piece === "rook") {
         const possibleMoves = getRookMoves(square, piece, boardState, true);
         console.log("Possible Rook moves:", possibleMoves);
-        setBoardState({
-          ...boardState,
-          validMoves: {
-            pieceSquare: square,
-            possibleMoves: possibleMoves.moves,
-            possibleCaptures: possibleMoves.captures,
-            piece,
-            possibleCastles: [],
-          },
-        });
+        if (square !== boardState.validMoves.pieceSquare) {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: square,
+              possibleMoves: possibleMoves.moves,
+              possibleCaptures: possibleMoves.captures,
+              piece,
+              possibleCastles: [],
+            },
+          });
+        } else {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: "",
+              possibleMoves: [],
+              possibleCaptures: [],
+              piece: "",
+              possibleCastles: [],
+            },
+          });
+        }
       }
       if (piece.piece === "bishop") {
         const possibleMoves = getBishopMoves(square, piece, boardState, true);
         console.log("Possible Bishop moves:", possibleMoves);
-        setBoardState({
-          ...boardState,
-          validMoves: {
-            pieceSquare: square,
-            possibleMoves: possibleMoves.moves,
-            possibleCaptures: possibleMoves.captures,
-            piece,
-            possibleCastles: [],
-          },
-        });
+        if (square !== boardState.validMoves.pieceSquare) {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: square,
+              possibleMoves: possibleMoves.moves,
+              possibleCaptures: possibleMoves.captures,
+              piece,
+              possibleCastles: [],
+            },
+          });
+        } else {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: "",
+              possibleMoves: [],
+              possibleCaptures: [],
+              piece: "",
+              possibleCastles: [],
+            },
+          });
+        }
       }
       if (piece.piece === "knight") {
         const possibleMoves = getKnightMoves(square, piece, boardState, true);
         console.log("Possible Knight moves:", possibleMoves);
-        setBoardState({
-          ...boardState,
-          validMoves: {
-            pieceSquare: square,
-            possibleMoves: possibleMoves.moves,
-            possibleCaptures: possibleMoves.captures,
-            piece,
-            possibleCastles: [],
-          },
-        });
+        if (square !== boardState.validMoves.pieceSquare) {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: square,
+              possibleMoves: possibleMoves.moves,
+              possibleCaptures: possibleMoves.captures,
+              piece,
+              possibleCastles: [],
+            },
+          });
+        } else {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: "",
+              possibleMoves: [],
+              possibleCaptures: [],
+              piece: "",
+              possibleCastles: [],
+            },
+          });
+        }
       }
       if (piece.piece === "queen") {
         const possibleMoves = getQueenMoves(square, piece, boardState, true);
         console.log("Possible Queen moves:", possibleMoves);
-        setBoardState({
-          ...boardState,
-          validMoves: {
-            pieceSquare: square,
-            possibleMoves: possibleMoves.moves,
-            possibleCaptures: possibleMoves.captures,
-            piece,
-            possibleCastles: [],
-          },
-        });
+        if (square !== boardState.validMoves.pieceSquare) {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: square,
+              possibleMoves: possibleMoves.moves,
+              possibleCaptures: possibleMoves.captures,
+              piece,
+              possibleCastles: [],
+            },
+          });
+        } else {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: "",
+              possibleMoves: [],
+              possibleCaptures: [],
+              piece: "",
+              possibleCastles: [],
+            },
+          });
+        }
       }
       if (piece.piece === "king") {
         const possibleMoves = getKingMoves(square, piece, color, boardState, true);
         console.log("Possible King moves:", possibleMoves);
-        setBoardState({
-          ...boardState,
-          validMoves: {
-            pieceSquare: square,
-            possibleMoves: possibleMoves.moves,
-            possibleCaptures: possibleMoves.captures,
-            piece,
-            possibleCastles: possibleMoves.castle,
-          },
-        });
+        if (square !== boardState.validMoves.pieceSquare) {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: square,
+              possibleMoves: possibleMoves.moves,
+              possibleCaptures: possibleMoves.captures,
+              piece,
+              possibleCastles: possibleMoves.castle,
+            },
+          });
+        } else {
+          setBoardState({
+            ...boardState,
+            validMoves: {
+              pieceSquare: "",
+              possibleMoves: [],
+              possibleCaptures: [],
+              piece: "",
+              possibleCastles: [],
+            },
+          });
+        }
       }
     }
   };
@@ -254,7 +334,7 @@ const Piece = ({
               let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
               sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle);
             }, 1000);
-          } 
+          }
         } else {
           // capture causing check
           let puzzleResult;
@@ -278,9 +358,6 @@ const Piece = ({
               let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
               sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle);
             }, 1000);
-          }
-          else {
-            console.log("not automating move")
           }
         }
       } else if (isGameADrawResult.draw) {
@@ -311,10 +388,6 @@ const Piece = ({
             let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
             sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle);
           }, 1000);
-        } else {
-          console.log("not automating move")
-          console.log("PUZZLE RESULT", puzzleResult);
-          console.log("board state puzzle moves", updatedBoardState.puzzleMoves)
         }
       }
     }
@@ -325,14 +398,44 @@ const Piece = ({
   return (
     <>
       {isValidCapture ? (
-        <div className={`piece ${color}-piece ${className}`} onClick={capturePiece}>
+        <Box
+          className={`piece ${color}-piece ${className}`}
+          onClick={capturePiece}
+          sx={{
+            "&:hover": {
+              backgroundImage: "linear-gradient(rgb(0 0 0/10%) 0 0)",
+              cursor: "pointer",
+            },
+          }}
+        >
           <span className={`chess-piece ${pieceColor} ${square}`}>{pieceStyle.content}</span>
-          {isValidCapture && <div className="valid-capture-ring" />}
-        </div>
+          {isValidCapture && <Box className="valid-capture-ring" />}
+        </Box>
       ) : (
-        <div className={`piece ${color}-piece ${className}`} onClick={onPieceClick}>
+        <Box
+          className={`piece ${color}-piece ${className}`}
+          onClick={onPieceClick}
+          sx={{
+            ...(color === boardState.currentPlayer && square !== boardState.validMoves.pieceSquare
+              ? {
+                  "&:hover": {
+                    backgroundImage: "linear-gradient(rgb(0 0 0/10%) 0 0)",
+                    cursor: "pointer",
+                  },
+                }
+              : {}),
+              ...(square === boardState.validMoves.pieceSquare
+                ? {
+                  backgroundImage: "linear-gradient(rgb(0 0 0/40%) 0 0)",
+                  "&:hover": {
+                    cursor: "pointer"
+                  }
+                }
+                : {}),   
+          }}
+        >
           <span className={`chess-piece ${pieceColor} ${square}`}>{pieceStyle.content}</span>
-        </div>
+        </Box>
       )}
     </>
   );
