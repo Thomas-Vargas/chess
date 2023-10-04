@@ -1,6 +1,6 @@
 import React from "react";
 import Piece from "../Piece/Piece";
-import { Divider, Grid, Typography, Button, Stack, Box, ownerDocument } from "@mui/material";
+import { Divider, Grid, Typography, Button, Stack, Box } from "@mui/material";
 import { useState, useEffect } from "react";
 import axios from "axios";
 

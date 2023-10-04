@@ -11,9 +11,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 const chessPuzzlesRouter = require('./routes/chessPuzzles.router');
-
+const usersRouter = require('./routes/users.router');
 /* Routes */
 app.use('/api/chessPuzzles', chessPuzzlesRouter);
+app.use('/api/users', usersRouter);
 
 // Serve static files
 // app.use(express.static('build'));
