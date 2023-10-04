@@ -31,13 +31,13 @@ const LoginCard = () => {
   // Redirect to root if the user is already logged in
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate("/testPage");
     }
   }, [user]);
 
   return (
     <Stack direction="row" justifyContent="center" mt={8}>
-      <Paper sx={{ width: "25%", padding: "50px" }} elevation={6}>
+      <Paper sx={{ padding: "50px" }} elevation={6}>
         <Stack>
           <Stack gap={3}>
             <Typography variant="h4" textAlign="center">

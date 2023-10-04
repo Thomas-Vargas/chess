@@ -6,7 +6,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (!user) {
     // user is not authenticated
-    return <Navigate to="/login" />;
+    return <Navigate to="/" />;
   }
   return <>{children}</>;
 };

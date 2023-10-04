@@ -12,6 +12,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import LoginCard from "./components/LoginCard/LoginCard";
 import ChessBoard from "./components/ChessBoard/ChessBoard";
 import NavbarWithSidebar from "./components/NavbarWithSidebar/NavbarWithSidebar";
+import LandingPage from "./Pages/LandingPage";
 
 const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
@@ -47,14 +48,14 @@ function App() {
             main: "#8A3324",
           },
           darkTest: {
-            main: "#3B3C36"
+            main: "#3B3C36",
           },
           biege: {
-            main: "#F5F5DC"
+            main: "#F5F5DC",
           },
           bone: {
-            main: "#E3DAC9"
-          }
+            main: "#E3DAC9",
+          },
         },
       }),
     [mode]
@@ -67,23 +68,21 @@ function App() {
           <AuthProvider>
             <Routes>
               <Route
-                path="/"
+                path="/testPage"
                 element={
                   <ProtectedRoute>
-                    <NavbarWithSidebar 
-                      darkModeController={<Controller />}
-                      component={<TestProtectedPage />}
-                    />
+                    <NavbarWithSidebar darkModeController={<Controller />} component={<TestProtectedPage />} />
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/"
+                element={<NavbarWithSidebar darkModeController={<Controller />} component={<LandingPage />} />}
+              />
+
               <Route path="/login" element={<LoginCard />} />
             </Routes>
           </AuthProvider>
-          <Stack direction="column" justifyContent="center" alignItems="center">
-            <h1>Chess App</h1>
-            <ChessBoard />
-          </Stack>
         </BrowserRouter>
       </ThemeProvider>
     </ColorModeContext.Provider>
