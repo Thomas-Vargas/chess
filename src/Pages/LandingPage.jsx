@@ -25,8 +25,8 @@ const LandingPage = () => {
   console.log(slideIn)
 
   return (
-    <div>
-      <Stack direction="row" gap={8} justifyContent="center" width="100%">
+    <div style={{overflow: "hidden"}}>
+      <Stack direction="row" gap={8} justifyContent="center" width="100%" height="100%">
         <Slide direction="right" in={slideIn} mountOnEnter unmountOnExit timeout={{ enter: 1000, exit: 1000 }}>
           <ChessBoard />
         </Slide>
