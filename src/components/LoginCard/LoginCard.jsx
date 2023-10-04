@@ -3,14 +3,15 @@ import { Paper, Stack, Typography, Button, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { supabaseClient } from "../../config/supabaseClient";
 import { useAuth } from "../AuthProvider/AuthProvider";
+import RegisterForm from "../RegisterForm/RegisterForm";
 
 const LoginCard = () => {
-  const navigate = useNavigate();
-
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
   });
+  const [register, setRegister] = useState(false);
+  const navigate = useNavigate();
 
   const { user } = useAuth();
 
@@ -28,7 +29,6 @@ const LoginCard = () => {
     }
   };
 
-  // Redirect to root if the user is already logged in
   useEffect(() => {
     if (user) {
       navigate("/testPage");
@@ -37,30 +37,42 @@ const LoginCard = () => {
 
   return (
     <Stack direction="row" justifyContent="center" mt={8}>
-      <Paper sx={{ padding: "50px" }} elevation={6}>
-        <Stack>
+      <Paper sx={{ padding: "20px" }} elevation={6}>
+        <Stack direction="column" justifyContent="space-between" height="100%">
           <Stack gap={3}>
-            <Typography variant="h4" textAlign="center">
-              Login
-            </Typography>
+            {!register ? (
+              <>
+                <Typography variant="h4" textAlign="center">
+                  Login
+                </Typography>
+                <Stack width="100%" gap={3}>
+                  <TextField
+                    label="email"
+                    value={loginData.email}
+                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                  />
+                  <TextField
+                    label="Password"
+                    value={loginData.password}
+                    type="password"
+                    onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                    onKeyDown={(e) => e.keyCode === 13 && login()}
+                  />
+                </Stack>
+              </>
+            ) : (
+              <RegisterForm />
+            )}
+          </Stack>
 
-            <Stack width="100%" gap={3}>
-              <TextField
-                label="email"
-                value={loginData.email}
-                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-              />
-              <TextField
-                label="Password"
-                value={loginData.password}
-                type="password"
-                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                onKeyDown={(e) => e.keyCode === 13 && login()}
-              />
-            </Stack>
-
-            <Button variant="contained" onClick={() => login()} size="large">
-              Submit
+          <Stack direction="row" justifyContent="space-between" width="100%">
+            {!register && (
+              <Button variant="contained" onClick={() => setRegister(true)}>
+                Register
+              </Button>
+            )}
+            <Button variant="contained" onClick={() => (!register ? login() : setRegister(false))}>
+              {register ? "BacK" : "Submit"}
             </Button>
           </Stack>
         </Stack>
