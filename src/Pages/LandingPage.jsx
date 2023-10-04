@@ -1,4 +1,4 @@
-import { Stack, Slide } from "@mui/material";
+import { Stack, Slide, Typography, Fade } from "@mui/material";
 import ChessBoard from "../components/ChessBoard/ChessBoard";
 import LoginCard from "../components/LoginCard/LoginCard";
 import { useNavigate } from "react-router-dom";
@@ -22,11 +22,16 @@ const LandingPage = () => {
     setSlideIn(true);
   }, []);
 
-  console.log(slideIn)
+  console.log(slideIn);
 
   return (
-    <div style={{overflow: "hidden"}}>
-      <Stack direction="row" gap={8} justifyContent="center" width="100%" height="100%">
+    <div style={{ overflow: "hidden" }}>
+      <Fade in={slideIn} style={{ transformOrigin: "0 0 0" }} {...(slideIn ? { timeout: 2000 } : {})}>
+        <Typography variant="h3" textAlign="center">
+          Title
+        </Typography>
+      </Fade>
+      <Stack direction="row" gap={8} justifyContent="center" width="100%" height="100%" padding="20px">
         <Slide direction="right" in={slideIn} mountOnEnter unmountOnExit timeout={{ enter: 1000, exit: 1000 }}>
           <ChessBoard />
         </Slide>
