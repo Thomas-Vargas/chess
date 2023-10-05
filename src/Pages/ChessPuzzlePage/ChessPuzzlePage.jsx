@@ -1,7 +1,7 @@
 
 const ChessPuzzlePage = () => {
-    
-    function calculateEloChange(playerElo, puzzleDifficulty, isSolved) {
+
+    const calculateEloChange = (playerElo, puzzleDifficulty, isSolved) => {
         const K = 16; // Adjust this based on your system's K-factor
     
         // Calculate expected outcome (E)

@@ -39,7 +39,7 @@ const LandingPage = () => {
         </Slide>
 
         <Stack gap={3} width="30%" mt={8}>
-          <Slide direction="top" in={slideIn} mountOnEnter unmountOnExit timeout={{ enter: 1000, exit: 1000 }}>
+          <Slide direction="up" in={slideIn} mountOnEnter unmountOnExit timeout={{ enter: 1000, exit: 1000 }}>
             <RegisterInfoCard />
           </Slide>
           <Slide direction="left" in={slideIn} mountOnEnter unmountOnExit timeout={{ enter: 1000, exit: 1000 }}>
