@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 const { Stack, TextField, Button, Typography } = require("@mui/material");
+import axios from "axios";
 
 const RegisterForm = () => {
   const [loginData, setLoginData] = useState({
@@ -8,8 +9,13 @@ const RegisterForm = () => {
   });
 
   const registerUser = () => {
-
-
+    axios.post('http://localhost:5000/api/users/signup', loginData) 
+        .then(result => {
+            console.log("result registering user", result);
+        })
+        .catch(error => {
+            console.log("error registering user", error);
+        })
   }
 
   return (

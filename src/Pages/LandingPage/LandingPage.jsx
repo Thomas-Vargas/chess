@@ -29,9 +29,9 @@ const LandingPage = () => {
   return (
     <div style={{ overflow: "hidden" }}>
       <Fade in={slideIn} style={{ transformOrigin: "0 0 0" }} {...(slideIn ? { timeout: 2000 } : {})}>
-          <Typography variant="h3" textAlign="center">
-            Open Source Chess
-          </Typography>
+        <Typography variant="h3" textAlign="center">
+          Open Source Chess
+        </Typography>
       </Fade>
       <Stack direction="row" gap={8} justifyContent="center" width="100%" height="100%" padding="20px">
         <Slide direction="right" in={slideIn} mountOnEnter unmountOnExit timeout={{ enter: 1000, exit: 1000 }}>

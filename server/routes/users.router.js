@@ -8,22 +8,40 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 router.post("/signUp", async (req, res) => {
   try {
-    let { data, error } = await supabase.auth.signUp({
+    let { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: req.body.email,
-        password: req.body.password
-      })
+        password: req.body.password,
+      });
 
-    // Check for errors
-    if (error) {
-      console.error("Error signing user up:", error);
+    if (signUpError) {
+      console.error("Error signing user up:", signUpError);
       return res.status(500).json({ error: "Internal Server Error" });
     }
 
-    // Log the fetched data
-    console.log(data);
+    // once signed up, initialize user data row
+    const { data: userData, error: userError } = await supabase
+      .from("user_data")
+      .insert([
+        {
+            userID: signUpData.user.id,
+            current_elo: 800,
+            lowest_elo: 800,
+            highest_elo: 800,
+            puzzles_played: 0,
+          }
+      ])
+      .select();
 
-    // Send the data in the response
-    res.json(data);
+    if (userError) {
+      console.error("Error inserting new user into user_data table:", userError);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    console.log("data returned from signing user up", signUpData);
+    console.log("data returned from initializing new user_data row", userData);
+
+    // probably want to return success rather than all of the user data
+    res.json(signUpData);
   } catch (error) {
     console.error("Unexpected error in /signUp route:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -33,23 +51,19 @@ router.post("/signUp", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     let { data, error } = await supabase.auth.signInWithPassword({
-        email: req.body.email,
-        password: req.body.password
-      })
+      email: req.body.email,
+      password: req.body.password,
+    });
 
-      const { access_token, refresh_token } = data.user;
+    const { access_token, refresh_token } = data.user;
 
-
-    // Check for errors
     if (error) {
       console.error("Error logging user in:", error);
       return res.status(500).json({ error: "Internal Server Error" });
     }
 
-    // Log the fetched data
     console.log(data.user);
 
-    // Send the data in the response
     res.json(data.user);
   } catch (error) {
     console.error("Unexpected error in /login route:", error);
@@ -59,22 +73,19 @@ router.post("/login", async (req, res) => {
 
 router.get("/logout", async (req, res) => {
   try {
-    let { error } = await supabase.auth.signOut()
+    let { error } = await supabase.auth.signOut();
 
-    // Check for errors
     if (error) {
       console.error("Error logging user out:", error);
       return res.status(500).json({ error: "Internal Server Error" });
     }
 
-    // Log the fetched data
     console.log(error);
 
-    // Send the data in the response
     if (error === null) {
-        res.json({success: 1});
+      res.json({ success: 1 });
     } else {
-        res.json({success: 0})
+      res.json({ success: 0 });
     }
   } catch (error) {
     console.error("Unexpected error in /logout route:", error);
@@ -83,46 +94,21 @@ router.get("/logout", async (req, res) => {
 });
 
 router.get("/session", async (req, res) => {
-    try {
-        const { data, error } = await supabase.auth.getSession()
-    
-        // Check for errors
-        if (error) {
-          console.error("Error getting session:", error);
-          return res.status(500).json({ error: "Internal Server Error" });
-        }
-    
-        // Log the fetched data
-        console.log(data);
-    
-        // Send the data in the response
-        res.json(data);
-      } catch (error) {
-        console.error("Unexpected error in /session route:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-      }
+  try {
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error("Error getting session:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    console.log(data);
+
+    res.json(data);
+  } catch (error) {
+    console.error("Unexpected error in /session route:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
-
-// router.get("/session", async (req, res) => {
-//     try {
-//         const { data, error } = await supabase.auth.getSession()
-    
-//         // Check for errors
-//         if (error) {
-//           console.error("Error getting session:", error);
-//           return res.status(500).json({ error: "Internal Server Error" });
-//         }
-    
-//         // Log the fetched data
-//         console.log(data);
-    
-//         // Send the data in the response
-//         res.json(data);
-//       } catch (error) {
-//         console.error("Unexpected error in /session route:", error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//       }
-// })
-
 
 module.exports = router;
