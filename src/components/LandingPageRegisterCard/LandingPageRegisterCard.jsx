@@ -5,7 +5,7 @@ import { supabaseClient } from "../../config/supabaseClient";
 import { useAuth } from "../AuthProvider/AuthProvider";
 import RegisterForm from "../RegisterForm/RegisterForm";
 
-const LoginCard = forwardRef((props, ref) => {
+const LandingPageRegisterCard = forwardRef((props, ref) => {
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -76,4 +76,4 @@ const LoginCard = forwardRef((props, ref) => {
   );
 });
 
-export default LoginCard;
+export default LandingPageRegisterCard;

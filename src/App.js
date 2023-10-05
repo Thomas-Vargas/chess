@@ -9,7 +9,7 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 import "./App.css";
 import TestProtectedPage from "./components/TestProtectedPage/TestProtectedPage";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
-import LoginCard from "./components/LoginCard/LoginCard";
+import LoginCard from "./components/LandingPageRegisterCard/LandingPageRegisterCard";
 import ChessBoard from "./components/ChessBoard/ChessBoard";
 import NavbarWithSidebar from "./components/NavbarWithSidebar/NavbarWithSidebar";
 import LandingPage from "./Pages/LandingPage/LandingPage";
@@ -39,17 +39,28 @@ function App() {
     []
   );
 
+  // color pallete
+  let biege = "#F5F5DC";
+  let blackOlive = "#3B3C36";
+  let burntUmber = "#8A3324";
+  // offwhites
+  let bone = "#E3DAC9";
+  let whiteSmoke = "#F5F5F5";
+  let alabaster = "#EDEAE0";
+  let eggshell = "#F0EAD6"
+
+
   const theme = useMemo(
     () =>
       createTheme({
         palette: {
           mode,
           primary: {
-            main: "#8A3324",
+            main: burntUmber,
           },
           background: {
-            default: mode === "dark" ? "#3B3C36" : "#F5F5DC",
-            paper: mode === "dark" ? "#3B3C36" : "#F5F5DC",
+            default: mode === "dark" ? blackOlive : biege,
+            paper: mode === "dark" ? blackOlive : biege,
           },
           text: {
             primary: mode === "dark" ? "#fff" : "rgba(0, 0, 0, 0.87)",
@@ -65,7 +76,6 @@ function App() {
       }),
     [mode]
   );
-  
 
           // palette: {
         //   mode,
@@ -82,9 +92,6 @@ function App() {
         //   bone: {
         //     main: "#E3DAC9",
         //   },
-        //   dark: {
-        //     background: "#3B3C36",
-        //   }
         // },
 
   return (

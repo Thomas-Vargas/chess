@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../components/AuthProvider/AuthProvider";
 
 import ChessBoard from "../../components/ChessBoard/ChessBoard";
-import LoginCard from "../../components/LoginCard/LoginCard";
+import LandingPageRegisterCard from "../../components/LandingPageRegisterCard/LandingPageRegisterCard";
 import RegisterInfoCard from "../../components/RegisterInfoCard/RegisterInfoCard";
 
 const LandingPage = () => {
@@ -43,7 +43,7 @@ const LandingPage = () => {
             <RegisterInfoCard />
           </Slide>
           <Slide direction="left" in={slideIn} mountOnEnter unmountOnExit timeout={{ enter: 1000, exit: 1000 }}>
-            <LoginCard />
+            <LandingPageRegisterCard />
           </Slide>
         </Stack>
       </Stack>
