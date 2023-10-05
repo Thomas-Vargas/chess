@@ -1,6 +1,6 @@
 import React from "react";
 import Piece from "../Piece/Piece";
-import { Divider, Grid, Typography, Button, Stack, Box } from "@mui/material";
+import { Divider, Grid, Typography, Button, Stack, Box, Paper } from "@mui/material";
 import { useState, useEffect, forwardRef } from "react";
 import axios from "axios";
 
@@ -1827,11 +1827,7 @@ const ChessBoard = forwardRef((props, ref) => {
           Draw!
         </Typography>
       )}
-      <Stack direction="row" gap={3} mb={3}>
-        <Button variant="contained" onClick={() => startPuzzle(currentPuzzle, boardState)}>
-          First Move
-        </Button>
-
+      <Stack direction="row" gap={3} mb={3} justifyContent="space-between">
         <Button variant="contained" onClick={() => setMode("puzzle")}>
           Puzzle Mode
         </Button>
@@ -1840,7 +1836,9 @@ const ChessBoard = forwardRef((props, ref) => {
           Chess Mode
         </Button>
       </Stack>
-      {renderBoard()}
+      <Paper elevation={6}>
+        {renderBoard()}
+      </Paper>
       <PawnPromotionModal
         boardState={boardState}
         selectPromotionPiece={selectPromotionPiece}

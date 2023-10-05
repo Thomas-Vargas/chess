@@ -10,7 +10,7 @@ const LoginCard = forwardRef((props, ref) => {
     email: "",
     password: "",
   });
-  const [register, setRegister] = useState(false);
+  const [register, setRegister] = useState(true);
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -36,8 +36,8 @@ const LoginCard = forwardRef((props, ref) => {
   }, [user]);
 
   return (
-    <Stack direction="row" justifyContent="center" mt={8} ref={ref}>
-      <Paper sx={{ padding: "20px" }} elevation={6}>
+    <Stack direction="row" justifyContent="center" ref={ref}>
+      <Paper sx={{ padding: "20px", width: "100%" }} elevation={6}>
         <Stack direction="column" justifyContent="space-between" height="100%">
           <Stack gap={3}>
             {!register ? (
@@ -65,15 +65,10 @@ const LoginCard = forwardRef((props, ref) => {
             )}
           </Stack>
 
-          <Stack direction="row" justifyContent="space-between" width="100%">
-            {!register && (
-              <Button variant="contained" onClick={() => setRegister(true)}>
-                Register
-              </Button>
-            )}
-            <Button variant="contained" onClick={() => (!register ? login() : setRegister(false))}>
-              {register ? "BacK" : "Submit"}
-            </Button>
+          <Stack direction="row" justifyContent="flex-end" width="100%">
+              {!register && (
+                <Button variant="contained" onClick={() => login()}>Submit</Button>
+              )}
           </Stack>
         </Stack>
       </Paper>

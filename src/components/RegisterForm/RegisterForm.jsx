@@ -13,7 +13,7 @@ const RegisterForm = () => {
   }
 
   return (
-    <Stack gap={3}>
+    <Stack gap={3} height="100%">
       <Typography variant="h4" textAlign="center">
         Sign Up
       </Typography>
@@ -31,6 +31,10 @@ const RegisterForm = () => {
           onKeyDown={(e) => e.keyCode === 13 && registerUser()}
         />
       </Stack>
+
+    <Stack direction="row" justifyContent="flex-end">
+      <Button variant="contained" onClick={() => registerUser()}>Submit</Button>
+    </Stack>
     </Stack>
   );
 };
