@@ -8,10 +8,11 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 router.post("/signUp", async (req, res) => {
   try {
+    // sign user up
     let { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: req.body.email,
-        password: req.body.password,
-      });
+      email: req.body.email,
+      password: req.body.password,
+    });
 
     if (signUpError) {
       console.error("Error signing user up:", signUpError);
@@ -23,12 +24,12 @@ router.post("/signUp", async (req, res) => {
       .from("user_data")
       .insert([
         {
-            userID: signUpData.user.id,
-            current_elo: 800,
-            lowest_elo: 800,
-            highest_elo: 800,
-            puzzles_played: 0,
-          }
+          userID: signUpData.user.id,
+          current_elo: 800,
+          lowest_elo: 800,
+          highest_elo: 800,
+          puzzles_played: 0,
+        },
       ])
       .select();
 
@@ -37,8 +38,19 @@ router.post("/signUp", async (req, res) => {
       return res.status(500).json({ error: "Internal Server Error" });
     }
 
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email: req.body.email,
+      password: req.body.password,
+    });
+
+    if (signInError) {
+        console.error("Error inserting new user into user_data table:", signInError);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+
     console.log("data returned from signing user up", signUpData);
     console.log("data returned from initializing new user_data row", userData);
+    console.log("data returned from logging new user in after registering them", signInData);
 
     // probably want to return success rather than all of the user data
     res.json(signUpData);
