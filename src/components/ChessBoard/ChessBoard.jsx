@@ -45,6 +45,40 @@ const ChessBoard = forwardRef((props, ref) => {
       77: { piece: "pawn", player: "black" },
       87: { piece: "pawn", player: "black" },
 
+      // for testing revealed attack check
+      // 11: { piece: "rook", player: "white", firstMove: false },
+      // 21: { piece: "knight", player: "white" },
+      // 31: { piece: "bishop", player: "white" },
+      // 14: { piece: "queen", player: "white" },
+      // 51: { piece: "king", player: "white", firstMove: true },
+      // 25: { piece: "bishop", player: "white" },
+      // 71: { piece: "knight", player: "white" },
+      // 81: { piece: "rook", player: "white", firstMove: true },
+      // 12: { piece: "pawn", player: "white" },
+      // 22: { piece: "pawn", player: "white" },
+      // 32: { piece: "pawn", player: "white" },
+      // 42: { piece: "pawn", player: "white" },
+      // 52: { piece: "pawn", player: "white" },
+      // 62: { piece: "pawn", player: "white" },
+      // 72: { piece: "pawn", player: "white" },
+      // 82: { piece: "pawn", player: "white" },
+      // 18: { piece: "rook", player: "black", firstMove: true },
+      // 28: { piece: "knight", player: "black" },
+      // 38: { piece: "bishop", player: "black" },
+      // 48: { piece: "queen", player: "black" },
+      // 58: { piece: "king", player: "black", firstMove: true },
+      // 68: { piece: "bishop", player: "black" },
+      // 78: { piece: "knight", player: "black" },
+      // 88: { piece: "rook", player: "black", firstMove: true },
+      // 17: { piece: "pawn", player: "black" },
+      // 27: { piece: "pawn", player: "black" },
+      // 37: { piece: "pawn", player: "black" },
+      // 46: { piece: "pawn", player: "black" },
+      // 57: { piece: "pawn", player: "black" },
+      // 67: { piece: "pawn", player: "black" },
+      // 77: { piece: "pawn", player: "black" },
+      // 87: { piece: "pawn", player: "black" },
+
       //test for draw
       // 47: { piece: "queen", player: "white" },
       // 16: { piece: "king", player: "white", firstMove: true },
@@ -955,41 +989,47 @@ const ChessBoard = forwardRef((props, ref) => {
     return possibleMoves;
   };
 
+  // alter this function so that it checks if any piece can attack the king, not just the piece that moved
+  // should fix revealed attacks
   const isThisMoveACheck = (square, piece, updatedBoardState) => {
-    let nextMoves = [];
-
-    // use board state or updated board state ??
-    switch (piece.piece) {
-      case "queen":
-        nextMoves = getQueenMoves(square, piece, updatedBoardState);
-        break;
-      case "rook":
-        nextMoves = getRookMoves(square, piece, updatedBoardState);
-        break;
-      case "knight":
-        nextMoves = getKnightMoves(square, piece, updatedBoardState);
-        break;
-      case "bishop":
-        nextMoves = getBishopMoves(square, piece, updatedBoardState);
-        break;
-      case "pawn":
-        nextMoves = getPawnMoves(square, piece.player, updatedBoardState);
-        break;
-    }
-
-    console.log("next moves", nextMoves);
-
-    // find position of opponent king - refactor to function
-    let kingPosition = getKingPosition(updatedBoardState, piece.player);
-
-    console.log("king position", kingPosition);
-
-    if (nextMoves.captures && nextMoves.captures.includes(kingPosition)) {
-      return true;
-    } else {
-      return false;
-    }
+    console.log("current player in isThisMoveACheck", updatedBoardState.currentPlayer);
+    return amIStillInCheck(updatedBoardState, updatedBoardState.currentPlayer);
   };
+  // const isThisMoveACheck = (square, piece, updatedBoardState) => {
+  //   let nextMoves = [];
+
+  //   // use board state or updated board state ??
+  //   switch (piece.piece) {
+  //     case "queen":
+  //       nextMoves = getQueenMoves(square, piece, updatedBoardState);
+  //       break;
+  //     case "rook":
+  //       nextMoves = getRookMoves(square, piece, updatedBoardState);
+  //       break;
+  //     case "knight":
+  //       nextMoves = getKnightMoves(square, piece, updatedBoardState);
+  //       break;
+  //     case "bishop":
+  //       nextMoves = getBishopMoves(square, piece, updatedBoardState);
+  //       break;
+  //     case "pawn":
+  //       nextMoves = getPawnMoves(square, piece.player, updatedBoardState);
+  //       break;
+  //   }
+
+  //   console.log("next moves", nextMoves);
+
+  //   // find position of opponent king - refactor to function
+  //   let kingPosition = getKingPosition(updatedBoardState, piece.player);
+
+  //   console.log("king position", kingPosition);
+
+  //   if (nextMoves.captures && nextMoves.captures.includes(kingPosition)) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // };
 
   const amIStillInCheck = (updatedBoardState, currentPlayer, isRecursive = false) => {
     // console.log("checking if player still in check");
