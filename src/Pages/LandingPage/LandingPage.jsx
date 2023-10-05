@@ -1,11 +1,11 @@
 import { Stack, Slide, Typography, Fade } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useAuth } from "../components/AuthProvider/AuthProvider";
+import { useAuth } from "../../components/AuthProvider/AuthProvider";
 
-import ChessBoard from "../components/ChessBoard/ChessBoard";
-import LoginCard from "../components/LoginCard/LoginCard";
-import RegisterInfoCard from "../components/RegisterInfoCard/RegisterInfoCard";
+import ChessBoard from "../../components/ChessBoard/ChessBoard";
+import LoginCard from "../../components/LoginCard/LoginCard";
+import RegisterInfoCard from "../../components/RegisterInfoCard/RegisterInfoCard";
 
 const LandingPage = () => {
   const navigate = useNavigate();
