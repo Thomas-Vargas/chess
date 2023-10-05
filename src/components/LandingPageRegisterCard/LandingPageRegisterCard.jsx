@@ -1,4 +1,4 @@
-import React, { useEffect, useState, forwardRef } from "react";
+import React, { useEffect, useState, forwardRef, Divider } from "react";
 import { Paper, Stack, Typography, Button, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { supabaseClient } from "../../config/supabaseClient";
@@ -66,11 +66,30 @@ const LandingPageRegisterCard = forwardRef((props, ref) => {
           </Stack>
 
           <Stack direction="row" justifyContent="flex-end" width="100%">
-              {!register && (
-                <Button variant="contained" onClick={() => login()}>Submit</Button>
-              )}
+            {!register && (
+              <Button variant="contained" onClick={() => login()}>
+                Submit
+              </Button>
+            )}
           </Stack>
         </Stack>
+
+        <Divider />
+
+        {register && (
+          <Stack alignItems="center">
+            <Typography>Already a member?</Typography>
+
+            <Button onClick={() => setRegister(false)}>Login</Button>
+          </Stack>
+        )}
+        {!register && (
+          <Stack alignItems="center">
+            <Typography>Sign Up Now!</Typography>
+
+            <Button onClick={() => setRegister(false)}>Login</Button>
+          </Stack>
+        )}
       </Paper>
     </Stack>
   );

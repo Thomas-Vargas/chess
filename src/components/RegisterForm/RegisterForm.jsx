@@ -94,7 +94,7 @@ const RegisterForm = () => {
         />
       </Stack>
 
-      <Stack direction="row" justifyContent="flex-end">
+      <Stack>
         <Button variant="contained" onClick={() => registerUser()}>
           Submit
         </Button>
