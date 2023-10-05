@@ -66,7 +66,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
-const NavbarWithSidebar = ({ component, darkModeController, currentUser }) => {
+const NavbarWithSidebar = ({ component, darkModeController, }) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
 
