@@ -413,7 +413,7 @@ const Piece = ({
         </Box>
       ) : (
         <Box
-          className={`piece ${color}-piece ${className}`}
+          className={`piece ${color}-piece ${!inCheckStatus ? className : inCheckStatus && piece.piece === "king" && piece.player === boardState.currentPlayer ? "check-square" : className}`}
           onClick={onPieceClick}
           sx={{
             ...(color === boardState.currentPlayer && square !== boardState.validMoves.pieceSquare

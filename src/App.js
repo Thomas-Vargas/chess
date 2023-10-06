@@ -12,7 +12,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import LoginCard from "./components/LandingPageRegisterCard/LandingPageRegisterCard";
 import ChessBoard from "./components/ChessBoard/ChessBoard";
 import NavbarWithSidebar from "./components/NavbarWithSidebar/NavbarWithSidebar";
-import LandingPage from "./Pages/LandingPage/LandingPage";
+import LandingPage from "./pages/LandingPage/LandingPage";
 
 const ColorModeContext = createContext({ toggleColorMode: () => {} });
 

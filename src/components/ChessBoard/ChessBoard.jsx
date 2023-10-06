@@ -120,16 +120,6 @@ const ChessBoard = forwardRef(({ sampleMode }, ref) => {
 
   useEffect(() => {
     if (currentPuzzle === null && mode === "puzzle" && randomPuzzles !== null) {
-      // getSinglePuzzle();
-      // setCurrentPuzzle({
-      //   puzzleid: "HxxIU",
-      //   fen: "2r2rk1/3nqp1p/p3p1p1/np1p4/3P4/P1NBP3/1PQ2PPP/2R2RK1 w - - 0 18",
-      //   rating: 1683,
-      //   ratingdeviation: 74,
-      //   moves: ["c3d5", "e6d5", "c2c8", "f8c8"],
-      //   themes: ["advantage", "hangingPiece", "middlegame", "short"],
-      // });
-
       // testing puzzle thast causes incorrect checkmate
       // setCurrentPuzzle({
       //   PuzzleId: "7LpIe",
@@ -265,6 +255,7 @@ const ChessBoard = forwardRef(({ sampleMode }, ref) => {
     }
   };
 
+  // implement next puzzle logic for both sample mode and regular user mode
   const startNextPuzzle = () => {
     // Remove the first element from randomPuzzles
     let puzzles = [...randomPuzzles];
@@ -378,8 +369,8 @@ const ChessBoard = forwardRef(({ sampleMode }, ref) => {
       boardStateWithValidMoves.board[startSquare] = promotionPiece;
     }
 
-    console.log("boardState before calling makeMove", boardStateWithValidMoves);
-    makeMove(endSquare, boardStateWithValidMoves, currentPuzzle, promotionSanMove);
+    // console.log("boardState before calling makeMove", boardStateWithValidMoves);
+    makeMove(endSquare, boardStateWithValidMoves, currentPuzzle, promotionSanMove, mode);
   };
 
   const fenToBoardState = (fen) => {
@@ -515,7 +506,8 @@ const ChessBoard = forwardRef(({ sampleMode }, ref) => {
   };
 
   // handles all moves not including captures, unless in puzzle mode
-  const makeMove = async (square, boardState, currentPuzzle, promotionSanMove) => {
+  // missing args: mode
+  const makeMove = async (square, boardState, currentPuzzle, promotionSanMove, mode) => {
     // Create a copy of the boardState object
     let previousBoardState = { ...boardState };
     if (
@@ -1572,7 +1564,7 @@ const ChessBoard = forwardRef(({ sampleMode }, ref) => {
     setOpen(true);
   };
 
-  const handleCastle = (square) => {
+  const handleCastle = (square, boardState) => {
     let previousBoardState = { ...boardState };
     switch (square) {
       case "71":
@@ -1682,7 +1674,7 @@ const ChessBoard = forwardRef(({ sampleMode }, ref) => {
           {isValidMove || isValidEnPassant ? (
             <Box
               className={`square ${isDark ? "dark" : "light"}-square ${square}`}
-              onClick={() => makeMove(square, boardState, currentPuzzle)}
+              onClick={() => makeMove(square, boardState, currentPuzzle, "", mode)}
               sx={{
                 "&:hover": {
                   backgroundImage: "linear-gradient(rgb(0 0 0/10%) 0 0)",
@@ -1694,7 +1686,7 @@ const ChessBoard = forwardRef(({ sampleMode }, ref) => {
             </Box>
           ) : (
             <Box className={`square ${isDark ? "dark" : "light"}-square ${square}`}>
-              {isValidCastle && <Box className="valid-capture-ring" onClick={() => handleCastle(square)} />}
+              {isValidCastle && <Box className="valid-capture-ring" onClick={() => handleCastle(square, boardState)} />}
             </Box>
           )}
         </>
@@ -1742,7 +1734,7 @@ const ChessBoard = forwardRef(({ sampleMode }, ref) => {
     return rowSquares.map((col, index) => {
       const square = `${col}${row}`;
       const isDark = (index + row) % 2 !== 0;
-      return <Box key={square}>{renderSquare(square, isDark)}</Box>;
+      return <Box key={square}>{renderSquare(square, isDark, boardState)}</Box>;
     });
   };
 
