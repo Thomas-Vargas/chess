@@ -8,7 +8,7 @@ import _, { endsWith, random } from "lodash";
 
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 
-const ChessBoard = forwardRef((props, ref) => {
+const ChessBoard = forwardRef(({ sampleMode }, ref) => {
   const [boardState, setBoardState] = useState({
     board: {
       // base setup
@@ -109,17 +109,17 @@ const ChessBoard = forwardRef((props, ref) => {
   const [puzzleIncorrect, setPuzzleIncorrect] = useState(false);
   const [puzzleFinished, setPuzzleFinished] = useState(false);
   const [mode, setMode] = useState("chess");
-  const [tenRandomPuzzles, setTenRandomPuzzles] = useState(null);
+  const [randomPuzzles, setrandomPuzzles] = useState(null);
 
   console.log("board state", boardState);
   console.log("inCheckStatus", inCheckStatus);
   console.log("checkmate status", checkmate);
   console.log("current puzzle:", currentPuzzle);
-  console.log("ten random puzzles in state", tenRandomPuzzles);
+  console.log("ten random puzzles in state", randomPuzzles);
+  console.log("current mode", mode);
 
   useEffect(() => {
-    // re-render page when validmoves updates.
-    if (currentPuzzle === null && mode === "puzzle" && tenRandomPuzzles[0]) {
+    if (currentPuzzle === null && mode === "puzzle" && randomPuzzles !== null) {
       // getSinglePuzzle();
       // setCurrentPuzzle({
       //   puzzleid: "HxxIU",
@@ -131,21 +131,21 @@ const ChessBoard = forwardRef((props, ref) => {
       // });
 
       // testing puzzle thast causes incorrect checkmate
-      setCurrentPuzzle({
-        PuzzleId: "7LpIe",
-        FEN: "1rb2rk1/q5P1/4p2p/3p3p/3P1P2/2P5/2QK3P/3R2R1 b - - 0 29",
-        Moves: "f8f7 c2h7 g8h7 g7g8q",
-        Rating: 763,
-        RatingDeviation: 93,
-        Popularity: 63,
-        NbPlays: 96,
-        Themes: "backRankMate mate mateIn2 middlegame short",
-        GameUrl: "https://lichess.org/JhKSeLyG/black#60",
-        OpeningTags: "",
-        id: 45085,
-        moves: ["f8f7", "c2h7", "g8h7", "g7g8q"],
-      });
-      // setCurrentPuzzle(tenRandomPuzzles[0])
+      // setCurrentPuzzle({
+      //   PuzzleId: "7LpIe",
+      //   FEN: "1rb2rk1/q5P1/4p2p/3p3p/3P1P2/2P5/2QK3P/3R2R1 b - - 0 29",
+      //   Moves: "f8f7 c2h7 g8h7 g7g8q",
+      //   Rating: 763,
+      //   RatingDeviation: 93,
+      //   Popularity: 63,
+      //   NbPlays: 96,
+      //   Themes: "backRankMate mate mateIn2 middlegame short",
+      //   GameUrl: "https://lichess.org/JhKSeLyG/black#60",
+      //   OpeningTags: "",
+      //   id: 45085,
+      //   moves: ["f8f7", "c2h7", "g8h7", "g7g8q"],
+      // });
+      setCurrentPuzzle(randomPuzzles[0]);
     }
 
     // reset board state in chess mode
@@ -202,8 +202,8 @@ const ChessBoard = forwardRef((props, ref) => {
       });
     }
 
-    // if current puzzle exists and no fen in board state and mode is puzzle - set boardstate to fen
-    if (currentPuzzle && !boardState.fen & (mode === "puzzle")) {
+    // page load logic for landing page sample puzzles
+    if (currentPuzzle && !boardState.fen && mode === "puzzle") {
       // reset check and checkmate
       setCheckmate(false);
       setInCheckStatus(false);
@@ -217,31 +217,16 @@ const ChessBoard = forwardRef((props, ref) => {
       }, 1000);
     }
 
-    if (!tenRandomPuzzles) {
-      getTenPuzzles();
+    // if in sampleMode (landingPage), only get 3 puzzles.
+    // will need to send a different prop when in regular puzzle mode to control how many puzzles to get/actions after puzzle is complete
+    if (!randomPuzzles && sampleMode) {
+      getAnyNumberOfPuzzles(3);
+    } else if (!randomPuzzles) {
+      getAnyNumberOfPuzzles(10);
     }
-  }, [boardState.validMoves, currentPuzzle, mode, tenRandomPuzzles, boardState.fen]);
+  }, [boardState.validMoves, currentPuzzle, mode, randomPuzzles, boardState.fen, sampleMode]);
 
-  // old - rapid api request
-  const getSinglePuzzle = () => {
-    const config = {
-      headers: {
-        "X-RapidAPI-Key": "",
-        "X-RapidAPI-Host": "chess-puzzles.p.rapidapi.com",
-      },
-      params: { id: "HxxIU" },
-    };
-    axios
-      .get(`https://chess-puzzles.p.rapidapi.com/`, config)
-      .then((result) => {
-        console.log("result in getSinglePuzzle", result.data);
-        setCurrentPuzzle(result.data.puzzles[0]);
-      })
-      .catch((error) => {
-        console.log("error in getSinglePuzzle", error);
-      });
-  };
-
+  // puzzle functions
   const generateRandomPuzzleID = () => {
     // Generate a random decimal between 0 (inclusive) and 1 (exclusive)
     const randomDecimal = Math.random();
@@ -252,11 +237,11 @@ const ChessBoard = forwardRef((props, ref) => {
     return randomNumber;
   };
 
-  const getTenPuzzles = async () => {
+  const getAnyNumberOfPuzzles = async (num) => {
     const randomIDs = [];
     const maxAttempts = 100;
 
-    while (randomIDs.length < 10 && randomIDs.length < maxAttempts) {
+    while (randomIDs.length < num && randomIDs.length < maxAttempts) {
       let id = generateRandomPuzzleID();
 
       // Check if the generated ID is not already in the array
@@ -274,15 +259,15 @@ const ChessBoard = forwardRef((props, ref) => {
       console.log("ten random puzzles ids:", randomIDs);
       console.log("ten random puzzles", randomPuzzles);
 
-      setTenRandomPuzzles(randomPuzzles);
+      setrandomPuzzles(randomPuzzles);
     } catch (error) {
-      console.log("Error in getTenPuzzles", error);
+      console.log("Error in getAnyNumberOfPuzzles", error);
     }
   };
 
   const startNextPuzzle = () => {
-    // Remove the first element from tenRandomPuzzles
-    let puzzles = [...tenRandomPuzzles];
+    // Remove the first element from randomPuzzles
+    let puzzles = [...randomPuzzles];
     puzzles.shift();
 
     // Get the next puzzle (now at the first position)
@@ -294,7 +279,7 @@ const ChessBoard = forwardRef((props, ref) => {
     if (nextPuzzle) {
       // reset state causing nextPuzzle functionality to trigger
       setCurrentPuzzle(nextPuzzle);
-      setTenRandomPuzzles(puzzles);
+      setrandomPuzzles(puzzles);
     } else {
       // Handle the case when there are no more puzzles
       console.log("No more puzzles");
@@ -327,7 +312,18 @@ const ChessBoard = forwardRef((props, ref) => {
     }
   };
 
-  // conversion function
+  const startPuzzle = (currentPuzzle, fenBoardState) => {
+    let startSquare = currentPuzzle.moves[0].substring(0, 2);
+    let endSquare = currentPuzzle.moves[0].substring(2, 4);
+
+    console.log("start square in start puzzle", startSquare);
+    console.log("end square in start puzzle", endSquare);
+
+    // console.log(startSquare, endSquare)
+    sanToBoardStateMove(startSquare, endSquare, fenBoardState, currentPuzzle, currentPuzzle.moves[0]);
+  };
+
+  // conversion functions
   const sanToBoardStateMove = (sanSquare1, sanSquare2, fenBoardState, currentPuzzle, sanMove) => {
     let startSquare = getColumnNumOrChar(sanSquare1[0]) + `${sanSquare1[1]}`;
     let endSquare = getColumnNumOrChar(sanSquare2[0]) + `${sanSquare2[1]}`;
@@ -447,17 +443,7 @@ const ChessBoard = forwardRef((props, ref) => {
     return startSquare + endSquare;
   };
 
-  const startPuzzle = (currentPuzzle, fenBoardState) => {
-    let startSquare = currentPuzzle.moves[0].substring(0, 2);
-    let endSquare = currentPuzzle.moves[0].substring(2, 4);
-
-    console.log("start square in start puzzle", startSquare);
-    console.log("end square in start puzzle", endSquare);
-
-    // console.log(startSquare, endSquare)
-    sanToBoardStateMove(startSquare, endSquare, fenBoardState, currentPuzzle, currentPuzzle.moves[0]);
-  };
-
+  // utility functions
   const getColumnNumOrChar = (char) => {
     switch (char) {
       case "a":
@@ -516,6 +502,19 @@ const ChessBoard = forwardRef((props, ref) => {
     return rank + file * 10;
   };
 
+  const getOpponent = (currentPlayer) => {
+    return currentPlayer === "white" ? "black" : "white";
+  };
+
+  const getKingPosition = (boardState, player) => {
+    for (let key in boardState.board) {
+      if (boardState.board[key].piece === "king" && boardState.board[key].player !== player) {
+        return key;
+      }
+    }
+  };
+
+  // handles all moves not including captures, unless in puzzle mode
   const makeMove = async (square, boardState, currentPuzzle, promotionSanMove) => {
     // Create a copy of the boardState object
     let previousBoardState = { ...boardState };
@@ -781,6 +780,7 @@ const ChessBoard = forwardRef((props, ref) => {
     }
   };
 
+  // game result functions
   const isGameOver = (squareCausingCheck, piece, updatedBoardState) => {
     let isGameOver = true;
     let possibleMoves;
@@ -920,12 +920,47 @@ const ChessBoard = forwardRef((props, ref) => {
     }
   };
 
-  const getKingPosition = (boardState, player) => {
-    for (let key in boardState.board) {
-      if (boardState.board[key].piece === "king" && boardState.board[key].player !== player) {
-        return key;
+  const isThisMoveACheck = (square, piece, updatedBoardState) => {
+    console.log("current player in isThisMoveACheck", updatedBoardState.currentPlayer);
+    return amIStillInCheck(updatedBoardState, updatedBoardState.currentPlayer);
+  };
+
+  const amIStillInCheck = (updatedBoardState, currentPlayer, isRecursive = false) => {
+    const kingPosition = getKingPosition(updatedBoardState, getOpponent(currentPlayer));
+
+    // Get all possible moves for the opponent
+    const opponentMoves = getAllPossibleMovesForPlayer(getOpponent(currentPlayer), updatedBoardState);
+    // console.log("opponent moves", getOpponent(currentPlayer) ,opponentMoves);
+
+    // console.log("opponent moves", opponentMoves);
+
+    // Check if the opponent can capture the king
+    if (opponentMoves.includes(kingPosition)) {
+      return true;
+    }
+
+    return false;
+  };
+
+  // piece move functions
+  const getAllPossibleMovesForPlayer = (currentPlayer, boardState, isCheckingForCheck = false) => {
+    const allPossibleMoves = [];
+
+    // Iterate through the board to find pieces of the current player
+    for (const square in boardState.board) {
+      const piece = boardState.board[square];
+
+      // Check if the piece belongs to the current player
+      if (piece.player === currentPlayer) {
+        // console.log("current player", currentPlayer);
+        // Use the piece-specific move function to get its moves
+        const pieceMoves = getPieceMoves(square, piece, boardState, isCheckingForCheck);
+
+        // Add the moves to the list of all possible moves
+        allPossibleMoves.push(...pieceMoves.moves, ...pieceMoves.captures);
       }
     }
+    return allPossibleMoves;
   };
 
   const getPieceMoves = (square, pieceObj, boardState, isCheckingForCheck = false) => {
@@ -987,92 +1022,6 @@ const ChessBoard = forwardRef((props, ref) => {
     }
 
     return possibleMoves;
-  };
-
-  const isThisMoveACheck = (square, piece, updatedBoardState) => {
-    console.log("current player in isThisMoveACheck", updatedBoardState.currentPlayer);
-    return amIStillInCheck(updatedBoardState, updatedBoardState.currentPlayer);
-  };
-  
-  // const isThisMoveACheck = (square, piece, updatedBoardState) => {
-  //   let nextMoves = [];
-
-  //   // use board state or updated board state ??
-  //   switch (piece.piece) {
-  //     case "queen":
-  //       nextMoves = getQueenMoves(square, piece, updatedBoardState);
-  //       break;
-  //     case "rook":
-  //       nextMoves = getRookMoves(square, piece, updatedBoardState);
-  //       break;
-  //     case "knight":
-  //       nextMoves = getKnightMoves(square, piece, updatedBoardState);
-  //       break;
-  //     case "bishop":
-  //       nextMoves = getBishopMoves(square, piece, updatedBoardState);
-  //       break;
-  //     case "pawn":
-  //       nextMoves = getPawnMoves(square, piece.player, updatedBoardState);
-  //       break;
-  //   }
-
-  //   console.log("next moves", nextMoves);
-
-  //   // find position of opponent king - refactor to function
-  //   let kingPosition = getKingPosition(updatedBoardState, piece.player);
-
-  //   console.log("king position", kingPosition);
-
-  //   if (nextMoves.captures && nextMoves.captures.includes(kingPosition)) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // };
-
-  const amIStillInCheck = (updatedBoardState, currentPlayer, isRecursive = false) => {
-    // console.log("checking if player still in check");
-    // Find the position of the current player's king
-    const kingPosition = getKingPosition(updatedBoardState, getOpponent(currentPlayer));
-
-    // console.log("king position", kingPosition);
-
-    // Get all possible moves for the opponent
-    const opponentMoves = getAllPossibleMovesForPlayer(getOpponent(currentPlayer), updatedBoardState);
-    // console.log("opponent moves", getOpponent(currentPlayer) ,opponentMoves);
-
-    // console.log("opponent moves", opponentMoves);
-
-    // Check if the opponent can capture the king
-    if (opponentMoves.includes(kingPosition)) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const getAllPossibleMovesForPlayer = (currentPlayer, boardState, isCheckingForCheck = false) => {
-    const allPossibleMoves = [];
-
-    // Iterate through the board to find pieces of the current player
-    for (const square in boardState.board) {
-      const piece = boardState.board[square];
-
-      // Check if the piece belongs to the current player
-      if (piece.player === currentPlayer) {
-        // console.log("current player", currentPlayer);
-        // Use the piece-specific move function to get its moves
-        const pieceMoves = getPieceMoves(square, piece, boardState, isCheckingForCheck);
-
-        // Add the moves to the list of all possible moves
-        allPossibleMoves.push(...pieceMoves.moves, ...pieceMoves.captures);
-      }
-    }
-    return allPossibleMoves;
-  };
-
-  const getOpponent = (currentPlayer) => {
-    return currentPlayer === "white" ? "black" : "white";
   };
 
   const getPawnMoves = (square, player, boardState, isCheckingForCheck = false) => {
@@ -1717,6 +1666,7 @@ const ChessBoard = forwardRef((props, ref) => {
     }
   };
 
+  // rendering functions
   const renderSquare = (square, isDark) => {
     const piece = boardState.board[square];
     const isValidMove = boardState.validMoves.possibleMoves.includes(square);
@@ -1827,17 +1777,17 @@ const ChessBoard = forwardRef((props, ref) => {
         </Typography>
       )}
       <Stack direction="row" gap={3} mb={3} justifyContent="space-between">
-        <Button variant="contained" onClick={() => setMode("puzzle")}>
-          Puzzle Mode
-        </Button>
+        {sampleMode && (
+          <Button variant="contained" onClick={() => setMode("puzzle")}>
+            Try Puzzle Mode
+          </Button>
+        )}
 
         <Button variant="contained" onClick={() => setMode("chess")}>
           Chess Mode
         </Button>
       </Stack>
-      <Paper elevation={6}>
-        {renderBoard()}
-      </Paper>
+      <Paper elevation={6}>{renderBoard()}</Paper>
       <PawnPromotionModal
         boardState={boardState}
         selectPromotionPiece={selectPromotionPiece}
