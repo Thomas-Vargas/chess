@@ -77,23 +77,6 @@ function App() {
     [mode]
   );
 
-          // palette: {
-        //   mode,
-        //   ...(mode === 'l')
-        //   primary: {
-        //     main: "#8A3324",
-        //   },
-        //   darkTest: {
-        //     main: "#3B3C36",
-        //   },
-        //   biege: {
-        //     main: "#F5F5DC",
-        //   },
-        //   bone: {
-        //     main: "#E3DAC9",
-        //   },
-        // },
-
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>

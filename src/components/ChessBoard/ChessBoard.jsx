@@ -989,12 +989,11 @@ const ChessBoard = forwardRef((props, ref) => {
     return possibleMoves;
   };
 
-  // alter this function so that it checks if any piece can attack the king, not just the piece that moved
-  // should fix revealed attacks
   const isThisMoveACheck = (square, piece, updatedBoardState) => {
     console.log("current player in isThisMoveACheck", updatedBoardState.currentPlayer);
     return amIStillInCheck(updatedBoardState, updatedBoardState.currentPlayer);
   };
+  
   // const isThisMoveACheck = (square, piece, updatedBoardState) => {
   //   let nextMoves = [];
 

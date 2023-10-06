@@ -18,8 +18,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import axios from "axios";
 
 import { supabaseClient } from "../../config/supabaseClient";
-
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../AuthProvider/AuthProvider";
 
 const drawerWidth = 240;
 
@@ -69,6 +69,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 const NavbarWithSidebar = ({ component, darkModeController, }) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -92,15 +93,17 @@ const NavbarWithSidebar = ({ component, darkModeController, }) => {
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar style={{ backgroundColor: "#8A3324" }}>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2, ...(open && { display: "none" }) }}
-          >
-            <MenuIcon />
-          </IconButton>
+          {user && (
+              <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{ mr: 2, ...(open && { display: "none" }) }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
           <Stack direction="row" width="100%" justifyContent="flex-end">
             {darkModeController}
           </Stack>

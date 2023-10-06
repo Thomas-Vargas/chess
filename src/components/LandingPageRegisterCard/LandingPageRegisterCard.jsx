@@ -37,8 +37,8 @@ const LandingPageRegisterCard = forwardRef((props, ref) => {
 
   return (
     <Stack direction="row" justifyContent="center" ref={ref}>
-      <Paper sx={{ padding: "20px", width: "100%" }} elevation={6}>
-        <Stack direction="column" justifyContent="space-between" height="100%">
+      <Paper sx={{ padding: "20px", width: "100%", height: "100%" }} elevation={6}>
+        <Stack direction="column" justifyContent="space-between" mb={3}>
           <Stack gap={3}>
             {!register ? (
               <>
@@ -59,17 +59,14 @@ const LandingPageRegisterCard = forwardRef((props, ref) => {
                     onKeyDown={(e) => e.keyCode === 13 && login()}
                   />
                 </Stack>
+                <Stack width="100%">
+                  <Button variant="contained" onClick={() => login()}>
+                    Submit
+                  </Button>
+                </Stack>
               </>
             ) : (
               <RegisterForm />
-            )}
-          </Stack>
-
-          <Stack direction="row" justifyContent="flex-end" width="100%">
-            {!register && (
-              <Button variant="contained" onClick={() => login()}>
-                Submit
-              </Button>
             )}
           </Stack>
         </Stack>
@@ -77,17 +74,17 @@ const LandingPageRegisterCard = forwardRef((props, ref) => {
         <Divider />
 
         {register && (
-          <Stack alignItems="center">
-            <Typography>Already a member?</Typography>
+          <Stack alignItems="center" mt={2}>
+            <Typography variant="h5" mb={2}>Already a member?</Typography>
 
-            <Button onClick={() => setRegister(false)}>Login</Button>
+            <Button variant="contained" onClick={() => setRegister(false)}>Login</Button>
           </Stack>
         )}
         {!register && (
-          <Stack alignItems="center">
-            <Typography>Sign Up Now!</Typography>
+          <Stack alignItems="center" mt={2}>
+            <Typography variant="h5" mb={2}>Sign Up Now!</Typography>
 
-            <Button onClick={() => setRegister(false)}>Login</Button>
+            <Button variant="contained" onClick={() => setRegister(true)}>Sign Up</Button>
           </Stack>
         )}
       </Paper>
