@@ -13,6 +13,8 @@ import LoginCard from "./components/LandingPageRegisterCard/LandingPageRegisterC
 import ChessBoard from "./components/ChessBoard/ChessBoard";
 import NavbarWithSidebar from "./components/NavbarWithSidebar/NavbarWithSidebar";
 import LandingPage from "./pages/LandingPage/LandingPage";
+import UserDashboard from "./pages/UserDashboard/UserDashboard";
+import { useAuth } from "./components/AuthProvider/AuthProvider";
 
 const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
@@ -77,6 +79,10 @@ function App() {
     [mode]
   );
 
+  const { user } = useAuth();
+
+  console.log("user", user);
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
@@ -84,10 +90,10 @@ function App() {
           <AuthProvider>
             <Routes>
               <Route
-                path="/testPage"
+                path="/dashboard"
                 element={
                   <ProtectedRoute>
-                    <NavbarWithSidebar darkModeController={<Controller />} component={<TestProtectedPage />} />
+                    <NavbarWithSidebar darkModeController={<Controller />} component={<UserDashboard />} />
                   </ProtectedRoute>
                 }
               />

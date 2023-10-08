@@ -31,7 +31,7 @@ const LandingPageRegisterCard = forwardRef((props, ref) => {
 
   useEffect(() => {
     if (user) {
-      navigate("/testPage");
+      navigate("/dashboard");
     }
   }, [user]);
 

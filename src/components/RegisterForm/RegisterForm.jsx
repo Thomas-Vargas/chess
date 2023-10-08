@@ -70,7 +70,7 @@ const RegisterForm = () => {
 
   useEffect(() => {
     if (user) {
-      navigate("/testPage");
+      navigate("/dashboard");
     }
   }, [user]);
 
