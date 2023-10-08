@@ -14,6 +14,7 @@ import ChessBoard from "./components/ChessBoard/ChessBoard";
 import NavbarWithSidebar from "./components/NavbarWithSidebar/NavbarWithSidebar";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import UserDashboard from "./pages/UserDashboard/UserDashboard";
+import ChessPuzzlePage from "./pages/ChessPuzzlePage/ChessPuzzlePage";
 import { useAuth } from "./components/AuthProvider/AuthProvider";
 
 const ColorModeContext = createContext({ toggleColorMode: () => {} });
@@ -89,6 +90,13 @@ function App() {
         <BrowserRouter>
           <AuthProvider>
             <Routes>
+            <Route
+                path="/"
+                element={<NavbarWithSidebar darkModeController={<Controller />} component={<LandingPage />} />}
+              />
+
+              <Route path="/login" element={<LoginCard />} />
+              
               <Route
                 path="/dashboard"
                 element={
@@ -98,11 +106,13 @@ function App() {
                 }
               />
               <Route
-                path="/"
-                element={<NavbarWithSidebar darkModeController={<Controller />} component={<LandingPage />} />}
+                path="/puzzle/"
+                element={
+                  <ProtectedRoute>
+                    <NavbarWithSidebar darkModeController={<Controller />} component={<ChessPuzzlePage />} />
+                  </ProtectedRoute>
+                }
               />
-
-              <Route path="/login" element={<LoginCard />} />
             </Routes>
           </AuthProvider>
         </BrowserRouter>
