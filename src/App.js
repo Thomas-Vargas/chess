@@ -16,6 +16,7 @@ import LandingPage from "./pages/LandingPage/LandingPage";
 import UserDashboard from "./pages/UserDashboard/UserDashboard";
 import ChessPuzzlePage from "./pages/ChessPuzzlePage/ChessPuzzlePage";
 import { useAuth } from "./components/AuthProvider/AuthProvider";
+import { supabaseClient } from "./config/supabaseClient";
 
 const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
@@ -32,6 +33,10 @@ function Controller() {
 
 function App() {
   const [mode, setMode] = useState("dark");
+
+  const { user } = useAuth();
+
+  // console.log("user", user);
 
   const colorMode = useMemo(
     () => ({
@@ -79,10 +84,6 @@ function App() {
       }),
     [mode]
   );
-
-  const { user } = useAuth();
-
-  console.log("user", user);
 
   return (
     <ColorModeContext.Provider value={colorMode}>

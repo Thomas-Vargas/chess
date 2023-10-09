@@ -2,13 +2,16 @@ import React from "react";
 import Piece from "../Piece/Piece";
 import { Divider, Grid, Typography, Button, Stack, Box, Paper } from "@mui/material";
 import { useState, useEffect, forwardRef } from "react";
+import { useAuth } from "../AuthProvider/AuthProvider";
+import { supabaseClient } from "../../config/supabaseClient";
+import useUserData from "../../utils/userData";
 import axios from "axios";
 
 import _, { endsWith, random } from "lodash";
 
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 
-const ChessBoard = forwardRef(({ sampleMode }, ref) => {
+const ChessBoard = forwardRef(({ sampleMode, modeToSet }, ref) => {
   const [boardState, setBoardState] = useState({
     board: {
       // base setup
@@ -111,6 +114,9 @@ const ChessBoard = forwardRef(({ sampleMode }, ref) => {
   const [mode, setMode] = useState("chess");
   const [randomPuzzles, setrandomPuzzles] = useState(null);
 
+  const { user } = useAuth();
+  const userData = useUserData(user?.id);
+
   console.log("board state", boardState);
   console.log("inCheckStatus", inCheckStatus);
   console.log("checkmate status", checkmate);
@@ -119,6 +125,10 @@ const ChessBoard = forwardRef(({ sampleMode }, ref) => {
   console.log("current mode", mode);
 
   useEffect(() => {
+    if (modeToSet) {
+      setMode(modeToSet);
+    }
+
     if (currentPuzzle === null && mode === "puzzle" && randomPuzzles !== null) {
       // testing puzzle thast causes incorrect checkmate
       // setCurrentPuzzle({

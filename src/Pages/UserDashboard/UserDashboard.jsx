@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { Stack, TextField, Button, Typography } from "@mui/material";
+import { Stack, TextField, Button, Typography, Paper } from "@mui/material";
 import { supabaseClient } from "../../config/supabaseClient";
 import { useAuth } from "../../components/AuthProvider/AuthProvider";
 import { useNavigate } from "react-router-dom";
 
 const UserDashboard = () => {
-  const [userData, setUserData] = useState(null);
   const [userCompletedPuzzles, setUserCmpletedPuzzles] = useState(null);
+  const [userData, setUserData] = useState(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -27,10 +27,12 @@ const UserDashboard = () => {
   const getUserCompletedPuzzles = async () => {
     let { data: userCompletedPuzzles, error } = await supabaseClient
       .from("completed_puzzles")
-      .select(`
+      .select(
+        `
         *, 
         ...chess_puzzles (*)
-      `)
+      `
+      )
       .eq("userID", user.id)
       .order("timeCompleted", { ascending: false })
       .limit(10);
@@ -52,16 +54,46 @@ const UserDashboard = () => {
 
   return (
     <div>
-      <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
-        <Typography variant="h3">Welcome</Typography>
-        <Button variant="contained" onClick={() => navigate("/puzzle")}>
-          Train
-        </Button>
+      {userData && (
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
+          <Typography variant="h3">{userData.username}</Typography>
+          <Button variant="contained" onClick={() => navigate("/puzzle")}>
+            Train
+          </Button>
+        </Stack>
+      )}
+
+      <Stack direction="row" width="100%" gap={3} mt={3}>
+        {/* player stats */}
+        {userData && (
+          <Stack flex={1} height="50%">
+            <Paper elevation={6} sx={{ padding: "20px" }}>
+              <Typography variant="h5" mb={1}>Current Rating: {userData.current_elo}</Typography>
+              <Typography variant="h5" mb={1}>Highest Rating: {userData.highest_elo}</Typography>
+              <Typography variant="h5" mb={1}>Lowest Rating: {userData.lowest_elo}</Typography>
+              <Typography variant="h5" mb={1}>Puzzles Played: {userData.puzzles_played}</Typography>
+            </Paper>
+          </Stack>
+        )}
+        {/* graphs */}
+        <Stack flex={1} height="50%">
+          <Paper elevation={6} sx={{ padding: "20px" }}></Paper>
+        </Stack>
       </Stack>
 
-      <Stack direction="row" width="100%">
-        <Stack flex={1}></Stack>
-        <Stack flex={1}></Stack>
+      <Stack direction="row" width="100%" gap={3} mt={3}>
+        {/* player stats */}
+        {userCompletedPuzzles && (
+          <Stack flex={1} height="50%">
+            <Paper elevation={6} sx={{ padding: "20px" }}>
+
+            </Paper>
+          </Stack>
+        )}
+        {/* graphs */}
+        <Stack flex={1} height="50%">
+          <Paper elevation={6} sx={{ padding: "20px" }}></Paper>
+        </Stack>
       </Stack>
     </div>
   );
