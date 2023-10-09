@@ -6,9 +6,10 @@ import { useAuth } from "../AuthProvider/AuthProvider";
 import { supabaseClient } from "../../config/supabaseClient";
 
 const RegisterForm = () => {
-  const [registerData, setregisterData] = useState({
+  const [registerData, setRegisterData] = useState({
     email: "",
     password: "",
+    username: ""
   });
 
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ const RegisterForm = () => {
             lowest_elo: 800,
             highest_elo: 800,
             puzzles_played: 0,
+            username: registerData.username
           },
         ])
         .select();
@@ -83,13 +85,18 @@ const RegisterForm = () => {
         <TextField
           label="email"
           value={registerData.email}
-          onChange={(e) => setregisterData({ ...registerData, email: e.target.value })}
+          onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+        />
+        <TextField
+          label="username"
+          value={registerData.username}
+          onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
         />
         <TextField
           label="Password"
           value={registerData.password}
           type="password"
-          onChange={(e) => setregisterData({ ...registerData, password: e.target.value })}
+          onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
           onKeyDown={(e) => e.keyCode === 13 && registerUser()}
         />
       </Stack>
