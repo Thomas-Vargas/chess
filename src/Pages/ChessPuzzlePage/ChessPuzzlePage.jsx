@@ -82,6 +82,47 @@ const ChessPuzzlePage = () => {
     setPuzzlesInEloRange(newPuzzles);
   };
 
+  const saveCompletedPuzzle = async (result, puzzleID, timeToComplete) => {
+    const { data, error } = await supabaseClient
+        .from("completed_puzzles")
+        .insert([{
+            completedStatus: result,
+            userID: userData.userID,
+            puzzleID: puzzleID,
+        }])
+        .select();
+
+        if (error) {
+            console.log("error inserting into completed_puzzles", error);
+        } else {
+            console.log("success inserting into completed_puzzles", data);
+        }
+  }
+
+  const updateUserElo = async (result, puzzleID, timeToComplete, currentPuzzle) => {
+    let eloChange = calculateEloChange(userData.current_elo, currentPuzzle.Rating, result);
+    let newElo;
+
+    const { data: eloHistoryData, error: eloHistoryError } = await supabaseClient
+        .from("puzzle_elo_history")
+        .insert([{
+            userID: user.id,
+            elo: newElo
+        }])
+
+    if (eloHistoryError) {
+        console.log("error inserting into puzzle_elo_history", eloHistoryError);
+    } else {
+        console.log("success inserting into puzzle_elo_history", eloHistoryData);
+    }
+
+    
+  }
+ 
+  const updateAllPuzzleData = async (result, puzzleID, timeToComplete, currentPuzzle) => {
+
+  }
+
   useEffect(() => {
     if (userData && !puzzlesInEloRange) {
       getPuzzlesWithinEloRange();

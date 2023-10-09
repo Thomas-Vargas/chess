@@ -56,6 +56,8 @@ function App() {
   let whiteSmoke = "#F5F5F5";
   let alabaster = "#EDEAE0";
   let eggshell = "#F0EAD6"
+  // font colors
+  let darkFont = "#48484a"
 
 
   const theme = useMemo(
