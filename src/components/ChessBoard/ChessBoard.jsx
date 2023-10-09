@@ -11,7 +11,7 @@ import _, { endsWith, random } from "lodash";
 
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 
-const ChessBoard = forwardRef(({ sampleMode, modeToSet }, ref) => {
+const ChessBoard = forwardRef(({ sampleMode, modeToSet, puzzlesInEloRange, setPuzzlesInEloRange }, ref) => {
   const [boardState, setBoardState] = useState({
     board: {
       // base setup
@@ -112,7 +112,7 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet }, ref) => {
   const [puzzleIncorrect, setPuzzleIncorrect] = useState(false);
   const [puzzleFinished, setPuzzleFinished] = useState(false);
   const [mode, setMode] = useState("chess");
-  const [randomPuzzles, setrandomPuzzles] = useState(null);
+  const [randomPuzzles, setRandomPuzzles] = useState(null);
 
   const { user } = useAuth();
   const userData = useUserData(user?.id);
@@ -121,8 +121,9 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet }, ref) => {
   console.log("inCheckStatus", inCheckStatus);
   console.log("checkmate status", checkmate);
   console.log("current puzzle:", currentPuzzle);
-  console.log("ten random puzzles in state", randomPuzzles);
+  console.log("random puzzles in state", randomPuzzles);
   console.log("current mode", mode);
+  console.log("puzzles in elo range in chessboard", puzzlesInEloRange)
 
   useEffect(() => {
     if (modeToSet) {
@@ -130,21 +131,6 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet }, ref) => {
     }
 
     if (currentPuzzle === null && mode === "puzzle" && randomPuzzles !== null) {
-      // testing puzzle thast causes incorrect checkmate
-      // setCurrentPuzzle({
-      //   PuzzleId: "7LpIe",
-      //   FEN: "1rb2rk1/q5P1/4p2p/3p3p/3P1P2/2P5/2QK3P/3R2R1 b - - 0 29",
-      //   Moves: "f8f7 c2h7 g8h7 g7g8q",
-      //   Rating: 763,
-      //   RatingDeviation: 93,
-      //   Popularity: 63,
-      //   NbPlays: 96,
-      //   Themes: "backRankMate mate mateIn2 middlegame short",
-      //   GameUrl: "https://lichess.org/JhKSeLyG/black#60",
-      //   OpeningTags: "",
-      //   id: 45085,
-      //   moves: ["f8f7", "c2h7", "g8h7", "g7g8q"],
-      // });
       setCurrentPuzzle(randomPuzzles[0]);
     }
 
@@ -217,14 +203,18 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet }, ref) => {
       }, 1000);
     }
 
+    // if coming from puzzle page, set 
+    if (puzzlesInEloRange && randomPuzzles === null && currentPuzzle === null) {
+      setRandomPuzzles(puzzlesInEloRange);
+      setCurrentPuzzle(puzzlesInEloRange[0]);
+    }
+
     // if in sampleMode (landingPage), only get 3 puzzles.
     // will need to send a different prop when in regular puzzle mode to control how many puzzles to get/actions after puzzle is complete
-    if (!randomPuzzles && sampleMode) {
+    if (!randomPuzzles && sampleMode && !puzzlesInEloRange) {
       getAnyNumberOfPuzzles(3);
-    } else if (!randomPuzzles) {
-      getAnyNumberOfPuzzles(10);
-    }
-  }, [boardState.validMoves, currentPuzzle, mode, randomPuzzles, boardState.fen, sampleMode]);
+    } 
+  }, [boardState.validMoves, currentPuzzle, mode, randomPuzzles, boardState.fen, sampleMode, puzzlesInEloRange]);
 
   // puzzle functions
   const generateRandomPuzzleID = () => {
@@ -259,7 +249,7 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet }, ref) => {
       console.log("ten random puzzles ids:", randomIDs);
       console.log("ten random puzzles", randomPuzzles);
 
-      setrandomPuzzles(randomPuzzles);
+      setRandomPuzzles(randomPuzzles);
     } catch (error) {
       console.log("Error in getAnyNumberOfPuzzles", error);
     }
@@ -280,7 +270,7 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet }, ref) => {
     if (nextPuzzle) {
       // reset state causing nextPuzzle functionality to trigger
       setCurrentPuzzle(nextPuzzle);
-      setrandomPuzzles(puzzles);
+      setRandomPuzzles(puzzles);
     } else {
       // Handle the case when there are no more puzzles
       console.log("No more puzzles");

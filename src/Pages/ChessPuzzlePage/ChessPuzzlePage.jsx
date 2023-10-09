@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabaseClient } from "../../config/supabaseClient";
 import { useAuth } from "../../components/AuthProvider/AuthProvider";
 import useUserData from "../../utils/userData";
@@ -6,10 +6,12 @@ import useUserData from "../../utils/userData";
 import ChessBoard from "../../components/ChessBoard/ChessBoard";
 
 const ChessPuzzlePage = () => {
+  const [puzzlesInEloRange, setPuzzlesInEloRange] = useState(null);
   const { user } = useAuth();
   const userData = useUserData(user?.id);
 
   console.log("user data in chess puzzle page", userData);
+  console.log("puzzles in elo range", puzzlesInEloRange);
 
   const calculateEloChange = (playerElo, puzzleDifficulty, isSolved) => {
     const K = 16; // Adjust this based on your system's K-factor
@@ -29,13 +31,13 @@ const ChessPuzzlePage = () => {
   const shuffleArray = (array) => {
     // Create a shallow copy of the array
     const shuffledArray = [...array];
-  
+
     // Simple Fisher-Yates shuffle algorithm
     for (let i = shuffledArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
     }
-  
+
     return shuffledArray;
   };
 
@@ -70,19 +72,31 @@ const ChessPuzzlePage = () => {
     console.log("completed puzzles", completedPuzzles);
 
     // Filter out completed puzzles
-    const newPuzzles = shuffleArray(puzzlesWithinRange).filter(
-      (puzzle) => !completedPuzzles.some((completedPuzzle) => completedPuzzle.puzzleID === puzzle.id)
-    );
-    console.log("new puzzles", newPuzzles);
+    const newPuzzles = shuffleArray(puzzlesWithinRange)
+      .map((puzzle) => ({
+        ...puzzle,
+        moves: puzzle.Moves.split(" "),
+      }))
+      .filter((puzzle) => !completedPuzzles.some((completedPuzzle) => completedPuzzle.puzzleID === puzzle.id));
+
+    setPuzzlesInEloRange(newPuzzles);
   };
 
   useEffect(() => {
-    if (userData) {
+    if (userData && !puzzlesInEloRange) {
       getPuzzlesWithinEloRange();
     }
-  }, [userData]);
+  }, [userData, puzzlesInEloRange]);
 
-  return <div>{/* <ChessBoard modeToSet={"puzzle"} /> */}</div>;
+  return (
+    <div>
+      <ChessBoard
+        modeToSet={"puzzle"}
+        puzzlesInEloRange={puzzlesInEloRange}
+        setPuzzlesInEloRange={setPuzzlesInEloRange}
+      />
+    </div>
+  );
 };
 
 export default ChessPuzzlePage;
