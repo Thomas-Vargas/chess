@@ -66,7 +66,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
-const NavbarWithSidebar = ({ component, darkModeController, }) => {
+const NavbarWithSidebar = ({ component, darkModeController }) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
@@ -80,7 +80,7 @@ const NavbarWithSidebar = ({ component, darkModeController, }) => {
   };
 
   const navigate = useNavigate();
-  
+
   const logout = async () => {
     const { error } = await supabaseClient.auth.signOut();
     if (error) throw error;
@@ -94,7 +94,7 @@ const NavbarWithSidebar = ({ component, darkModeController, }) => {
       <AppBar position="fixed" open={open}>
         <Toolbar style={{ backgroundColor: "#8A3324" }}>
           {user && (
-              <IconButton
+            <IconButton
               color="inherit"
               aria-label="open drawer"
               onClick={handleDrawerOpen}
@@ -129,6 +129,20 @@ const NavbarWithSidebar = ({ component, darkModeController, }) => {
         </DrawerHeader>
         <Divider />
         <List>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => navigate("/dashboard")}>
+              <ListItemText primary={"Home"} />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => navigate("/puzzle")}>
+              <ListItemText primary={"Puzzles"} />
+            </ListItemButton>
+          </ListItem>
+
+          <Divider />
+          
           <ListItem disablePadding>
             <ListItemButton onClick={() => logout()}>
               <ListItemText primary={"Logout"} />
