@@ -115,7 +115,7 @@ const ChessPuzzlePage = () => {
       .from("puzzle_elo_history")
       .insert([
         {
-          userID: user.id,
+          userID: userData.userID,
           elo: newElo,
         },
       ])
@@ -155,7 +155,7 @@ const ChessPuzzlePage = () => {
     console.log("session", session)
 
     try {
-      const { data, error } = await supabaseClient.from("user_data").update({ current_elo: 300 }).eq("id", 12).select();
+      const { data, error } = await supabaseClient.from("user_data").update({ current_elo: 800 }).eq("userID", userData.userID).select();
 
       if (error) {
         console.error("Error updating user_data:", error);
@@ -178,12 +178,12 @@ const ChessPuzzlePage = () => {
       <Button variant="contained" onClick={() => testUpdate()}>
         TEST
       </Button>
-      {/* <ChessBoard
+      <ChessBoard
         modeToSet={"puzzle"}
         puzzlesInEloRange={puzzlesInEloRange}
         setPuzzlesInEloRange={setPuzzlesInEloRange}
         updateAllUserPuzzleData={updateAllUserPuzzleData}
-      /> */}
+      />
     </div>
   );
 };
