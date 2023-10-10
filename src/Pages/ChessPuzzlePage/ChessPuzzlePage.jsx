@@ -103,6 +103,7 @@ const ChessPuzzlePage = () => {
     let eloChange = calculateEloChange(userData.current_elo, currentPuzzle.Rating, result);
     let newElo;
 
+    // save elo history
     const { data: eloHistoryData, error: eloHistoryError } = await supabaseClient
         .from("puzzle_elo_history")
         .insert([{
@@ -116,11 +117,23 @@ const ChessPuzzlePage = () => {
         console.log("success inserting into puzzle_elo_history", eloHistoryData);
     }
 
-    
+    // update current_elo in user_data and ++ puzzles_played
+    const { data: currentEloData, error: currentEloError } = await supabaseClient
+        .from('user_data')
+        .update({ current_elo: newElo })
+        .eq('userID', userData.userID)
+        .select()
+
+        if (currentEloError) {
+            console.log("error updating elo in user_data", currentEloError);
+        } else {
+            console.log("success updating elo in user_data", currentEloData);
+        }
   }
  
   const updateAllPuzzleData = async (result, puzzleID, timeToComplete, currentPuzzle) => {
-
+    await saveCompletedPuzzle(result, puzzleID, timeToComplete);
+    await updateUserElo(result, puzzleID, timeToComplete, currentPuzzle);
   }
 
   useEffect(() => {
