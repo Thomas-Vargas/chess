@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { supabaseClient } from "../../config/supabaseClient";
 import { useAuth } from "../../components/AuthProvider/AuthProvider";
 import useUserData from "../../utils/userData";
+import { Button } from "@mui/material";
 
 import ChessBoard from "../../components/ChessBoard/ChessBoard";
 
 const ChessPuzzlePage = () => {
   const [puzzlesInEloRange, setPuzzlesInEloRange] = useState(null);
   const { user } = useAuth();
+  const { session } = useAuth();
   const userData = useUserData(user?.id);
 
   console.log("user data in chess puzzle page", userData);
@@ -84,57 +86,86 @@ const ChessPuzzlePage = () => {
 
   const saveCompletedPuzzle = async (result, puzzleID, timeToComplete) => {
     const { data, error } = await supabaseClient
-        .from("completed_puzzles")
-        .insert([{
-            completedStatus: result,
-            userID: userData.userID,
-            puzzleID: puzzleID,
-        }])
-        .select();
+      .from("completed_puzzles")
+      .insert([
+        {
+          completedStatus: result,
+          userID: userData.userID,
+          puzzleID: puzzleID,
+        },
+      ])
+      .select();
 
-        if (error) {
-            console.log("error inserting into completed_puzzles", error);
-        } else {
-            console.log("success inserting into completed_puzzles", data);
-        }
-  }
+    if (error) {
+      console.log("error inserting into completed_puzzles", error);
+    } else {
+      console.log("success inserting into completed_puzzles", data);
+    }
+  };
 
   const updateUserElo = async (result, puzzleID, timeToComplete, currentPuzzle) => {
     let eloChange = calculateEloChange(userData.current_elo, currentPuzzle.Rating, result);
-    let newElo;
+    let newElo = userData.current_elo + eloChange;
+
+    console.log("elo change", eloChange);
+    console.log("users new elo", newElo);
 
     // save elo history
     const { data: eloHistoryData, error: eloHistoryError } = await supabaseClient
-        .from("puzzle_elo_history")
-        .insert([{
-            userID: user.id,
-            elo: newElo
-        }])
+      .from("puzzle_elo_history")
+      .insert([
+        {
+          userID: user.id,
+          elo: newElo,
+        },
+      ])
+      .select();
 
     if (eloHistoryError) {
-        console.log("error inserting into puzzle_elo_history", eloHistoryError);
+      console.log("error inserting into puzzle_elo_history", eloHistoryError);
     } else {
-        console.log("success inserting into puzzle_elo_history", eloHistoryData);
+      console.log("success inserting into puzzle_elo_history", eloHistoryData);
     }
 
+    console.log("userData.userID:", userData.userID);
     // update current_elo in user_data and ++ puzzles_played
+    // something is not working when updating the user_data
     const { data: currentEloData, error: currentEloError } = await supabaseClient
-        .from('user_data')
-        .update({ current_elo: newElo })
-        .eq('userID', userData.userID)
-        .select()
+      .from("user_data")
+      .update({
+        current_elo: newElo,
+        puzzles_played: userData.puzzles_played + 1,
+      })
+      .eq("userID", userData.userID)
+      .select();
 
-        if (currentEloError) {
-            console.log("error updating elo in user_data", currentEloError);
-        } else {
-            console.log("success updating elo in user_data", currentEloData);
-        }
-  }
- 
-  const updateAllPuzzleData = async (result, puzzleID, timeToComplete, currentPuzzle) => {
-    await saveCompletedPuzzle(result, puzzleID, timeToComplete);
-    await updateUserElo(result, puzzleID, timeToComplete, currentPuzzle);
-  }
+    if (currentEloError) {
+      console.log("error updating elo in user_data", currentEloError);
+    } else {
+      console.log("success updating elo in user_data", currentEloData);
+    }
+  };
+
+  const updateAllUserPuzzleData = async (result, currentPuzzle, timeToComplete) => {
+    await saveCompletedPuzzle(result, currentPuzzle.id, timeToComplete);
+    await updateUserElo(result, currentPuzzle.id, timeToComplete, currentPuzzle);
+  };
+
+  const testUpdate = async () => {
+    console.log("session", session)
+
+    try {
+      const { data, error } = await supabaseClient.from("user_data").update({ current_elo: 300 }).eq("id", 12).select();
+
+      if (error) {
+        console.error("Error updating user_data:", error);
+      } else {
+        console.log("Update successful. Data:", data);
+      }
+    } catch (e) {
+      console.error("An unexpected error occurred:", e);
+    }
+  };
 
   useEffect(() => {
     if (userData && !puzzlesInEloRange) {
@@ -144,11 +175,15 @@ const ChessPuzzlePage = () => {
 
   return (
     <div>
-      <ChessBoard
+      <Button variant="contained" onClick={() => testUpdate()}>
+        TEST
+      </Button>
+      {/* <ChessBoard
         modeToSet={"puzzle"}
         puzzlesInEloRange={puzzlesInEloRange}
         setPuzzlesInEloRange={setPuzzlesInEloRange}
-      />
+        updateAllUserPuzzleData={updateAllUserPuzzleData}
+      /> */}
     </div>
   );
 };

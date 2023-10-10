@@ -11,7 +11,7 @@ import _, { endsWith, random } from "lodash";
 
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 
-const ChessBoard = forwardRef(({ sampleMode, modeToSet, puzzlesInEloRange, setPuzzlesInEloRange }, ref) => {
+const ChessBoard = forwardRef(({ sampleMode, modeToSet, puzzlesInEloRange, setPuzzlesInEloRange, updateAllUserPuzzleData}, ref) => {
   const [boardState, setBoardState] = useState({
     board: {
       // base setup
@@ -282,6 +282,9 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet, puzzlesInEloRange, setPu
 
     if (JSON.stringify(correctPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
       setPuzzleFinished(true);
+      if (!sampleMode) {
+        updateAllUserPuzzleData(true, currentPuzzle, "")
+      }
       alert("puzzle complete! you go!");
       startNextPuzzle();
       return "finished";
@@ -297,6 +300,9 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet, puzzlesInEloRange, setPu
     } else {
       console.log("not equal");
       setPuzzleIncorrect(true);
+      if (!sampleMode) {
+        updateAllUserPuzzleData(false, currentPuzzle, "")
+      }
       alert("failed puzzle");
       startNextPuzzle();
       return false;
@@ -1775,9 +1781,9 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet, puzzlesInEloRange, setPu
           </Button>
         )}
 
-        <Button variant="contained" onClick={() => setMode("chess")}>
+        {/* <Button variant="contained" onClick={() => setMode("chess")}>
           Chess Mode
-        </Button>
+        </Button> */}
       </Stack>
       <Paper elevation={6}>{renderBoard()}</Paper>
       <PawnPromotionModal
