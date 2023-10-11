@@ -1,6 +1,6 @@
 import React from "react";
 import Piece from "../Piece/Piece";
-import { Divider, Grid, Typography, Button, Stack, Box, Paper } from "@mui/material";
+import { Divider, Grid, Typography, Button, Stack, Box, Paper, Fade } from "@mui/material";
 import { useState, useEffect, forwardRef } from "react";
 import { useAuth } from "../AuthProvider/AuthProvider";
 import { supabaseClient } from "../../config/supabaseClient";
@@ -13,17 +13,7 @@ import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 import ChessBoardHeader from "../ChessBoardHeader/ChessBoardHeader";
 
 const ChessBoard = forwardRef(
-  (
-    {
-      sampleMode,
-      modeToSet,
-      puzzlesInEloRange,
-      setPuzzlesInEloRange,
-      updateAllUserPuzzleData,
-      getPuzzlesWithinEloRange,
-    },
-    ref
-  ) => {
+  ({ sampleMode, modeToSet, puzzlesInEloRange, updateAllUserPuzzleData, getPuzzlesWithinEloRange, fade }, ref) => {
     const [boardState, setBoardState] = useState({
       board: {
         // base setup
@@ -844,7 +834,7 @@ const ChessBoard = forwardRef(
             if (possibleMoves?.captures) {
               for (let capture of possibleMoves.captures) {
                 let testBoardState = _.cloneDeep(updatedBoardState);
-  
+
                 delete testBoardState.board[position];
                 delete testBoardState.board[capture];
                 testBoardState.board[capture] = possibleMoves.piece;
@@ -1833,8 +1823,20 @@ const ChessBoard = forwardRef(
         </Button> */}
         </Stack>
 
-        {mode === "puzzle" && !sampleMode && currentPuzzle && <ChessBoardHeader currentPuzzle={currentPuzzle} />}
-        <Paper elevation={6}>{renderBoard()}</Paper>
+        {mode === "puzzle" && currentPuzzle && (
+          <div>
+            {mode === "puzzle" && !sampleMode && <ChessBoardHeader currentPuzzle={currentPuzzle} />}
+            {fade ? (
+              <Fade in={true} timeout={1000}>
+                <Paper elevation={6}>{renderBoard()}</Paper>
+              </Fade>
+            ) : (
+              <Paper elevation={6}>{renderBoard()}</Paper>
+            )}
+          </div>
+        )}
+
+        {mode === "chess" && <Paper elevation={6}>{renderBoard()}</Paper>}
 
         {puzzleCorrect && (
           <Stack direction="row" justifyContent="center">

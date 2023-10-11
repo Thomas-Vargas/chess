@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabaseClient } from "../../config/supabaseClient";
 import { useAuth } from "../../components/AuthProvider/AuthProvider";
 import useUserData from "../../utils/userData";
-import { Button, Typography, Stack } from "@mui/material";
+import { Button, Typography, Stack, Fade } from "@mui/material";
 
 import ChessBoard from "../../components/ChessBoard/ChessBoard";
 
@@ -177,13 +177,14 @@ const ChessPuzzlePage = () => {
   return (
     <div>
       <Stack direction="row" justifyContent="center" width="100%">
-        <ChessBoard
-          modeToSet={"puzzle"}
-          puzzlesInEloRange={puzzlesInEloRange}
-          setPuzzlesInEloRange={setPuzzlesInEloRange}
-          updateAllUserPuzzleData={updateAllUserPuzzleData}
-          getPuzzlesWithinEloRange={getPuzzlesWithinEloRange}
-        />
+          <ChessBoard
+            modeToSet={"puzzle"}
+            puzzlesInEloRange={puzzlesInEloRange}
+            setPuzzlesInEloRange={setPuzzlesInEloRange}
+            updateAllUserPuzzleData={updateAllUserPuzzleData}
+            getPuzzlesWithinEloRange={getPuzzlesWithinEloRange}
+            fade={true}
+          />
       </Stack>
     </div>
   );
