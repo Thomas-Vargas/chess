@@ -74,15 +74,17 @@ const ChessPuzzlePage = () => {
 
     console.log("completed puzzles", completedPuzzles);
 
-    // Filter out completed puzzles
+    // Filter out completed puzzles - limit to 10 at a time so that a new array of puzzles is returned as the players elo adjusts
     const newPuzzles = shuffleArray(puzzlesWithinRange)
       .map((puzzle) => ({
         ...puzzle,
         moves: puzzle.Moves.split(" "),
       }))
       .filter((puzzle) => !completedPuzzles.some((completedPuzzle) => completedPuzzle.puzzleID === puzzle.id))
-      .slice(0, 10);;
+      .slice(0, 10);
 
+    // previous puzzle causing incorrect checkmate - now fixed
+    // return [{FEN: '3r1r1k/p1p2p1P/4p1p1/4P3/2n4Q/P3BK2/q5P1/nR6 b - - 2 26', moves: ['c4e3', 'h4f6', 'h8h7', 'b1h1', 'h7g8', 'h1h8'], Rating: 1193}];
     return newPuzzles;
   };
 
@@ -163,27 +165,17 @@ const ChessPuzzlePage = () => {
         let newPuzzles = await getPuzzlesWithinEloRange();
         setPuzzlesInEloRange(newPuzzles);
       }
-  
+
       if (userDataResult && !userData) {
         setUserData(userDataResult);
       }
     };
-  
+
     fetchData();
   }, [userData, puzzlesInEloRange, userDataResult]);
 
   return (
     <div>
-      {/* <Button variant="contained" onClick={() => testUpdate()}>
-        TEST
-      </Button> */}
-
-      {userData && (
-        <Stack direction="row">
-          <Typography variant="h5">Current Rank: {userData.current_elo}</Typography>
-          {/* <Typography variant="h5">Puzzle Rank: {userData.current_elo}</Typography> */}
-        </Stack>
-      )}
       <Stack direction="row" justifyContent="center" width="100%">
         <ChessBoard
           modeToSet={"puzzle"}

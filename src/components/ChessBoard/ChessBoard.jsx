@@ -13,7 +13,17 @@ import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 import ChessBoardHeader from "../ChessBoardHeader/ChessBoardHeader";
 
 const ChessBoard = forwardRef(
-  ({ sampleMode, modeToSet, puzzlesInEloRange, setPuzzlesInEloRange, updateAllUserPuzzleData, getPuzzlesWithinEloRange }, ref) => {
+  (
+    {
+      sampleMode,
+      modeToSet,
+      puzzlesInEloRange,
+      setPuzzlesInEloRange,
+      updateAllUserPuzzleData,
+      getPuzzlesWithinEloRange,
+    },
+    ref
+  ) => {
     const [boardState, setBoardState] = useState({
       board: {
         // base setup
@@ -289,7 +299,6 @@ const ChessBoard = forwardRef(
         // alert("puzzle complete! you go!");
         setTimeout(() => {
           setPuzzleCorrect(false);
-
         }, 1000);
         startNextPuzzle();
         return "finished";
@@ -310,7 +319,6 @@ const ChessBoard = forwardRef(
           // alert("failed puzzle");
           setTimeout(() => {
             setPuzzleIncorrect(false);
-
           }, 1000);
           startNextPuzzle();
           return false;
@@ -831,7 +839,23 @@ const ChessBoard = forwardRef(
               break;
             }
           } else {
-            console.log("piece cant be captured, here is the position", position);
+            // check if a capture that does not capture the piece causing check would get player out of check
+            console.log("check piece cant be captured, checking if another capture gets king out of check");
+            if (possibleMoves?.captures) {
+              for (let capture of possibleMoves.captures) {
+                let testBoardState = _.cloneDeep(updatedBoardState);
+  
+                delete testBoardState.board[position];
+                delete testBoardState.board[capture];
+                testBoardState.board[capture] = possibleMoves.piece;
+
+                if (!amIStillInCheck(testBoardState, updatedBoardState.currentPlayer, true)) {
+                  console.log("a capture can get king out of check, capturing to square:", capture);
+                  isGameOver = false;
+                  break;
+                }
+              }
+            }
           }
 
           // check if move can block check
@@ -1809,9 +1833,7 @@ const ChessBoard = forwardRef(
         </Button> */}
         </Stack>
 
-        {mode === "puzzle" && !sampleMode && currentPuzzle && (
-          <ChessBoardHeader currentPuzzle={currentPuzzle} />
-        )}
+        {mode === "puzzle" && !sampleMode && currentPuzzle && <ChessBoardHeader currentPuzzle={currentPuzzle} />}
         <Paper elevation={6}>{renderBoard()}</Paper>
 
         {puzzleCorrect && (
