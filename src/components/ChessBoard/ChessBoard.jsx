@@ -1759,16 +1759,11 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet, puzzlesInEloRange, setPu
 
   return (
     <div style={{ width: "484px" }} ref={ref}>
-      {inCheckStatus && (
+      {/* {inCheckStatus && (
         <Typography variant="h5" textAlign="center">
           Check!
         </Typography>
-      )}
-      {checkmate && (
-        <Typography variant="h5" textAlign="center">
-          Checkmate! {getOpponent(boardState.currentPlayer)} wins!
-        </Typography>
-      )}
+      )} */}
       {draw && (
         <Typography variant="h5" textAlign="center">
           Draw!
@@ -1786,6 +1781,11 @@ const ChessBoard = forwardRef(({ sampleMode, modeToSet, puzzlesInEloRange, setPu
         </Button> */}
       </Stack>
       <Paper elevation={6}>{renderBoard()}</Paper>
+      {checkmate && (
+        <Typography variant="h5" textAlign="center">
+          Checkmate! {getOpponent(boardState.currentPlayer)} wins!
+        </Typography>
+      )}
       <PawnPromotionModal
         boardState={boardState}
         selectPromotionPiece={selectPromotionPiece}

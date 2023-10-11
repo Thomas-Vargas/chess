@@ -8,9 +8,10 @@ import ChessBoard from "../../components/ChessBoard/ChessBoard";
 
 const ChessPuzzlePage = () => {
   const [puzzlesInEloRange, setPuzzlesInEloRange] = useState(null);
+  const [userData, setUserData] = useState(null);
   const { user } = useAuth();
   const { session } = useAuth();
-  let userData = useUserData(user?.id);
+  let userDataResult = useUserData(user?.id);
 
   console.log("user data in chess puzzle page", userData);
   console.log("puzzles in elo range", puzzlesInEloRange);
@@ -37,10 +38,7 @@ const ChessPuzzlePage = () => {
     // Simple Fisher-Yates shuffle algorithm
     for (let i = shuffledArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffledArray[i], shuffledArray[j]] = [
-        shuffledArray[j],
-        shuffledArray[i],
-      ];
+      [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
     }
 
     return shuffledArray;
@@ -51,29 +49,21 @@ const ChessPuzzlePage = () => {
     const playerElo = userData.current_elo;
 
     // Step 2: Filter puzzles by Elo range
-    const { data: puzzlesWithinRange, error: puzzlesWithinRangeError } =
-      await supabaseClient
-        .from("chess_puzzles")
-        .select("*")
-        .gte("Rating", playerElo - eloRange)
-        .lte("Rating", playerElo + eloRange)
-        .limit(500);
+    const { data: puzzlesWithinRange, error: puzzlesWithinRangeError } = await supabaseClient
+      .from("chess_puzzles")
+      .select("*")
+      .gte("Rating", playerElo - eloRange)
+      .lte("Rating", playerElo + eloRange)
+      .limit(500);
 
     if (puzzlesWithinRangeError) {
-      console.log(
-        "error fetching puzzles within range",
-        puzzlesWithinRangeError
-      );
+      console.log("error fetching puzzles within range", puzzlesWithinRangeError);
     }
 
     console.log("puzzles within range", puzzlesWithinRange);
 
     // Step 3: Retrieve puzzles the player has already completed
-    const { data: completedPuzzles, error: completedPuzzlesError } =
-      await supabaseClient
-        .from("completed_puzzles")
-        .select("puzzleID")
-        .eq("userID", userData.userID);
+    const { data: completedPuzzles, error: completedPuzzlesError } = await supabaseClient.from("completed_puzzles").select("puzzleID").eq("userID", userData.userID);
 
     if (completedPuzzlesError) {
       console.log("error fetching completed puzzles", completedPuzzlesError);
@@ -87,12 +77,7 @@ const ChessPuzzlePage = () => {
         ...puzzle,
         moves: puzzle.Moves.split(" "),
       }))
-      .filter(
-        (puzzle) =>
-          !completedPuzzles.some(
-            (completedPuzzle) => completedPuzzle.puzzleID === puzzle.id
-          )
-      );
+      .filter((puzzle) => !completedPuzzles.some((completedPuzzle) => completedPuzzle.puzzleID === puzzle.id));
 
     setPuzzlesInEloRange(newPuzzles);
   };
@@ -116,33 +101,20 @@ const ChessPuzzlePage = () => {
     }
   };
 
-  const updateUserElo = async (
-    result,
-    puzzleID,
-    timeToComplete,
-    currentPuzzle
-  ) => {
-    let eloChange = calculateEloChange(
-      userData.current_elo,
-      currentPuzzle.Rating,
-      result
-    );
+  const updateUserElo = async (result, puzzleID, timeToComplete, currentPuzzle) => {
+    let eloChange = calculateEloChange(userData.current_elo, currentPuzzle.Rating, result);
     let newElo = userData.current_elo + eloChange;
 
-    console.log("elo change", eloChange);
-    console.log("users new elo", newElo);
-
     // save elo history
-    const { data: eloHistoryData, error: eloHistoryError } =
-      await supabaseClient
-        .from("puzzle_elo_history")
-        .insert([
-          {
-            userID: userData.userID,
-            elo: newElo,
-          },
-        ])
-        .select();
+    const { data: eloHistoryData, error: eloHistoryError } = await supabaseClient
+      .from("puzzle_elo_history")
+      .insert([
+        {
+          userID: userData.userID,
+          elo: newElo,
+        },
+      ])
+      .select();
 
     if (eloHistoryError) {
       console.log("error inserting into puzzle_elo_history", eloHistoryError);
@@ -150,59 +122,42 @@ const ChessPuzzlePage = () => {
       console.log("success inserting into puzzle_elo_history", eloHistoryData);
     }
 
-    console.log("userData.userID:", userData.userID);
-    const { data: currentEloData, error: currentEloError } =
-      await supabaseClient
-        .from("user_data")
-        .update({
-          current_elo: newElo,
-          highest_elo:
-            newElo > userData.highest_elo ? newElo : userData.highest_elo,
-          lowest_elo:
-            newElo < userData.lowest_elo ? newElo : userData.lowest_elo,
-          puzzles_played: userData.puzzles_played + 1,
-        })
-        .eq("userID", userData.userID)
-        .select();
+    // update user elo data
+    const { data: currentEloData, error: currentEloError } = await supabaseClient
+      .from("user_data")
+      .update({
+        current_elo: newElo,
+        highest_elo: newElo > userData.highest_elo ? newElo : userData.highest_elo,
+        lowest_elo: newElo < userData.lowest_elo ? newElo : userData.lowest_elo,
+        puzzles_played: userData.puzzles_played + 1,
+      })
+      .eq("userID", userData.userID)
+      .select();
 
     if (currentEloError) {
       console.log("error updating elo in user_data", currentEloError);
     } else {
       console.log("success updating elo in user_data", currentEloData);
-      userData = {
+      setUserData({
         ...userData,
         current_elo: newElo,
-        highest_elo:
-          newElo > userData.highest_elo ? newElo : userData.highest_elo,
+        highest_elo: newElo > userData.highest_elo ? newElo : userData.highest_elo,
         lowest_elo: newElo < userData.lowest_elo ? newElo : userData.lowest_elo,
         puzzles_played: userData.puzzles_played + 1,
-      };
+      });
     }
   };
 
-  const updateAllUserPuzzleData = async (
-    result,
-    currentPuzzle,
-    timeToComplete
-  ) => {
+  const updateAllUserPuzzleData = async (result, currentPuzzle, timeToComplete) => {
     await saveCompletedPuzzle(result, currentPuzzle.id, timeToComplete);
-    await updateUserElo(
-      result,
-      currentPuzzle.id,
-      timeToComplete,
-      currentPuzzle
-    );
+    await updateUserElo(result, currentPuzzle.id, timeToComplete, currentPuzzle);
   };
 
   const testUpdate = async () => {
     console.log("session", session);
 
     try {
-      const { data, error } = await supabaseClient
-        .from("user_data")
-        .update({ current_elo: 800 })
-        .eq("userID", userData.userID)
-        .select();
+      const { data, error } = await supabaseClient.from("user_data").update({ current_elo: 800 }).eq("userID", userData.userID).select();
 
       if (error) {
         console.error("Error updating user_data:", error);
@@ -218,28 +173,25 @@ const ChessPuzzlePage = () => {
     if (userData && !puzzlesInEloRange) {
       getPuzzlesWithinEloRange();
     }
-  }, [userData.current_elo, puzzlesInEloRange]);
+
+    if (userDataResult && !userData) {
+      setUserData(userDataResult);
+    }
+  }, [userData, puzzlesInEloRange, userDataResult]);
 
   return (
     <div>
-      <Button variant="contained" onClick={() => testUpdate()}>
+      {/* <Button variant="contained" onClick={() => testUpdate()}>
         TEST
-      </Button>
+      </Button> */}
 
       {userData && (
         <Stack direction="row">
-          <Typography variant="h5">
-            Current Rank: {userData.current_elo}
-          </Typography>
+          <Typography variant="h5">Current Rank: {userData.current_elo}</Typography>
           {/* <Typography variant="h5">Puzzle Rank: {userData.current_elo}</Typography> */}
         </Stack>
       )}
-      <ChessBoard
-        modeToSet={"puzzle"}
-        puzzlesInEloRange={puzzlesInEloRange}
-        setPuzzlesInEloRange={setPuzzlesInEloRange}
-        updateAllUserPuzzleData={updateAllUserPuzzleData}
-      />
+      <ChessBoard modeToSet={"puzzle"} puzzlesInEloRange={puzzlesInEloRange} setPuzzlesInEloRange={setPuzzlesInEloRange} updateAllUserPuzzleData={updateAllUserPuzzleData} />
     </div>
   );
 };
