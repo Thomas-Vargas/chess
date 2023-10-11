@@ -63,7 +63,10 @@ const ChessPuzzlePage = () => {
     console.log("puzzles within range", puzzlesWithinRange);
 
     // Step 3: Retrieve puzzles the player has already completed
-    const { data: completedPuzzles, error: completedPuzzlesError } = await supabaseClient.from("completed_puzzles").select("puzzleID").eq("userID", userData.userID);
+    const { data: completedPuzzles, error: completedPuzzlesError } = await supabaseClient
+      .from("completed_puzzles")
+      .select("puzzleID")
+      .eq("userID", userData.userID);
 
     if (completedPuzzlesError) {
       console.log("error fetching completed puzzles", completedPuzzlesError);
@@ -157,7 +160,11 @@ const ChessPuzzlePage = () => {
     console.log("session", session);
 
     try {
-      const { data, error } = await supabaseClient.from("user_data").update({ current_elo: 800 }).eq("userID", userData.userID).select();
+      const { data, error } = await supabaseClient
+        .from("user_data")
+        .update({ current_elo: 800 })
+        .eq("userID", userData.userID)
+        .select();
 
       if (error) {
         console.error("Error updating user_data:", error);
@@ -191,7 +198,14 @@ const ChessPuzzlePage = () => {
           {/* <Typography variant="h5">Puzzle Rank: {userData.current_elo}</Typography> */}
         </Stack>
       )}
-      <ChessBoard modeToSet={"puzzle"} puzzlesInEloRange={puzzlesInEloRange} setPuzzlesInEloRange={setPuzzlesInEloRange} updateAllUserPuzzleData={updateAllUserPuzzleData} />
+      <Stack direction="row" justifyContent="center" width="100%">
+        <ChessBoard
+          modeToSet={"puzzle"}
+          puzzlesInEloRange={puzzlesInEloRange}
+          setPuzzlesInEloRange={setPuzzlesInEloRange}
+          updateAllUserPuzzleData={updateAllUserPuzzleData}
+        />
+      </Stack>
     </div>
   );
 };

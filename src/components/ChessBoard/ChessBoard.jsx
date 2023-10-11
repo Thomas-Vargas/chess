@@ -10,6 +10,7 @@ import axios from "axios";
 import _, { endsWith, random } from "lodash";
 
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
+import ChessBoardHeader from "../ChessBoardHeader/ChessBoardHeader";
 
 const ChessBoard = forwardRef(
   ({ sampleMode, modeToSet, puzzlesInEloRange, setPuzzlesInEloRange, updateAllUserPuzzleData }, ref) => {
@@ -1804,6 +1805,10 @@ const ChessBoard = forwardRef(
           Chess Mode
         </Button> */}
         </Stack>
+
+        {mode === "puzzle" && !sampleMode && currentPuzzle && (
+          <ChessBoardHeader currentPuzzle={currentPuzzle} />
+        )}
         <Paper elevation={6}>{renderBoard()}</Paper>
 
         {puzzleCorrect && (
