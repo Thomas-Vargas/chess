@@ -30,8 +30,6 @@ const Piece = ({
   currentPuzzle,
   mode,
   sanToBoardStateMove,
-  puzzleFinished,
-  puzzleIncorrect,
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -320,8 +318,10 @@ const Piece = ({
           }
 
           if (puzzleResult === false || puzzleResult === "finished") {
-            updatedBoardState.fen = false;
-            updatedBoardState.puzzleMoves = [];
+            setTimeout(() => {
+              updatedBoardState.fen = false;
+              updatedBoardState.puzzleMoves = [];
+            }, 1000);
           }
 
           console.log("game over chump");
@@ -344,8 +344,10 @@ const Piece = ({
           }
 
           if (puzzleResult === false || puzzleResult === "finished") {
-            updatedBoardState.fen = false;
-            updatedBoardState.puzzleMoves = [];
+            setTimeout(() => {
+              updatedBoardState.fen = false;
+              updatedBoardState.puzzleMoves = [];
+            }, 1000);
           }
 
           setInCheckStatus(true);
@@ -375,8 +377,10 @@ const Piece = ({
         }
 
         if (puzzleResult === false || puzzleResult === "finished") {
-          updatedBoardState.fen = false;
-          updatedBoardState.puzzleMoves = [];
+          setTimeout(() => {
+            updatedBoardState.fen = false;
+            updatedBoardState.puzzleMoves = [];
+          }, 1000);
         }
 
         setInCheckStatus(false);
