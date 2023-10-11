@@ -35,7 +35,7 @@ const LandingPage = () => {
         </Fade>
         <Stack direction="row" gap={8} justifyContent="center" padding="20px">
           <Slide direction="right" in={slideIn} mountOnEnter unmountOnExit timeout={{ enter: 1000, exit: 1000 }}>
-            <ChessBoard sampleMode={true} />
+            <ChessBoard sampleMode={true} modeToSet={"chess"} />
           </Slide>
 
           <Stack gap={3} width="30%">

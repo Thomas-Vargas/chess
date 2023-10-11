@@ -113,19 +113,19 @@ const ChessBoard = forwardRef(
     const [draw, setDraw] = useState(false);
     const [puzzleIncorrect, setPuzzleIncorrect] = useState(false);
     const [puzzleCorrect, setPuzzleCorrect] = useState(false);
-    const [mode, setMode] = useState("chess");
+    const [mode, setMode] = useState("");
     const [randomPuzzles, setRandomPuzzles] = useState(null);
 
     const { user } = useAuth();
     const userData = useUserData(user?.id);
 
     console.log("board state", boardState);
-    console.log("inCheckStatus", inCheckStatus);
+    // console.log("inCheckStatus", inCheckStatus);
     console.log("checkmate status", checkmate);
     console.log("current puzzle:", currentPuzzle);
-    console.log("random puzzles in state", randomPuzzles);
-    console.log("current mode", mode);
-    console.log("puzzles in elo range in chessboard", puzzlesInEloRange);
+    // console.log("random puzzles in state", randomPuzzles);
+    // console.log("current mode", mode);
+    // console.log("puzzles in elo range in chessboard", puzzlesInEloRange);
 
     useEffect(() => {
       if (modeToSet) {
@@ -406,6 +406,8 @@ const ChessBoard = forwardRef(
 
       const [position, turn, castling, enPassant, halfMove, fullMove] = fen.split(" ");
 
+      console.log("castling rights", castling);
+
       // Update the current player based on the turn information
       fenBoardState.currentPlayer = turn === "w" ? "white" : "black";
 
@@ -422,7 +424,29 @@ const ChessBoard = forwardRef(
             if (piece !== "p") {
               const pieceName = getPieceName(piece);
               const square = getSquare(file, rank);
-              fenBoardState.board[square] = { piece: pieceName, player };
+              let pieceObj = { piece: pieceName, player }
+
+              // check if king should have first move property
+              if ((castling.includes("K") || castling.includes("Q")) && pieceName === 'king' && player === "white") {
+                pieceObj.firstMove = true;
+              }
+              if ((castling.includes("k") || castling.includes("q")) && pieceName === 'king' && player === "black") {
+                pieceObj.firstMove = true;
+              }
+              // check if rook should have first move property
+              if (castling.includes("K") && square === 81 && pieceName === "rook") {
+                pieceObj.firstMove = true;
+              }
+              if (castling.includes("Q") && square === 11 && pieceName === "rook") {
+                pieceObj.firstMove = true;
+              }
+              if (castling.includes("k") && square === 18 && pieceName === "rook") {
+                pieceObj.firstMove = true;
+              }
+              if (castling.includes("q") && square === 88 && pieceName === "rook") {
+                pieceObj.firstMove = true;
+              }
+              fenBoardState.board[square] = pieceObj;
             } else {
               // Handle pawn separately
               const square = getSquare(file, rank);
@@ -1044,7 +1068,9 @@ const ChessBoard = forwardRef(
           };
           break;
         case "king":
-          let kingMoves = getKingMoves(square, pieceObj, pieceObj.player, boardState, isCheckingForCheck);
+          // sending empty array for opponent moves because getPieceMoves result only useful for checking for valid moves
+          // king can never castle to escape check anyway
+          let kingMoves = getKingMoves(square, pieceObj, pieceObj.player, boardState, isCheckingForCheck, []);
 
           possibleMoves = {
             ...kingMoves,
@@ -1388,7 +1414,7 @@ const ChessBoard = forwardRef(
       return { moves, captures, selfCaptures };
     };
 
-    const getKingMoves = (square, piece, color, boardState, isCheckingForCheck = false) => {
+    const getKingMoves = (square, piece, color, boardState, isCheckingForCheck = false, opponentMoves) => {
       const col = square[0];
       const row = square[1];
       const moves = [];
@@ -1433,6 +1459,8 @@ const ChessBoard = forwardRef(
         }
       }
 
+      console.log("all opponent moves in get king moves", opponentMoves)
+
       // castle logic
       if (color === "white" && !inCheckStatus) {
         // check for possible castle right and left
@@ -1440,7 +1468,8 @@ const ChessBoard = forwardRef(
           !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
           !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
           piece.firstMove === true &&
-          boardState.board["81"].firstMove === true
+          boardState.board["81"].firstMove === true &&
+          (!opponentMoves.includes("61") && !opponentMoves.includes("71"))
         ) {
           castle.push(`${Number(col) + 2}` + row);
         }
@@ -1449,7 +1478,8 @@ const ChessBoard = forwardRef(
           !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
           !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
           piece.firstMove === true &&
-          boardState.board["11"].firstMove === true
+          boardState.board["11"].firstMove === true && 
+          (!opponentMoves.includes("21") && !opponentMoves.includes("31") && !opponentMoves.includes("41"))
         ) {
           castle.push(`${Number(col) - 2}` + row);
         }
@@ -1458,7 +1488,8 @@ const ChessBoard = forwardRef(
           !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
           !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
           piece.firstMove === true &&
-          boardState.board["88"].firstMove === true
+          boardState.board["88"].firstMove === true && 
+          (!opponentMoves.includes("68") && !opponentMoves.includes("78"))
         ) {
           castle.push(`${Number(col) + 2}` + row);
         }
@@ -1467,7 +1498,8 @@ const ChessBoard = forwardRef(
           !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
           !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
           piece.firstMove === true &&
-          boardState.board["18"].firstMove === true
+          boardState.board["18"].firstMove === true && 
+          (!opponentMoves.includes("28") && !opponentMoves.includes("38") && !opponentMoves.includes("48"))
         ) {
           castle.push(`${Number(col) - 2}` + row);
         }
@@ -1714,7 +1746,6 @@ const ChessBoard = forwardRef(
       const isValidCastle = boardState.validMoves.possibleCastles.includes(square);
       const isValidEnPassant = boardState.validMoves.enPassantCapture?.squareToMoveTo === square;
       let currentPlayer = boardState.currentPlayer;
-
       // Check if the square is empty
       if (!piece) {
         return (
@@ -1773,6 +1804,7 @@ const ChessBoard = forwardRef(
           currentPuzzle={currentPuzzle}
           mode={mode}
           sanToBoardStateMove={sanToBoardStateMove}
+          getAllPossibleMovesForPlayer={getAllPossibleMovesForPlayer}
         />
       );
     };

@@ -30,6 +30,7 @@ const Piece = ({
   currentPuzzle,
   mode,
   sanToBoardStateMove,
+  getAllPossibleMovesForPlayer
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -215,7 +216,10 @@ const Piece = ({
         }
       }
       if (piece.piece === "king") {
-        const possibleMoves = getKingMoves(square, piece, color, boardState, true);
+        let oponnent = color === "white" ? "black" : "white"
+        // using opponent moves here to send to get accurate castles
+        let opponentMoves = getAllPossibleMovesForPlayer(oponnent, boardState);
+        const possibleMoves = getKingMoves(square, piece, color, boardState, true, opponentMoves);
         console.log("Possible King moves:", possibleMoves);
         if (square !== boardState.validMoves.pieceSquare) {
           setBoardState({
