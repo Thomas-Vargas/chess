@@ -13,7 +13,7 @@ import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 import ChessBoardHeader from "../ChessBoardHeader/ChessBoardHeader";
 
 const ChessBoard = forwardRef(
-  ({ sampleMode, modeToSet, puzzlesInEloRange, setPuzzlesInEloRange, updateAllUserPuzzleData }, ref) => {
+  ({ sampleMode, modeToSet, puzzlesInEloRange, setPuzzlesInEloRange, updateAllUserPuzzleData, getPuzzlesWithinEloRange }, ref) => {
     const [boardState, setBoardState] = useState({
       board: {
         // base setup
@@ -258,7 +258,7 @@ const ChessBoard = forwardRef(
     };
 
     // implement next puzzle logic for both sample mode and regular user mode
-    const startNextPuzzle = () => {
+    const startNextPuzzle = async () => {
       let puzzles = [...randomPuzzles];
       puzzles.shift();
 
@@ -274,6 +274,9 @@ const ChessBoard = forwardRef(
       } else {
         // Handle the case when there are no more puzzles
         console.log("No more puzzles");
+        let newPuzzles = await getPuzzlesWithinEloRange();
+        setRandomPuzzles(newPuzzles);
+        setCurrentPuzzle(newPuzzles[0]);
       }
     };
 

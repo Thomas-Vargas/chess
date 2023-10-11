@@ -80,9 +80,10 @@ const ChessPuzzlePage = () => {
         ...puzzle,
         moves: puzzle.Moves.split(" "),
       }))
-      .filter((puzzle) => !completedPuzzles.some((completedPuzzle) => completedPuzzle.puzzleID === puzzle.id));
+      .filter((puzzle) => !completedPuzzles.some((completedPuzzle) => completedPuzzle.puzzleID === puzzle.id))
+      .slice(0, 10);;
 
-    setPuzzlesInEloRange(newPuzzles);
+    return newPuzzles;
   };
 
   const saveCompletedPuzzle = async (result, puzzleID, timeToComplete) => {
@@ -156,34 +157,19 @@ const ChessPuzzlePage = () => {
     await updateUserElo(result, currentPuzzle.id, timeToComplete, currentPuzzle);
   };
 
-  const testUpdate = async () => {
-    console.log("session", session);
-
-    try {
-      const { data, error } = await supabaseClient
-        .from("user_data")
-        .update({ current_elo: 800 })
-        .eq("userID", userData.userID)
-        .select();
-
-      if (error) {
-        console.error("Error updating user_data:", error);
-      } else {
-        console.log("Update successful. Data:", data);
-      }
-    } catch (e) {
-      console.error("An unexpected error occurred:", e);
-    }
-  };
-
   useEffect(() => {
-    if (userData && !puzzlesInEloRange) {
-      getPuzzlesWithinEloRange();
-    }
-
-    if (userDataResult && !userData) {
-      setUserData(userDataResult);
-    }
+    const fetchData = async () => {
+      if (userData && !puzzlesInEloRange) {
+        let newPuzzles = await getPuzzlesWithinEloRange();
+        setPuzzlesInEloRange(newPuzzles);
+      }
+  
+      if (userDataResult && !userData) {
+        setUserData(userDataResult);
+      }
+    };
+  
+    fetchData();
   }, [userData, puzzlesInEloRange, userDataResult]);
 
   return (
@@ -204,6 +190,7 @@ const ChessPuzzlePage = () => {
           puzzlesInEloRange={puzzlesInEloRange}
           setPuzzlesInEloRange={setPuzzlesInEloRange}
           updateAllUserPuzzleData={updateAllUserPuzzleData}
+          getPuzzlesWithinEloRange={getPuzzlesWithinEloRange}
         />
       </Stack>
     </div>
