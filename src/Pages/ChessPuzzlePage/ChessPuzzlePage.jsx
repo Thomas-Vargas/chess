@@ -83,11 +83,14 @@ const ChessPuzzlePage = () => {
       .filter((puzzle) => !completedPuzzles.some((completedPuzzle) => completedPuzzle.puzzleID === puzzle.id))
       .slice(0, 10);
 
+    // TEST PUZZLES
     // previous puzzle causing incorrect checkmate - now fixed
     // return [{FEN: '3r1r1k/p1p2p1P/4p1p1/4P3/2n4Q/P3BK2/q5P1/nR6 b - - 2 26', moves: ['c4e3', 'h4f6', 'h8h7', 'b1h1', 'h7g8', 'h1h8'], Rating: 1193}];
+
     // puzzle that allows a castle, but it is not a valid move
-    return [{FEN: 'r1bq3r/ppppnkpp/2n5/b5N1/4P3/B1P5/P4PPP/RN1QK2R b KQ - 1 9', moves: ['f7f8', 'd1f3', 'f8e8', 'f3f7'], Rating: 1193}];
-    // return newPuzzles;
+    // return [{FEN: 'r1bq3r/ppppnkpp/2n5/b5N1/4P3/B1P5/P4PPP/RN1QK2R b KQ - 1 9', moves: ['f7f8', 'd1f3', 'f8e8', 'f3f7'], Rating: 1193}];
+
+    return newPuzzles;
   };
 
   const saveCompletedPuzzle = async (result, puzzleID, timeToComplete) => {
