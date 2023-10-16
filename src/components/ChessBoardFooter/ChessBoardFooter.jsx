@@ -1,4 +1,5 @@
 import { Stack, Paper, Typography, Button, Chip, Fade } from "@mui/material";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 const ChessBoardFooter = ({ currentPuzzle }) => {
   let delay = 1000;
@@ -30,6 +31,8 @@ const ChessBoardFooter = ({ currentPuzzle }) => {
               variant="outlined"
               target="_blank"
               clickable
+              icon={<OpenInNewIcon fontSize="small" />} // Include the icon as an avatar
+              sx={{ flexDirection: "row-reverse", paddingRight: 2 }}
             />
           </Stack>
         </Fade>
