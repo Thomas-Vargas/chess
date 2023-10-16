@@ -8,6 +8,7 @@ import ChessBoard from "../../components/ChessBoard/ChessBoard";
 
 const ChessPuzzlePage = () => {
   const [puzzlesInEloRange, setPuzzlesInEloRange] = useState(null);
+  const [currentPuzzle, setCurrentPuzzle] = useState(null);
   const [userData, setUserData] = useState(null);
   const { user } = useAuth();
   const { session } = useAuth();
@@ -188,6 +189,8 @@ const ChessPuzzlePage = () => {
             setPuzzlesInEloRange={setPuzzlesInEloRange}
             updateAllUserPuzzleData={updateAllUserPuzzleData}
             getPuzzlesWithinEloRange={getPuzzlesWithinEloRange}
+            currentPuzzle={currentPuzzle}
+            setCurrentPuzzle={setCurrentPuzzle}
             fade={true}
           />
       </Stack>

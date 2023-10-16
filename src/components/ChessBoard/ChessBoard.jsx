@@ -13,7 +13,7 @@ import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 import ChessBoardHeader from "../ChessBoardHeader/ChessBoardHeader";
 
 const ChessBoard = forwardRef(
-  ({ sampleMode, modeToSet, puzzlesInEloRange, updateAllUserPuzzleData, getPuzzlesWithinEloRange, fade }, ref) => {
+  ({ sampleMode, modeToSet, puzzlesInEloRange, updateAllUserPuzzleData, getPuzzlesWithinEloRange, fade, currentPuzzle, setCurrentPuzzle }, ref) => {
     const [boardState, setBoardState] = useState({
       board: {
         // base setup
@@ -103,7 +103,6 @@ const ChessBoard = forwardRef(
       fen: false,
       puzzleMoves: [],
     });
-    const [currentPuzzle, setCurrentPuzzle] = useState(null);
     const [open, setOpen] = useState(false);
     const [promotionBoardState, setPromotionBoardState] = useState({});
     const [promotionSquare, setPromotionSquare] = useState(null);
