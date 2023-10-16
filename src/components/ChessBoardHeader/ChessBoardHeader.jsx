@@ -36,30 +36,32 @@ const ChessBoardHeader = ({ currentPuzzle }) => {
   }, [currentPuzzle]);
 
   return (
-    <Stack mb={2}>
-      <Paper elevation={6} sx={{ width: "100%", padding: 3 }}>
-        {userData ? (
-          <Stack direction="row" justifyContent="space-between">
-            <Fade in={true} timeout={1000}>
-              <Typography variant="h6">Current Rank: {userData.current_elo}</Typography>
-            </Fade>
-            <Fade in={true} timeout={1000} style={{ transitionDelay: "500ms" }}>
-              <Typography variant="h6">Current Puzzle: {currentPuzzle.Rating}</Typography>
-            </Fade>
-          </Stack>
-        ) : (
-          <Stack direction="row" justifyContent="space-between">
-            <Typography variant="h6" sx={{ visibility: "hidden" }}>
-              Current Rank
-            </Typography>
-            <Typography variant="h6" sx={{ visibility: "hidden" }}>
-              Current Puzzle:
-            </Typography>
-          </Stack>
-        )}
-      </Paper>
-    </Stack>
-  );
+    currentPuzzle && (
+      <Stack direction="row" justifyContent="center">
+        <Paper elevation={6} sx={{ width: "58%", padding: 3 }}>
+          {userData && currentPuzzle ? (
+            <Stack direction="row" justifyContent="space-between">
+              <Fade in={true} timeout={1000}>
+                <Typography variant="h6">Current Rank: {userData.current_elo}</Typography>
+              </Fade>
+              <Fade in={true} timeout={1000} style={{ transitionDelay: "500ms" }}>
+                <Typography variant="h6">Current Puzzle: {currentPuzzle.Rating}</Typography>
+              </Fade>
+            </Stack>
+          ) : (
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="h6" sx={{ visibility: "hidden" }}>
+                Current Rank
+              </Typography>
+              <Typography variant="h6" sx={{ visibility: "hidden" }}>
+                Current Puzzle:
+              </Typography>
+            </Stack>
+          )}
+        </Paper>
+      </Stack>
+    )
+  );  
 };
 
 export default ChessBoardHeader;

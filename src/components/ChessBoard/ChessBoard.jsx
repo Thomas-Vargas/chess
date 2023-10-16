@@ -1856,7 +1856,6 @@ const ChessBoard = forwardRef(
 
         {mode === "puzzle" && currentPuzzle && (
           <div>
-            {mode === "puzzle" && !sampleMode && <ChessBoardHeader currentPuzzle={currentPuzzle} />}
             {fade ? (
               <Fade in={true} timeout={1000}>
                 <Paper elevation={6}>{renderBoard()}</Paper>

@@ -5,6 +5,7 @@ import useUserData from "../../utils/userData";
 import { Button, Typography, Stack, Fade } from "@mui/material";
 
 import ChessBoard from "../../components/ChessBoard/ChessBoard";
+import ChessBoardHeader from "../../components/ChessBoardHeader/ChessBoardHeader";
 import ChessBoardFooter from "../../components/ChessBoardFooter/ChessBoardFooter";
 
 const ChessPuzzlePage = () => {
@@ -183,6 +184,7 @@ const ChessPuzzlePage = () => {
 
   return (
     <div>
+      <ChessBoardHeader currentPuzzle={currentPuzzle} />
       <Stack alignItems="center" width="100%">
         <ChessBoard
           modeToSet={"puzzle"}
