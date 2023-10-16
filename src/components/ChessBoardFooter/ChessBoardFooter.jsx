@@ -12,14 +12,14 @@ const ChessBoardFooter = ({ currentPuzzle }) => {
 
   return (
     <div>
-      <Stack direction="row" gap={2} mt={1}>
+      {/* <Stack direction="row" gap={2} mt={1}>
         {currentPuzzle &&
           currentPuzzle.Themes.split(" ").map((theme) => (
             <Fade in={true} timeout={delay}>
               <Chip label={convertCamelToSeparated(theme)} />
             </Fade>
           ))}
-      </Stack>
+      </Stack> */}
 
       {currentPuzzle && (
         <Fade in={true} timeout={delay}>
