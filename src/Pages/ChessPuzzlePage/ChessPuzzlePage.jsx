@@ -5,6 +5,7 @@ import useUserData from "../../utils/userData";
 import { Button, Typography, Stack, Fade } from "@mui/material";
 
 import ChessBoard from "../../components/ChessBoard/ChessBoard";
+import ChessBoardFooter from "../../components/ChessBoardFooter/ChessBoardFooter";
 
 const ChessPuzzlePage = () => {
   const [puzzlesInEloRange, setPuzzlesInEloRange] = useState(null);
@@ -182,17 +183,18 @@ const ChessPuzzlePage = () => {
 
   return (
     <div>
-      <Stack direction="row" justifyContent="center" width="100%">
-          <ChessBoard
-            modeToSet={"puzzle"}
-            puzzlesInEloRange={puzzlesInEloRange}
-            setPuzzlesInEloRange={setPuzzlesInEloRange}
-            updateAllUserPuzzleData={updateAllUserPuzzleData}
-            getPuzzlesWithinEloRange={getPuzzlesWithinEloRange}
-            currentPuzzle={currentPuzzle}
-            setCurrentPuzzle={setCurrentPuzzle}
-            fade={true}
-          />
+      <Stack alignItems="center" width="100%">
+        <ChessBoard
+          modeToSet={"puzzle"}
+          puzzlesInEloRange={puzzlesInEloRange}
+          setPuzzlesInEloRange={setPuzzlesInEloRange}
+          updateAllUserPuzzleData={updateAllUserPuzzleData}
+          getPuzzlesWithinEloRange={getPuzzlesWithinEloRange}
+          currentPuzzle={currentPuzzle}
+          setCurrentPuzzle={setCurrentPuzzle}
+          fade={true}
+        />
+        <ChessBoardFooter currentPuzzle={currentPuzzle} />
       </Stack>
     </div>
   );
