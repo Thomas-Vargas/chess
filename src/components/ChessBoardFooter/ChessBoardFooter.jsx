@@ -23,7 +23,7 @@ const ChessBoardFooter = ({ currentPuzzle }) => {
 
       {currentPuzzle && (
         <Fade in={true} timeout={delay}>
-          <Stack alignItems="center" mt={1}>
+          <Stack alignItems="flex-end" mt={1} width="480px">
             <Chip
               label="Game Review"
               component="a"
