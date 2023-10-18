@@ -219,7 +219,7 @@ const Piece = ({
         let oponnent = color === "white" ? "black" : "white"
         // using opponent moves here to send to get accurate castles
         let opponentMoves = getAllPossibleMovesForPlayer(oponnent, boardState);
-        const possibleMoves = getKingMoves(square, piece, color, boardState, true, opponentMoves);
+        const possibleMoves = getKingMoves(square, piece, color, boardState, true, opponentMoves, inCheckStatus);
         console.log("Possible King moves:", possibleMoves);
         if (square !== boardState.validMoves.pieceSquare) {
           setBoardState({
@@ -278,31 +278,6 @@ const Piece = ({
       updatedBoardState.board[square].firstMove = false;
     }
 
-    // kept in case i need to revert to old logic
-
-    // check for pawn promotion
-    // if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
-    //   console.log("promoting pawn")
-    //   const clonedBoardState = _.cloneDeep(updatedBoardState);
-    //   promotePawn(clonedBoardState, square);
-    // } else {
-    //   console.log("not promoting pawn")
-    //   const clonedBoardState = _.cloneDeep(updatedBoardState);
-    //   // check if game is over
-    //   if (isGameOver(square, updatedBoardState.board[square], clonedBoardState)) {
-    //     console.log("game over chump");
-    //     setBoardState(updatedBoardState);
-    //     setCheckmate(true);
-    //   } else if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
-    //     console.log("major major we have a check");
-    //     // save check status to generate valid moves for escaping check
-    //     setInCheckStatus(true);
-    //     setBoardState(updatedBoardState);
-    //   } else {
-    //     setInCheckStatus(false);
-    //     setBoardState(updatedBoardState);
-    //   }
-    // }
     let isGameADrawResult = isGameADraw(updatedBoardState);
 
     // check for pawn promotion
