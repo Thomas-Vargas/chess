@@ -30,7 +30,8 @@ const Piece = ({
   currentPuzzle,
   mode,
   sanToBoardStateMove,
-  getAllPossibleMovesForPlayer
+  getAllPossibleMovesForPlayer,
+  makeMove
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -311,7 +312,7 @@ const Piece = ({
             setTimeout(() => {
               let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
               let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
-              sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle);
+              sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
             }, 1000);
           }
         } else {
@@ -337,7 +338,7 @@ const Piece = ({
             setTimeout(() => {
               let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
               let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
-              sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle);
+              sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
             }, 1000);
           }
         }
@@ -369,7 +370,7 @@ const Piece = ({
           setTimeout(() => {
             let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
             let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
-            sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle);
+            sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
           }, 1000);
         }
       }
