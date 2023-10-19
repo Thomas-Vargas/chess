@@ -10,28 +10,16 @@ const Piece = ({
   boardState,
   setBoardState,
   isValidCapture,
-  promotePawn,
   getBishopMoves,
   getKingMoves,
   getKnightMoves,
   getPawnMoves,
   getRookMoves,
   getQueenMoves,
-  isThisMoveACheck,
-  isGameOver,
-  setInCheckStatus,
   inCheckStatus,
-  setCheckmate,
   checkmate,
-  isGameADraw,
-  setDraw,
-  internalMoveToSan,
-  isPuzzleMoveCorrect,
-  currentPuzzle,
-  mode,
-  sanToBoardStateMove,
   getAllPossibleMovesForPlayer,
-  makeMove
+  capturePiece
 }) => {
   const pieceColor = color === "white" ? "white" : "black";
   const pieceStyles = {
@@ -217,7 +205,7 @@ const Piece = ({
         }
       }
       if (piece.piece === "king") {
-        let oponnent = color === "white" ? "black" : "white"
+        let oponnent = color === "white" ? "black" : "white";
         // using opponent moves here to send to get accurate castles
         let opponentMoves = getAllPossibleMovesForPlayer(oponnent, boardState);
         const possibleMoves = getKingMoves(square, piece, color, boardState, true, opponentMoves, inCheckStatus);
@@ -249,133 +237,172 @@ const Piece = ({
     }
   };
 
-  const capturePiece = () => {
-    let previousBoardState = { ...boardState };
+  // const capturePiece = () => {
+  //   let previousBoardState = { ...boardState };
 
-    if (mode === "puzzle") {
-      let sanMove = internalMoveToSan(previousBoardState.validMoves.pieceSquare, square);
-      console.log("piece square", previousBoardState.validMoves.pieceSquare);
-      console.log("square", square);
-      if (!previousBoardState.puzzleMoves) {
-        previousBoardState.puzzleMoves = [];
-      }
-      previousBoardState.puzzleMoves = [...previousBoardState.puzzleMoves, sanMove];
-    }
+  //   if (mode === "puzzle") {
+  //     let sanMove = internalMoveToSan(previousBoardState.validMoves.pieceSquare, square);
+  //     console.log("piece square", previousBoardState.validMoves.pieceSquare);
+  //     console.log("square", square);
+  //     if (!previousBoardState.puzzleMoves) {
+  //       previousBoardState.puzzleMoves = [];
+  //     }
+  //     previousBoardState.puzzleMoves = [...previousBoardState.puzzleMoves, sanMove];
+  //   }
 
-    delete previousBoardState.board[square];
-    delete previousBoardState.board[boardState.validMoves.pieceSquare];
-    let updatedBoardState = {
-      ...previousBoardState,
-      currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
-    };
-    updatedBoardState.board[square] = boardState.validMoves.piece;
-    updatedBoardState.validMoves.possibleMoves = [];
-    updatedBoardState.validMoves.possibleCaptures = [];
-    updatedBoardState.validMoves.piece = "";
-    updatedBoardState.validMoves.pieceSquare = "";
+  //   delete previousBoardState.board[square];
+  //   delete previousBoardState.board[boardState.validMoves.pieceSquare];
+  //   let updatedBoardState = {
+  //     ...previousBoardState,
+  //     currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
+  //   };
+  //   updatedBoardState.board[square] = boardState.validMoves.piece;
+  //   updatedBoardState.validMoves.possibleMoves = [];
+  //   updatedBoardState.validMoves.possibleCaptures = [];
+  //   updatedBoardState.validMoves.piece = "";
+  //   updatedBoardState.validMoves.pieceSquare = "";
 
-    // change first move property to false on first move
-    if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
-      updatedBoardState.board[square].firstMove = false;
-    }
+  //   // change first move property to false on first move
+  //   if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
+  //     updatedBoardState.board[square].firstMove = false;
+  //   }
 
-    let isGameADrawResult = isGameADraw(updatedBoardState);
+  //   let isGameADrawResult = isGameADraw(updatedBoardState);
 
-    // check for pawn promotion
-    if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
-      // capture with pawn promotion
-      promotePawn(updatedBoardState, square);
-    } else {
-      if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
-        const clonedBoardState = _.cloneDeep(updatedBoardState);
-        // check if the game is over
-        const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
-        if (isThisCheckmate) {
-          let puzzleResult;
-          // capture causing checkmate
-          if (mode === "puzzle") {
-            puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
-          }
+  //   // check for pawn promotion
+  //   if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+  //     // capture with pawn promotion
+  //     promotePawn(updatedBoardState, square);
+  //   } else {
+  //     if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+  //       const clonedBoardState = _.cloneDeep(updatedBoardState);
+  //       // check if the game is over
+  //       const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
+  //       if (isThisCheckmate) {
+  //         let puzzleResult;
+  //         // capture causing checkmate
+  //         if (mode === "puzzle") {
+  //           puzzleResult = isPuzzleMoveCorrect(
+  //             currentPuzzle.moves,
+  //             updatedBoardState.puzzleMoves,
+  //             updatedBoardState.puzzleMoves,
+  //             sampleMode,
+  //             currentPuzzle,
+  //             setCurrentPuzzle,
+  //             setPuzzleCorrect,
+  //             setPuzzleIncorrect,
+  //             updateAllUserPuzzleData,
+  //             randomPuzzles,
+  //             setRandomPuzzles,
+  //             getPuzzlesWithinEloRange
+  //           );
+  //         }
 
-          if (puzzleResult === false || puzzleResult === "finished") {
-            setTimeout(() => {
-              updatedBoardState.fen = false;
-              updatedBoardState.puzzleMoves = [];
-            }, 1000);
-          }
+  //         if (puzzleResult === false || puzzleResult === "finished") {
+  //           setTimeout(() => {
+  //             updatedBoardState.fen = false;
+  //             updatedBoardState.puzzleMoves = [];
+  //           }, 1000);
+  //         }
 
-          console.log("game over chump");
-          setBoardState(updatedBoardState);
-          setCheckmate(true);
+  //         console.log("game over chump");
+  //         setBoardState(updatedBoardState);
+  //         setCheckmate(true);
 
-          if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
-            setTimeout(() => {
-              let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
-              let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
-              sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
-            }, 1000);
-          }
-        } else {
-          // capture causing check
-          let puzzleResult;
+  //         if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
+  //           setTimeout(() => {
+  //             let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
+  //             let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
+  //             sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
+  //           }, 1000);
+  //         }
+  //       } else {
+  //         // capture causing check
+  //         let puzzleResult;
 
-          if (mode === "puzzle") {
-            puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
-          }
+  //         if (mode === "puzzle") {
+  //           puzzleResult = isPuzzleMoveCorrect(
+  //             currentPuzzle.moves,
+  //             updatedBoardState.puzzleMoves,
+  //             updatedBoardState.puzzleMoves,
+  //             sampleMode,
+  //             currentPuzzle,
+  //             setCurrentPuzzle,
+  //             setPuzzleCorrect,
+  //             setPuzzleIncorrect,
+  //             updateAllUserPuzzleData,
+  //             randomPuzzles,
+  //             setRandomPuzzles,
+  //             getPuzzlesWithinEloRange
+  //           );
+  //         }
 
-          if (puzzleResult === false || puzzleResult === "finished") {
-            setTimeout(() => {
-              updatedBoardState.fen = false;
-              updatedBoardState.puzzleMoves = [];
-            }, 1000);
-          }
+  //         if (puzzleResult === false || puzzleResult === "finished") {
+  //           setTimeout(() => {
+  //             updatedBoardState.fen = false;
+  //             updatedBoardState.puzzleMoves = [];
+  //           }, 1000);
+  //         }
 
-          setInCheckStatus(true);
-          setBoardState(updatedBoardState);
-          console.log("major major we have a check");
+  //         setInCheckStatus(true);
+  //         setBoardState(updatedBoardState);
+  //         console.log("major major we have a check");
 
-          if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
-            setTimeout(() => {
-              let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
-              let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
-              sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
-            }, 1000);
-          }
-        }
-      } else if (isGameADrawResult.draw) {
-        // capture causing draw
-        console.log("game is a draw", isGameADrawResult);
-        setInCheckStatus(false);
-        setDraw(true);
-        setBoardState(updatedBoardState);
-      } else {
-        // normal capture
-        let puzzleResult;
+  //         if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
+  //           setTimeout(() => {
+  //             let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
+  //             let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
+  //             sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
+  //           }, 1000);
+  //         }
+  //       }
+  //     } else if (isGameADrawResult.draw) {
+  //       // capture causing draw
+  //       console.log("game is a draw", isGameADrawResult);
+  //       setInCheckStatus(false);
+  //       setDraw(true);
+  //       setBoardState(updatedBoardState);
+  //     } else {
+  //       // normal capture
+  //       let puzzleResult;
 
-        if (mode === "puzzle") {
-          puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
-        }
+  //       if (mode === "puzzle") {
+  //         puzzleResult = isPuzzleMoveCorrect(
+  //           currentPuzzle.moves,
+  //           updatedBoardState.puzzleMoves,
+  //           updatedBoardState.puzzleMoves,
+  //           sampleMode,
+  //           currentPuzzle,
+  //           setCurrentPuzzle,
+  //           setPuzzleCorrect,
+  //           setPuzzleIncorrect,
+  //           updateAllUserPuzzleData,
+  //           randomPuzzles,
+  //           setRandomPuzzles,
+  //           getPuzzlesWithinEloRange
+  //         );
+  //       }
 
-        if (puzzleResult === false || puzzleResult === "finished") {
-          setTimeout(() => {
-            updatedBoardState.fen = false;
-            updatedBoardState.puzzleMoves = [];
-          }, 1000);
-        }
+  //       if (puzzleResult === false || puzzleResult === "finished") {
+  //         setTimeout(() => {
+  //           updatedBoardState.fen = false;
+  //           updatedBoardState.puzzleMoves = [];
+  //         }, 1000);
+  //       }
 
-        setInCheckStatus(false);
-        setBoardState(updatedBoardState);
+  //       setInCheckStatus(false);
+  //       setBoardState(updatedBoardState);
 
-        if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
-          setTimeout(() => {
-            let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
-            let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
-            sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
-          }, 1000);
-        }
-      }
-    }
-  };
+  //       if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
+  //         setTimeout(() => {
+  //           let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
+  //           let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
+  //           sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
+  //         }, 1000);
+  //       }
+  //     }
+  //   }
+  // };
 
   const pieceStyle = pieceStyles[piece.player][piece.piece];
 
@@ -384,7 +411,7 @@ const Piece = ({
       {isValidCapture ? (
         <Box
           className={`piece ${color}-piece ${className}`}
-          onClick={capturePiece}
+          onClick={() => capturePiece(square)}
           sx={{
             "&:hover": {
               backgroundImage: "linear-gradient(rgb(0 0 0/10%) 0 0)",
@@ -397,7 +424,13 @@ const Piece = ({
         </Box>
       ) : (
         <Box
-          className={`piece ${color}-piece ${!inCheckStatus ? className : inCheckStatus && piece.piece === "king" && piece.player === boardState.currentPlayer ? "check-square" : className}`}
+          className={`piece ${color}-piece ${
+            !inCheckStatus
+              ? className
+              : inCheckStatus && piece.piece === "king" && piece.player === boardState.currentPlayer
+              ? "check-square"
+              : className
+          }`}
           onClick={onPieceClick}
           sx={{
             ...(color === boardState.currentPlayer && square !== boardState.validMoves.pieceSquare
@@ -408,14 +441,14 @@ const Piece = ({
                   },
                 }
               : {}),
-              ...(square === boardState.validMoves.pieceSquare
-                ? {
+            ...(square === boardState.validMoves.pieceSquare
+              ? {
                   backgroundImage: "linear-gradient(rgb(0 0 0/40%) 0 0)",
                   "&:hover": {
-                    cursor: "pointer"
-                  }
+                    cursor: "pointer",
+                  },
                 }
-                : {}),   
+              : {}),
           }}
         >
           <span className={`chess-piece ${pieceColor} ${square}`}>{pieceStyle.content}</span>

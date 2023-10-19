@@ -16,15 +16,34 @@ import { getRookMoves } from "../../chessUtils/PieceUtils/rookMoves";
 import { getQueenMoves } from "../../chessUtils/PieceUtils/queenMoves";
 import { getKingMoves } from "../../chessUtils/PieceUtils/kingMoves";
 import { getPieceMoves } from "../../chessUtils/PieceUtils/pieceMoves";
-import { amIStillInCheck } from "../../chessUtils/CheckUtils/checkUtils";
+import { amIStillInCheck, isThisMoveACheck, isPieceProtected } from "../../chessUtils/CheckUtils/checkUtils";
+import { isGameADraw, isGameOver } from "../../chessUtils/GameResultUtils/gameResultUtils";
 import { getAllPossibleMovesForPlayer } from "../../chessUtils/PlayerUtils/playerUtils";
 import { getOpponent } from "../../chessUtils/PlayerUtils/playerUtils";
-import { isThisMoveACheck } from "../../chessUtils/CheckUtils/checkUtils";
 import { handleCastle } from "../../chessUtils/PieceUtils/kingMoves";
-import { fenToBoardState, sanToBoardStateMove, internalMoveToSan, startPuzzle } from "../../chessUtils/PuzzleUtils/puzzleUtils";
+import {
+  fenToBoardState,
+  sanToBoardStateMove,
+  internalMoveToSan,
+  startPuzzle,
+  startNextPuzzle,
+  isPuzzleMoveCorrect,
+} from "../../chessUtils/PuzzleUtils/puzzleUtils";
 
 const ChessBoard = forwardRef(
-  ({ sampleMode, modeToSet, puzzlesInEloRange, updateAllUserPuzzleData, getPuzzlesWithinEloRange, fade, currentPuzzle, setCurrentPuzzle }, ref) => {
+  (
+    {
+      sampleMode,
+      modeToSet,
+      puzzlesInEloRange,
+      updateAllUserPuzzleData,
+      getPuzzlesWithinEloRange,
+      fade,
+      currentPuzzle,
+      setCurrentPuzzle,
+    },
+    ref
+  ) => {
     const [boardState, setBoardState] = useState({
       board: {
         // base setup
@@ -228,7 +247,7 @@ const ChessBoard = forwardRef(
       }
     }, [boardState.validMoves, currentPuzzle, mode, randomPuzzles, boardState.fen, sampleMode, puzzlesInEloRange]);
 
-    // puzzle functions
+    // puzzle functions - this is old and currently used in the landing page for sample puzzles
     const generateRandomPuzzleID = () => {
       // Generate a random decimal between 0 (inclusive) and 1 (exclusive)
       const randomDecimal = Math.random();
@@ -268,64 +287,64 @@ const ChessBoard = forwardRef(
     };
 
     // implement next puzzle logic for both sample mode and regular user mode
-    const startNextPuzzle = async () => {
-      let puzzles = [...randomPuzzles];
-      puzzles.shift();
+    // const startNextPuzzle = async () => {
+    //   let puzzles = [...randomPuzzles];
+    //   puzzles.shift();
 
-      let nextPuzzle = puzzles[0];
+    //   let nextPuzzle = puzzles[0];
 
-      console.log("next puzzle", nextPuzzle);
+    //   console.log("next puzzle", nextPuzzle);
 
-      // If there's a next puzzle, proceed
-      if (nextPuzzle) {
-        // reset state causing nextPuzzle functionality to trigger
-        setCurrentPuzzle(nextPuzzle);
-        setRandomPuzzles(puzzles);
-      } else {
-        // Handle the case when there are no more puzzles
-        console.log("No more puzzles");
-        let newPuzzles = await getPuzzlesWithinEloRange();
-        setRandomPuzzles(newPuzzles);
-        setCurrentPuzzle(newPuzzles[0]);
-      }
-    };
+    //   // If there's a next puzzle, proceed
+    //   if (nextPuzzle) {
+    //     // reset state causing nextPuzzle functionality to trigger
+    //     setCurrentPuzzle(nextPuzzle);
+    //     setRandomPuzzles(puzzles);
+    //   } else {
+    //     // Handle the case when there are no more puzzles
+    //     console.log("No more puzzles");
+    //     let newPuzzles = await getPuzzlesWithinEloRange();
+    //     setRandomPuzzles(newPuzzles);
+    //     setCurrentPuzzle(newPuzzles[0]);
+    //   }
+    // };
 
-    const isPuzzleMoveCorrect = (correctPuzzleMoves, currentPuzzleMoves) => {
-      if (JSON.stringify(correctPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
-        if (!sampleMode) {
-          updateAllUserPuzzleData(true, currentPuzzle, "");
-        }
-        setPuzzleCorrect(true);
-        // alert("puzzle complete! you go!");
-        setTimeout(() => {
-          setPuzzleCorrect(false);
-        }, 1000);
-        startNextPuzzle();
-        return "finished";
-        // return "finished";
-      } else {
-        let numberOfMoves = currentPuzzleMoves.length;
-        let shortenedCorrectPuzzleMoves = correctPuzzleMoves.slice(0, numberOfMoves);
+    // const isPuzzleMoveCorrect = (correctPuzzleMoves, currentPuzzleMoves) => {
+    //   if (JSON.stringify(correctPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
+    //     if (!sampleMode) {
+    //       updateAllUserPuzzleData(true, currentPuzzle, "");
+    //     }
+    //     setPuzzleCorrect(true);
+    //     // alert("puzzle complete! you go!");
+    //     setTimeout(() => {
+    //       setPuzzleCorrect(false);
+    //     }, 1000);
+    //     startNextPuzzle();
+    //     return "finished";
+    //     // return "finished";
+    //   } else {
+    //     let numberOfMoves = currentPuzzleMoves.length;
+    //     let shortenedCorrectPuzzleMoves = correctPuzzleMoves.slice(0, numberOfMoves);
 
-        console.log("moves comparison", shortenedCorrectPuzzleMoves, currentPuzzleMoves);
+    //     console.log("moves comparison", shortenedCorrectPuzzleMoves, currentPuzzleMoves);
 
-        if (JSON.stringify(shortenedCorrectPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
-          return true;
-        } else {
-          if (!sampleMode) {
-            updateAllUserPuzzleData(false, currentPuzzle, "");
-          }
-          setPuzzleIncorrect(true);
-          // alert("failed puzzle");
-          setTimeout(() => {
-            setPuzzleIncorrect(false);
-          }, 1000);
-          startNextPuzzle();
-          return false;
-          // return false;
-        }
-      }
-    };
+    //     if (JSON.stringify(shortenedCorrectPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
+    //       return true;
+    //     } else {
+    //       if (!sampleMode) {
+    //         updateAllUserPuzzleData(false, currentPuzzle, "");
+    //       }
+    //       setPuzzleIncorrect(true);
+    //       // alert("failed puzzle");
+    //       setTimeout(() => {
+    //         setPuzzleIncorrect(false);
+    //       }, 1000);
+    //       startNextPuzzle();
+    //       return false;
+    //       // return false;
+    //     }
+    //   }
+    // };
 
     // const startPuzzle = (currentPuzzle, fenBoardState) => {
     //   let startSquare = currentPuzzle.moves[0].substring(0, 2);
@@ -628,7 +647,19 @@ const ChessBoard = forwardRef(
               let puzzleResult;
               // move causing checkmate
               if (mode === "puzzle") {
-                puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+                puzzleResult = isPuzzleMoveCorrect(
+                  currentPuzzle.moves,
+                  updatedBoardState.puzzleMoves,
+                  sampleMode,
+                  currentPuzzle,
+                  setCurrentPuzzle,
+                  setPuzzleCorrect,
+                  setPuzzleIncorrect,
+                  updateAllUserPuzzleData,
+                  randomPuzzles,
+                  setRandomPuzzles,
+                  getPuzzlesWithinEloRange
+                );
               }
 
               if (puzzleResult === false || puzzleResult === "finished") {
@@ -653,7 +684,19 @@ const ChessBoard = forwardRef(
               // move cause check
               let puzzleResult;
               if (mode === "puzzle") {
-                puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+                puzzleResult = isPuzzleMoveCorrect(
+                  currentPuzzle.moves,
+                  updatedBoardState.puzzleMoves,
+                  sampleMode,
+                  currentPuzzle,
+                  setCurrentPuzzle,
+                  setPuzzleCorrect,
+                  setPuzzleIncorrect,
+                  updateAllUserPuzzleData,
+                  randomPuzzles,
+                  setRandomPuzzles,
+                  getPuzzlesWithinEloRange
+                );
               }
 
               if (puzzleResult === false || puzzleResult === "finished") {
@@ -687,7 +730,17 @@ const ChessBoard = forwardRef(
             if (mode === "puzzle") {
               console.log("current puzzle moves", currentPuzzle.moves);
               console.log("board state puzzle moves", updatedBoardState.puzzleMoves);
-              puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+              puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves,
+                updatedBoardState.puzzleMoves,
+                sampleMode,
+                currentPuzzle,
+                setCurrentPuzzle,
+                setPuzzleCorrect,
+                setPuzzleIncorrect,
+                updateAllUserPuzzleData,
+                randomPuzzles,
+                setRandomPuzzles,
+                getPuzzlesWithinEloRange);
             }
             if (puzzleResult === false || puzzleResult === "finished") {
               setTimeout(() => {
@@ -751,7 +804,17 @@ const ChessBoard = forwardRef(
             if (isThisCheckmate) {
               let puzzleResult;
               if (mode === "puzzle") {
-                puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+                puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves,
+                  updatedBoardState.puzzleMoves,
+                  sampleMode,
+                  currentPuzzle,
+                  setCurrentPuzzle,
+                  setPuzzleCorrect,
+                  setPuzzleIncorrect,
+                  updateAllUserPuzzleData,
+                  randomPuzzles,
+                  setRandomPuzzles,
+                  getPuzzlesWithinEloRange);
               }
 
               if (puzzleResult === false || puzzleResult === "finished") {
@@ -775,7 +838,17 @@ const ChessBoard = forwardRef(
             } else {
               let puzzleResult;
               if (mode === "puzzle") {
-                puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+                puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves,
+                  updatedBoardState.puzzleMoves,
+                  sampleMode,
+                  currentPuzzle,
+                  setCurrentPuzzle,
+                  setPuzzleCorrect,
+                  setPuzzleIncorrect,
+                  updateAllUserPuzzleData,
+                  randomPuzzles,
+                  setRandomPuzzles,
+                  getPuzzlesWithinEloRange);
               }
 
               if (puzzleResult === false || puzzleResult === "finished") {
@@ -805,7 +878,17 @@ const ChessBoard = forwardRef(
           } else {
             let puzzleResult;
             if (mode === "puzzle") {
-              puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves);
+              puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves,
+                updatedBoardState.puzzleMoves,
+                sampleMode,
+                currentPuzzle,
+                setCurrentPuzzle,
+                setPuzzleCorrect,
+                setPuzzleIncorrect,
+                updateAllUserPuzzleData,
+                randomPuzzles,
+                setRandomPuzzles,
+                getPuzzlesWithinEloRange);
             }
 
             if (puzzleResult === false || puzzleResult === "finished") {
@@ -830,138 +913,305 @@ const ChessBoard = forwardRef(
       }
     };
 
-    // game result functions
-    const isGameOver = (squareCausingCheck, piece, updatedBoardState) => {
-      let isGameOver = true;
-      let possibleMoves;
-
-      console.log("in isgameover");
-
-      console.log("updated board state before for loop", updatedBoardState);
-
-      // get all moves
-      for (let position in updatedBoardState.board) {
-        console.log(position);
-        if (updatedBoardState.board[position].player === updatedBoardState.currentPlayer) {
-          possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
-
-          let currentPiece = updatedBoardState.board[position].piece;
-
-          console.log("all possible moves", possibleMoves);
-
-          console.log("current piece in is game over", currentPiece);
-
-          // check if piece can be captured, make sure piece is not protected
-          if (possibleMoves?.captures && possibleMoves.captures.includes(squareCausingCheck)) {
-            if (currentPiece === "king" && !isPieceProtected(squareCausingCheck, updatedBoardState)) {
-              console.log("piece can be captured by this position", position);
-              isGameOver = false;
-              break;
-            } else if (currentPiece !== "king") {
-              console.log("piece can be captured by this position", position);
-              isGameOver = false;
-              break;
+    const capturePiece = (square) => {
+      let previousBoardState = { ...boardState };
+  
+      if (mode === "puzzle") {
+        let sanMove = internalMoveToSan(previousBoardState.validMoves.pieceSquare, square);
+        console.log("piece square", previousBoardState.validMoves.pieceSquare);
+        console.log("square", square);
+        if (!previousBoardState.puzzleMoves) {
+          previousBoardState.puzzleMoves = [];
+        }
+        previousBoardState.puzzleMoves = [...previousBoardState.puzzleMoves, sanMove];
+      }
+  
+      delete previousBoardState.board[square];
+      delete previousBoardState.board[boardState.validMoves.pieceSquare];
+      let updatedBoardState = {
+        ...previousBoardState,
+        currentPlayer: previousBoardState.currentPlayer === "white" ? "black" : "white",
+      };
+      updatedBoardState.board[square] = boardState.validMoves.piece;
+      updatedBoardState.validMoves.possibleMoves = [];
+      updatedBoardState.validMoves.possibleCaptures = [];
+      updatedBoardState.validMoves.piece = "";
+      updatedBoardState.validMoves.pieceSquare = "";
+  
+      // change first move property to false on first move
+      if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
+        updatedBoardState.board[square].firstMove = false;
+      }
+  
+      let isGameADrawResult = isGameADraw(updatedBoardState);
+  
+      // check for pawn promotion
+      if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
+        // capture with pawn promotion
+        promotePawn(updatedBoardState, square);
+      } else {
+        if (isThisMoveACheck(square, updatedBoardState.board[square], updatedBoardState) && !inCheckStatus) {
+          const clonedBoardState = _.cloneDeep(updatedBoardState);
+          // check if the game is over
+          const isThisCheckmate = isGameOver(square, updatedBoardState.board[square], clonedBoardState);
+          if (isThisCheckmate) {
+            let puzzleResult;
+            // capture causing checkmate
+            if (mode === "puzzle") {
+              puzzleResult = isPuzzleMoveCorrect(
+                currentPuzzle.moves,
+                updatedBoardState.puzzleMoves,
+                updatedBoardState.puzzleMoves,
+                sampleMode,
+                currentPuzzle,
+                setCurrentPuzzle,
+                setPuzzleCorrect,
+                setPuzzleIncorrect,
+                updateAllUserPuzzleData,
+                randomPuzzles,
+                setRandomPuzzles,
+                getPuzzlesWithinEloRange
+              );
+            }
+  
+            if (puzzleResult === false || puzzleResult === "finished") {
+              setTimeout(() => {
+                updatedBoardState.fen = false;
+                updatedBoardState.puzzleMoves = [];
+              }, 1000);
+            }
+  
+            console.log("game over chump");
+            setBoardState(updatedBoardState);
+            setCheckmate(true);
+  
+            if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
+              setTimeout(() => {
+                let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
+                let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
+                sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
+              }, 1000);
             }
           } else {
-            // check if a capture that does not capture the piece causing check would get player out of check
-            console.log("check piece cant be captured, checking if another capture gets king out of check");
-            if (possibleMoves?.captures) {
-              for (let capture of possibleMoves.captures) {
-                let testBoardState = _.cloneDeep(updatedBoardState);
-
-                delete testBoardState.board[position];
-                delete testBoardState.board[capture];
-                testBoardState.board[capture] = possibleMoves.piece;
-
-                if (!amIStillInCheck(testBoardState, updatedBoardState.currentPlayer, true)) {
-                  console.log("a capture can get king out of check, capturing to square:", capture);
-                  isGameOver = false;
-                  break;
-                }
-              }
+            // capture causing check
+            let puzzleResult;
+  
+            if (mode === "puzzle") {
+              puzzleResult = isPuzzleMoveCorrect(
+                currentPuzzle.moves,
+                updatedBoardState.puzzleMoves,
+                updatedBoardState.puzzleMoves,
+                sampleMode,
+                currentPuzzle,
+                setCurrentPuzzle,
+                setPuzzleCorrect,
+                setPuzzleIncorrect,
+                updateAllUserPuzzleData,
+                randomPuzzles,
+                setRandomPuzzles,
+                getPuzzlesWithinEloRange
+              );
+            }
+  
+            if (puzzleResult === false || puzzleResult === "finished") {
+              setTimeout(() => {
+                updatedBoardState.fen = false;
+                updatedBoardState.puzzleMoves = [];
+              }, 1000);
+            }
+  
+            setInCheckStatus(true);
+            setBoardState(updatedBoardState);
+            console.log("major major we have a check");
+  
+            if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
+              setTimeout(() => {
+                let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
+                let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
+                sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
+              }, 1000);
             }
           }
-
-          // check if move can block check
-          if (possibleMoves?.moves) {
-            for (let move of possibleMoves.moves) {
-              // Create test board state modeling the move as made
-              let testBoardState = _.cloneDeep(updatedBoardState);
-              // Remove the previous square
-              delete testBoardState.board[position];
-              // Add the new move
-              testBoardState.board[move] = possibleMoves.piece;
-              // Use test board state to see if it blocks check
-              if (!amIStillInCheck(testBoardState, updatedBoardState.currentPlayer, true)) {
-                console.log("check can be blocked");
-                isGameOver = false;
-                break;
-              }
-            }
-          }
-          possibleMoves = {};
+        } else if (isGameADrawResult.draw) {
+          // capture causing draw
+          console.log("game is a draw", isGameADrawResult);
+          setInCheckStatus(false);
+          setDraw(true);
+          setBoardState(updatedBoardState);
         } else {
-          console.log("updated board state curr player", updatedBoardState.currentPlayer);
-        }
-      }
-
-      return isGameOver;
-    };
-
-    const isGameADraw = (updatedBoardState) => {
-      let isDraw = true;
-      let insufficientMaterial = true;
-      const availableMoves = getAllPossibleMovesForPlayer(updatedBoardState.currentPlayer, updatedBoardState, true);
-
-      if (availableMoves.length > 0) {
-        isDraw = false;
-      }
-
-      // Check for insufficient material (only kings left)
-      const piecesOnBoard = Object.values(updatedBoardState.board);
-      const nonKingPieces = piecesOnBoard.filter((piece) => piece.piece !== "king");
-
-      if (nonKingPieces.length > 0) {
-        insufficientMaterial = false;
-      }
-
-      let result = {
-        draw: isDraw || insufficientMaterial,
-        insufficientMaterial: insufficientMaterial,
-      };
-
-      return result;
-    };
-
-    const isPieceProtected = (square, updatedBoardState) => {
-      let isPieceProtected = false;
-      let possibleMoves;
-
-      console.log("board in is piece protected", updatedBoardState);
-
-      // get all moves
-      for (let position in updatedBoardState.board) {
-        if (updatedBoardState.board[position].player !== updatedBoardState.currentPlayer) {
-          // am i trying to make sure the king is not protected?
-          // chanded to !== king 9/24, seems to fix the is piece protected functionality
-          // if (updatedBoardState.board[position].piece !== "king") {
-          possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
-          // }
-
-          console.log("possible moves", possibleMoves);
-
-          // check if piece is protected
-          if (possibleMoves?.selfCaptures && possibleMoves.selfCaptures.includes(square)) {
-            console.log("piece cannot be captured, piece is protected");
-            isPieceProtected = true;
-            break;
+          // normal capture
+          let puzzleResult;
+  
+          if (mode === "puzzle") {
+            puzzleResult = isPuzzleMoveCorrect(
+              currentPuzzle.moves,
+              updatedBoardState.puzzleMoves,
+              updatedBoardState.puzzleMoves,
+              sampleMode,
+              currentPuzzle,
+              setCurrentPuzzle,
+              setPuzzleCorrect,
+              setPuzzleIncorrect,
+              updateAllUserPuzzleData,
+              randomPuzzles,
+              setRandomPuzzles,
+              getPuzzlesWithinEloRange
+            );
           }
-          possibleMoves = {};
+  
+          if (puzzleResult === false || puzzleResult === "finished") {
+            setTimeout(() => {
+              updatedBoardState.fen = false;
+              updatedBoardState.puzzleMoves = [];
+            }, 1000);
+          }
+  
+          setInCheckStatus(false);
+          setBoardState(updatedBoardState);
+  
+          if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
+            setTimeout(() => {
+              let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
+              let endSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(2, 4);
+              sanToBoardStateMove(startSquare, endSquare, updatedBoardState, currentPuzzle, "", mode, makeMove);
+            }, 1000);
+          }
         }
       }
-
-      return isPieceProtected;
     };
+
+    // game result functions
+    // const isGameOver = (squareCausingCheck, piece, updatedBoardState) => {
+    //   let isGameOver = true;
+    //   let possibleMoves;
+
+    //   console.log("in isgameover");
+
+    //   console.log("updated board state before for loop", updatedBoardState);
+
+    //   // get all moves
+    //   for (let position in updatedBoardState.board) {
+    //     console.log(position);
+    //     if (updatedBoardState.board[position].player === updatedBoardState.currentPlayer) {
+    //       possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
+
+    //       let currentPiece = updatedBoardState.board[position].piece;
+
+    //       console.log("all possible moves", possibleMoves);
+
+    //       console.log("current piece in is game over", currentPiece);
+
+    //       // check if piece can be captured, make sure piece is not protected
+    //       if (possibleMoves?.captures && possibleMoves.captures.includes(squareCausingCheck)) {
+    //         if (currentPiece === "king" && !isPieceProtected(squareCausingCheck, updatedBoardState)) {
+    //           console.log("piece can be captured by this position", position);
+    //           isGameOver = false;
+    //           break;
+    //         } else if (currentPiece !== "king") {
+    //           console.log("piece can be captured by this position", position);
+    //           isGameOver = false;
+    //           break;
+    //         }
+    //       } else {
+    //         // check if a capture that does not capture the piece causing check would get player out of check
+    //         console.log("check piece cant be captured, checking if another capture gets king out of check");
+    //         if (possibleMoves?.captures) {
+    //           for (let capture of possibleMoves.captures) {
+    //             let testBoardState = _.cloneDeep(updatedBoardState);
+
+    //             delete testBoardState.board[position];
+    //             delete testBoardState.board[capture];
+    //             testBoardState.board[capture] = possibleMoves.piece;
+
+    //             if (!amIStillInCheck(testBoardState, updatedBoardState.currentPlayer, true)) {
+    //               console.log("a capture can get king out of check, capturing to square:", capture);
+    //               isGameOver = false;
+    //               break;
+    //             }
+    //           }
+    //         }
+    //       }
+
+    //       // check if move can block check
+    //       if (possibleMoves?.moves) {
+    //         for (let move of possibleMoves.moves) {
+    //           // Create test board state modeling the move as made
+    //           let testBoardState = _.cloneDeep(updatedBoardState);
+    //           // Remove the previous square
+    //           delete testBoardState.board[position];
+    //           // Add the new move
+    //           testBoardState.board[move] = possibleMoves.piece;
+    //           // Use test board state to see if it blocks check
+    //           if (!amIStillInCheck(testBoardState, updatedBoardState.currentPlayer, true)) {
+    //             console.log("check can be blocked");
+    //             isGameOver = false;
+    //             break;
+    //           }
+    //         }
+    //       }
+    //       possibleMoves = {};
+    //     } else {
+    //       console.log("updated board state curr player", updatedBoardState.currentPlayer);
+    //     }
+    //   }
+
+    //   return isGameOver;
+    // };
+
+    // const isGameADraw = (updatedBoardState) => {
+    //   let isDraw = true;
+    //   let insufficientMaterial = true;
+    //   const availableMoves = getAllPossibleMovesForPlayer(updatedBoardState.currentPlayer, updatedBoardState, true);
+
+    //   if (availableMoves.length > 0) {
+    //     isDraw = false;
+    //   }
+
+    //   // Check for insufficient material (only kings left)
+    //   const piecesOnBoard = Object.values(updatedBoardState.board);
+    //   const nonKingPieces = piecesOnBoard.filter((piece) => piece.piece !== "king");
+
+    //   if (nonKingPieces.length > 0) {
+    //     insufficientMaterial = false;
+    //   }
+
+    //   let result = {
+    //     draw: isDraw || insufficientMaterial,
+    //     insufficientMaterial: insufficientMaterial,
+    //   };
+
+    //   return result;
+    // };
+
+    // const isPieceProtected = (square, updatedBoardState) => {
+    //   let isPieceProtected = false;
+    //   let possibleMoves;
+
+    //   console.log("board in is piece protected", updatedBoardState);
+
+    //   // get all moves
+    //   for (let position in updatedBoardState.board) {
+    //     if (updatedBoardState.board[position].player !== updatedBoardState.currentPlayer) {
+    //       // am i trying to make sure the king is not protected?
+    //       // chanded to !== king 9/24, seems to fix the is piece protected functionality
+    //       // if (updatedBoardState.board[position].piece !== "king") {
+    //       possibleMoves = getPieceMoves(position, updatedBoardState.board[position], updatedBoardState);
+    //       // }
+
+    //       console.log("possible moves", possibleMoves);
+
+    //       // check if piece is protected
+    //       if (possibleMoves?.selfCaptures && possibleMoves.selfCaptures.includes(square)) {
+    //         console.log("piece cannot be captured, piece is protected");
+    //         isPieceProtected = true;
+    //         break;
+    //       }
+    //       possibleMoves = {};
+    //     }
+    //   }
+
+    //   return isPieceProtected;
+    // };
 
     // const isEnPassantPossible = (square, boardState) => {
     //   let possibleEnPassantSquares = [];
@@ -1488,7 +1738,7 @@ const ChessBoard = forwardRef(
     //       !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
     //       !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
     //       piece.firstMove === true &&
-    //       boardState.board["11"].firstMove === true && 
+    //       boardState.board["11"].firstMove === true &&
     //       (!opponentMoves.includes("21") && !opponentMoves.includes("31") && !opponentMoves.includes("41"))
     //     ) {
     //       castle.push(`${Number(col) - 2}` + row);
@@ -1498,7 +1748,7 @@ const ChessBoard = forwardRef(
     //       !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
     //       !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
     //       piece.firstMove === true &&
-    //       boardState.board["88"].firstMove === true && 
+    //       boardState.board["88"].firstMove === true &&
     //       (!opponentMoves.includes("68") && !opponentMoves.includes("78"))
     //     ) {
     //       castle.push(`${Number(col) + 2}` + row);
@@ -1508,7 +1758,7 @@ const ChessBoard = forwardRef(
     //       !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
     //       !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
     //       piece.firstMove === true &&
-    //       boardState.board["18"].firstMove === true && 
+    //       boardState.board["18"].firstMove === true &&
     //       (!opponentMoves.includes("28") && !opponentMoves.includes("38") && !opponentMoves.includes("48"))
     //     ) {
     //       castle.push(`${Number(col) - 2}` + row);
@@ -1566,7 +1816,17 @@ const ChessBoard = forwardRef(
         // if checkmate, execute this code
         let puzzleResult;
         if (mode === "puzzle") {
-          puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves);
+          puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves,
+            clonedBoardState.puzzleMoves,
+            sampleMode,
+            currentPuzzle,
+            setCurrentPuzzle,
+            setPuzzleCorrect,
+            setPuzzleIncorrect,
+            updateAllUserPuzzleData,
+            randomPuzzles,
+            setRandomPuzzles,
+            getPuzzlesWithinEloRange);
         }
 
         if (puzzleResult === false || puzzleResult === "finished") {
@@ -1591,7 +1851,17 @@ const ChessBoard = forwardRef(
         // if check, execute this code
         let puzzleResult;
         if (mode === "puzzle") {
-          puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves);
+          puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves,
+            clonedBoardState.puzzleMoves,
+            sampleMode,
+            currentPuzzle,
+            setCurrentPuzzle,
+            setPuzzleCorrect,
+            setPuzzleIncorrect,
+            updateAllUserPuzzleData,
+            randomPuzzles,
+            setRandomPuzzles,
+            getPuzzlesWithinEloRange);
         }
 
         if (puzzleResult === false || puzzleResult === "finished") {
@@ -1621,7 +1891,17 @@ const ChessBoard = forwardRef(
         // otherwise its a normal promotion, execute this code
         let puzzleResult;
         if (mode === "puzzle") {
-          puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves);
+          puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves,
+            clonedBoardState.puzzleMoves,
+            sampleMode,
+            currentPuzzle,
+            setCurrentPuzzle,
+            setPuzzleCorrect,
+            setPuzzleIncorrect,
+            updateAllUserPuzzleData,
+            randomPuzzles,
+            setRandomPuzzles,
+            getPuzzlesWithinEloRange);
         }
 
         if (puzzleResult === false || puzzleResult === "finished") {
@@ -1794,28 +2074,16 @@ const ChessBoard = forwardRef(
           boardState={boardState}
           setBoardState={setBoardState}
           isValidCapture={isValidCapture}
-          promotePawn={promotePawn}
           getPawnMoves={getPawnMoves}
           getBishopMoves={getBishopMoves}
           getKnightMoves={getKnightMoves}
           getRookMoves={getRookMoves}
           getQueenMoves={getQueenMoves}
           getKingMoves={getKingMoves}
-          setInCheckStatus={setInCheckStatus}
-          isGameOver={isGameOver}
-          isThisMoveACheck={isThisMoveACheck}
           inCheckStatus={inCheckStatus}
-          setCheckmate={setCheckmate}
           checkmate={checkmate}
-          isGameADraw={isGameADraw}
-          setDraw={setDraw}
-          internalMoveToSan={internalMoveToSan}
-          isPuzzleMoveCorrect={isPuzzleMoveCorrect}
-          currentPuzzle={currentPuzzle}
-          mode={mode}
-          sanToBoardStateMove={sanToBoardStateMove}
           getAllPossibleMovesForPlayer={getAllPossibleMovesForPlayer}
-          makeMove={makeMove}
+          capturePiece={capturePiece}
         />
       );
     };
