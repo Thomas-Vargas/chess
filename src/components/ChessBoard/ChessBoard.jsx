@@ -730,7 +730,8 @@ const ChessBoard = forwardRef(
             if (mode === "puzzle") {
               console.log("current puzzle moves", currentPuzzle.moves);
               console.log("board state puzzle moves", updatedBoardState.puzzleMoves);
-              puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves,
+              puzzleResult = isPuzzleMoveCorrect(
+                currentPuzzle.moves,
                 updatedBoardState.puzzleMoves,
                 sampleMode,
                 currentPuzzle,
@@ -740,7 +741,8 @@ const ChessBoard = forwardRef(
                 updateAllUserPuzzleData,
                 randomPuzzles,
                 setRandomPuzzles,
-                getPuzzlesWithinEloRange);
+                getPuzzlesWithinEloRange
+              );
             }
             if (puzzleResult === false || puzzleResult === "finished") {
               setTimeout(() => {
@@ -804,7 +806,8 @@ const ChessBoard = forwardRef(
             if (isThisCheckmate) {
               let puzzleResult;
               if (mode === "puzzle") {
-                puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves,
+                puzzleResult = isPuzzleMoveCorrect(
+                  currentPuzzle.moves,
                   updatedBoardState.puzzleMoves,
                   sampleMode,
                   currentPuzzle,
@@ -814,7 +817,8 @@ const ChessBoard = forwardRef(
                   updateAllUserPuzzleData,
                   randomPuzzles,
                   setRandomPuzzles,
-                  getPuzzlesWithinEloRange);
+                  getPuzzlesWithinEloRange
+                );
               }
 
               if (puzzleResult === false || puzzleResult === "finished") {
@@ -838,7 +842,8 @@ const ChessBoard = forwardRef(
             } else {
               let puzzleResult;
               if (mode === "puzzle") {
-                puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves,
+                puzzleResult = isPuzzleMoveCorrect(
+                  currentPuzzle.moves,
                   updatedBoardState.puzzleMoves,
                   sampleMode,
                   currentPuzzle,
@@ -848,7 +853,8 @@ const ChessBoard = forwardRef(
                   updateAllUserPuzzleData,
                   randomPuzzles,
                   setRandomPuzzles,
-                  getPuzzlesWithinEloRange);
+                  getPuzzlesWithinEloRange
+                );
               }
 
               if (puzzleResult === false || puzzleResult === "finished") {
@@ -878,7 +884,8 @@ const ChessBoard = forwardRef(
           } else {
             let puzzleResult;
             if (mode === "puzzle") {
-              puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, updatedBoardState.puzzleMoves,
+              puzzleResult = isPuzzleMoveCorrect(
+                currentPuzzle.moves,
                 updatedBoardState.puzzleMoves,
                 sampleMode,
                 currentPuzzle,
@@ -888,7 +895,8 @@ const ChessBoard = forwardRef(
                 updateAllUserPuzzleData,
                 randomPuzzles,
                 setRandomPuzzles,
-                getPuzzlesWithinEloRange);
+                getPuzzlesWithinEloRange
+              );
             }
 
             if (puzzleResult === false || puzzleResult === "finished") {
@@ -915,7 +923,7 @@ const ChessBoard = forwardRef(
 
     const capturePiece = (square) => {
       let previousBoardState = { ...boardState };
-  
+
       if (mode === "puzzle") {
         let sanMove = internalMoveToSan(previousBoardState.validMoves.pieceSquare, square);
         console.log("piece square", previousBoardState.validMoves.pieceSquare);
@@ -925,7 +933,7 @@ const ChessBoard = forwardRef(
         }
         previousBoardState.puzzleMoves = [...previousBoardState.puzzleMoves, sanMove];
       }
-  
+
       delete previousBoardState.board[square];
       delete previousBoardState.board[boardState.validMoves.pieceSquare];
       let updatedBoardState = {
@@ -937,14 +945,14 @@ const ChessBoard = forwardRef(
       updatedBoardState.validMoves.possibleCaptures = [];
       updatedBoardState.validMoves.piece = "";
       updatedBoardState.validMoves.pieceSquare = "";
-  
+
       // change first move property to false on first move
       if (updatedBoardState.board[square].hasOwnProperty("firstMove")) {
         updatedBoardState.board[square].firstMove = false;
       }
-  
+
       let isGameADrawResult = isGameADraw(updatedBoardState);
-  
+
       // check for pawn promotion
       if (updatedBoardState.board[square].piece === "pawn" && (square[1] == 8 || square[1] == 1)) {
         // capture with pawn promotion
@@ -961,7 +969,6 @@ const ChessBoard = forwardRef(
               puzzleResult = isPuzzleMoveCorrect(
                 currentPuzzle.moves,
                 updatedBoardState.puzzleMoves,
-                updatedBoardState.puzzleMoves,
                 sampleMode,
                 currentPuzzle,
                 setCurrentPuzzle,
@@ -973,18 +980,18 @@ const ChessBoard = forwardRef(
                 getPuzzlesWithinEloRange
               );
             }
-  
+
             if (puzzleResult === false || puzzleResult === "finished") {
               setTimeout(() => {
                 updatedBoardState.fen = false;
                 updatedBoardState.puzzleMoves = [];
               }, 1000);
             }
-  
+
             console.log("game over chump");
             setBoardState(updatedBoardState);
             setCheckmate(true);
-  
+
             if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
               setTimeout(() => {
                 let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
@@ -995,11 +1002,10 @@ const ChessBoard = forwardRef(
           } else {
             // capture causing check
             let puzzleResult;
-  
+
             if (mode === "puzzle") {
               puzzleResult = isPuzzleMoveCorrect(
                 currentPuzzle.moves,
-                updatedBoardState.puzzleMoves,
                 updatedBoardState.puzzleMoves,
                 sampleMode,
                 currentPuzzle,
@@ -1012,18 +1018,18 @@ const ChessBoard = forwardRef(
                 getPuzzlesWithinEloRange
               );
             }
-  
+
             if (puzzleResult === false || puzzleResult === "finished") {
               setTimeout(() => {
                 updatedBoardState.fen = false;
                 updatedBoardState.puzzleMoves = [];
               }, 1000);
             }
-  
+
             setInCheckStatus(true);
             setBoardState(updatedBoardState);
             console.log("major major we have a check");
-  
+
             if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
               setTimeout(() => {
                 let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
@@ -1041,11 +1047,10 @@ const ChessBoard = forwardRef(
         } else {
           // normal capture
           let puzzleResult;
-  
+
           if (mode === "puzzle") {
             puzzleResult = isPuzzleMoveCorrect(
               currentPuzzle.moves,
-              updatedBoardState.puzzleMoves,
               updatedBoardState.puzzleMoves,
               sampleMode,
               currentPuzzle,
@@ -1058,17 +1063,17 @@ const ChessBoard = forwardRef(
               getPuzzlesWithinEloRange
             );
           }
-  
+
           if (puzzleResult === false || puzzleResult === "finished") {
             setTimeout(() => {
               updatedBoardState.fen = false;
               updatedBoardState.puzzleMoves = [];
             }, 1000);
           }
-  
+
           setInCheckStatus(false);
           setBoardState(updatedBoardState);
-  
+
           if (puzzleResult === true && updatedBoardState.puzzleMoves.length % 2 === 0) {
             setTimeout(() => {
               let startSquare = currentPuzzle.moves[updatedBoardState.puzzleMoves.length].substring(0, 2);
@@ -1816,7 +1821,8 @@ const ChessBoard = forwardRef(
         // if checkmate, execute this code
         let puzzleResult;
         if (mode === "puzzle") {
-          puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves,
+          puzzleResult = isPuzzleMoveCorrect(
+            currentPuzzle.moves,
             clonedBoardState.puzzleMoves,
             sampleMode,
             currentPuzzle,
@@ -1826,7 +1832,8 @@ const ChessBoard = forwardRef(
             updateAllUserPuzzleData,
             randomPuzzles,
             setRandomPuzzles,
-            getPuzzlesWithinEloRange);
+            getPuzzlesWithinEloRange
+          );
         }
 
         if (puzzleResult === false || puzzleResult === "finished") {
@@ -1851,7 +1858,8 @@ const ChessBoard = forwardRef(
         // if check, execute this code
         let puzzleResult;
         if (mode === "puzzle") {
-          puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves,
+          puzzleResult = isPuzzleMoveCorrect(
+            currentPuzzle.moves,
             clonedBoardState.puzzleMoves,
             sampleMode,
             currentPuzzle,
@@ -1861,7 +1869,8 @@ const ChessBoard = forwardRef(
             updateAllUserPuzzleData,
             randomPuzzles,
             setRandomPuzzles,
-            getPuzzlesWithinEloRange);
+            getPuzzlesWithinEloRange
+          );
         }
 
         if (puzzleResult === false || puzzleResult === "finished") {
@@ -1891,7 +1900,8 @@ const ChessBoard = forwardRef(
         // otherwise its a normal promotion, execute this code
         let puzzleResult;
         if (mode === "puzzle") {
-          puzzleResult = isPuzzleMoveCorrect(currentPuzzle.moves, clonedBoardState.puzzleMoves,
+          puzzleResult = isPuzzleMoveCorrect(
+            currentPuzzle.moves,
             clonedBoardState.puzzleMoves,
             sampleMode,
             currentPuzzle,
@@ -1901,7 +1911,8 @@ const ChessBoard = forwardRef(
             updateAllUserPuzzleData,
             randomPuzzles,
             setRandomPuzzles,
-            getPuzzlesWithinEloRange);
+            getPuzzlesWithinEloRange
+          );
         }
 
         if (puzzleResult === false || puzzleResult === "finished") {

@@ -143,6 +143,90 @@ export const internalMoveToSan = (square1, square2) => {
   return startSquare + endSquare;
 };
 
+export const startPuzzle = (currentPuzzle, fenBoardState, mode, makeMove) => {
+  let startSquare = currentPuzzle.moves[0].substring(0, 2);
+  let endSquare = currentPuzzle.moves[0].substring(2, 4);
+
+  console.log("start square in start puzzle", startSquare);
+  console.log("end square in start puzzle", endSquare);
+
+  // console.log(startSquare, endSquare)
+  sanToBoardStateMove(startSquare, endSquare, fenBoardState, currentPuzzle, currentPuzzle.moves[0], mode, makeMove);
+};
+
+export const startNextPuzzle = async (setCurrentPuzzle, setRandomPuzzles, getPuzzlesWithinEloRange, randomPuzzles) => {
+  console.log("random puzzles in start next puzzle", randomPuzzles);
+  let puzzles = [...randomPuzzles];
+  puzzles.shift();
+
+  let nextPuzzle = puzzles[0];
+
+  console.log("next puzzle", nextPuzzle);
+
+  // If there's a next puzzle, proceed
+  if (nextPuzzle) {
+    // reset state causing nextPuzzle functionality to trigger
+    setCurrentPuzzle(nextPuzzle);
+    setRandomPuzzles(puzzles);
+  } else {
+    // Handle the case when there are no more puzzles
+    console.log("No more puzzles");
+    let newPuzzles = await getPuzzlesWithinEloRange();
+    setRandomPuzzles(newPuzzles);
+    setCurrentPuzzle(newPuzzles[0]);
+  }
+};
+
+export const isPuzzleMoveCorrect = (
+  correctPuzzleMoves,
+  currentPuzzleMoves,
+  sampleMode,
+  currentPuzzle,
+  setCurrentPuzzle,
+  setPuzzleCorrect,
+  setPuzzleIncorrect,
+  updateAllUserPuzzleData,
+  randomPuzzles,
+  setRandomPuzzles,
+  getPuzzlesWithinEloRange
+) => {
+  console.log("random puzzles in isPuzzleMoveCorrect", randomPuzzles);
+  if (JSON.stringify(correctPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
+    if (!sampleMode) {
+      updateAllUserPuzzleData(true, currentPuzzle, "");
+    }
+    setPuzzleCorrect(true);
+    // alert("puzzle complete! you go!");
+    setTimeout(() => {
+      setPuzzleCorrect(false);
+    }, 1000);
+    startNextPuzzle(setCurrentPuzzle, setRandomPuzzles, getPuzzlesWithinEloRange, randomPuzzles);
+    return "finished";
+    // return "finished";
+  } else {
+    let numberOfMoves = currentPuzzleMoves.length;
+    let shortenedCorrectPuzzleMoves = correctPuzzleMoves.slice(0, numberOfMoves);
+
+    console.log("moves comparison", shortenedCorrectPuzzleMoves, currentPuzzleMoves);
+
+    if (JSON.stringify(shortenedCorrectPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
+      return true;
+    } else {
+      if (!sampleMode) {
+        updateAllUserPuzzleData(false, currentPuzzle, "");
+      }
+      setPuzzleIncorrect(true);
+      // alert("failed puzzle");
+      setTimeout(() => {
+        setPuzzleIncorrect(false);
+      }, 1000);
+      startNextPuzzle(setCurrentPuzzle, setRandomPuzzles, getPuzzlesWithinEloRange, randomPuzzles);
+      return false;
+      // return false;
+    }
+  }
+};
+
 // utility functions
 export const getColumnNumOrChar = (char) => {
   switch (char) {
@@ -200,86 +284,4 @@ export const getPieceName = (piece) => {
 
 export const getSquare = (file, rank) => {
   return rank + file * 10;
-};
-
-export const startPuzzle = (currentPuzzle, fenBoardState, mode, makeMove) => {
-  let startSquare = currentPuzzle.moves[0].substring(0, 2);
-  let endSquare = currentPuzzle.moves[0].substring(2, 4);
-
-  console.log("start square in start puzzle", startSquare);
-  console.log("end square in start puzzle", endSquare);
-
-  // console.log(startSquare, endSquare)
-  sanToBoardStateMove(startSquare, endSquare, fenBoardState, currentPuzzle, currentPuzzle.moves[0], mode, makeMove);
-};
-
-export const startNextPuzzle = async (setCurrentPuzzle, setRandomPuzzles, getPuzzlesWithinEloRange, randomPuzzles) => {
-  let puzzles = [...randomPuzzles];
-  puzzles.shift();
-
-  let nextPuzzle = puzzles[0];
-
-  console.log("next puzzle", nextPuzzle);
-
-  // If there's a next puzzle, proceed
-  if (nextPuzzle) {
-    // reset state causing nextPuzzle functionality to trigger
-    setCurrentPuzzle(nextPuzzle);
-    setRandomPuzzles(puzzles);
-  } else {
-    // Handle the case when there are no more puzzles
-    console.log("No more puzzles");
-    let newPuzzles = await getPuzzlesWithinEloRange();
-    setRandomPuzzles(newPuzzles);
-    setCurrentPuzzle(newPuzzles[0]);
-  }
-};
-
-export const isPuzzleMoveCorrect = (
-  correctPuzzleMoves,
-  currentPuzzleMoves,
-  sampleMode,
-  currentPuzzle,
-  setCurrentPuzzle,
-  setPuzzleCorrect,
-  setPuzzleIncorrect,
-  updateAllUserPuzzleData,
-  randomPuzzles,
-  setRandomPuzzles,
-  getPuzzlesWithinEloRange
-) => {
-  if (JSON.stringify(correctPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
-    if (!sampleMode) {
-      updateAllUserPuzzleData(true, currentPuzzle, "");
-    }
-    setPuzzleCorrect(true);
-    // alert("puzzle complete! you go!");
-    setTimeout(() => {
-      setPuzzleCorrect(false);
-    }, 1000);
-    startNextPuzzle(setCurrentPuzzle, setRandomPuzzles, getPuzzlesWithinEloRange, randomPuzzles);
-    return "finished";
-    // return "finished";
-  } else {
-    let numberOfMoves = currentPuzzleMoves.length;
-    let shortenedCorrectPuzzleMoves = correctPuzzleMoves.slice(0, numberOfMoves);
-
-    console.log("moves comparison", shortenedCorrectPuzzleMoves, currentPuzzleMoves);
-
-    if (JSON.stringify(shortenedCorrectPuzzleMoves) === JSON.stringify(currentPuzzleMoves)) {
-      return true;
-    } else {
-      if (!sampleMode) {
-        updateAllUserPuzzleData(false, currentPuzzle, "");
-      }
-      setPuzzleIncorrect(true);
-      // alert("failed puzzle");
-      setTimeout(() => {
-        setPuzzleIncorrect(false);
-      }, 1000);
-      startNextPuzzle(setCurrentPuzzle, setRandomPuzzles, getPuzzlesWithinEloRange, randomPuzzles);
-      return false;
-      // return false;
-    }
-  }
 };

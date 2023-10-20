@@ -3,7 +3,7 @@ import { amIStillInCheck, isPieceProtected } from "../CheckUtils/checkUtils";
 import { getPieceMoves } from "../PieceUtils/pieceMoves";
 import { getAllPossibleMovesForPlayer } from "../PlayerUtils/playerUtils";
 
-export const isGameOver = (squareCausingCheck, updatedBoardState) => {
+export const isGameOver = (squareCausingCheck, piece, updatedBoardState) => {
   let isGameOver = true;
   let possibleMoves;
 
