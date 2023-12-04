@@ -620,6 +620,7 @@ const ChessBoard = forwardRef(
         updatedBoardState.validMoves.possibleMoves = [];
         updatedBoardState.validMoves.possibleCaptures = [];
         updatedBoardState.validMoves.piece = "";
+        updatedBoardState.validMoves.possibleCastles = [];
         // updatedBoardState.validMoves.pieceSquare = "";
 
         // the piece - yes
@@ -2111,7 +2112,17 @@ const ChessBoard = forwardRef(
     const renderBoard = () => {
       const rows = [8, 7, 6, 5, 4, 3, 2, 1];
       return (
-        <Grid container direction="column" className={mode === "puzzle" && puzzleCorrect ? "glow-green chess-board" : mode === "puzzle" && puzzleIncorrect ? "glow-red chess-board" : "chess-board"}>
+        <Grid
+          container
+          direction="column"
+          className={
+            mode === "puzzle" && puzzleCorrect
+              ? "glow-green chess-board"
+              : mode === "puzzle" && puzzleIncorrect
+              ? "glow-red chess-board"
+              : "chess-board"
+          }
+        >
           {rows.map((row, index) => (
             <Grid container item key={row} className={`board-row ${index % 2 === 0 ? "light" : "dark"}-row`}>
               {renderRow(row)}
