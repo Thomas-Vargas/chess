@@ -8,6 +8,14 @@
   border: 2px solid black;
 }
 
+.glow-green {
+  box-shadow: 0 0 30px rgba(65, 134, 71, 0.8); /* Adjust the values as needed */
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(182, 78, 78, 0.8); /* Adjust the values as needed */
+}
+
 .dark-square {
   background-color: #b58863; /* Set the background color for dark squares */
 }
@@ -17,7 +25,6 @@
 }
 
 .check-square {
-  background-color: #8A3324;
 }
 
 .board-row {
