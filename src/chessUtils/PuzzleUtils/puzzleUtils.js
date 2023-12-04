@@ -120,8 +120,10 @@ export const fenToBoardState = (fen, setBoardState) => {
             pieceObj.firstMove = true;
           }
 
-          // If firstMove is not explicitly set to true, set it to false
-          pieceObj.firstMove = pieceObj.firstMove || false;
+          if (pieceName === "rook" || pieceName === "king") {
+            // If firstMove is not explicitly set to true, set it to false
+            pieceObj.firstMove = pieceObj.firstMove || false;
+          }
 
           fenBoardState.board[square] = pieceObj;
         } else {
