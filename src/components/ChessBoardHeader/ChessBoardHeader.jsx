@@ -6,6 +6,7 @@ import { supabaseClient } from "../../config/supabaseClient";
 
 const ChessBoardHeader = ({ currentPuzzle }) => {
   const [userData, setUserData] = useState(null);
+  const [currentPuzzleRating, setCurrentPuzzleRating] = useState(null);
   const { user } = useAuth();
   let userDataResult = useUserData(user?.id);
 
@@ -33,6 +34,14 @@ const ChessBoardHeader = ({ currentPuzzle }) => {
     setTimeout(() => {
       fetchUserData(user.id);
     }, 1000);
+
+    if (currentPuzzle && currentPuzzleRating !== null) {
+      setTimeout(() => {
+        setCurrentPuzzleRating(currentPuzzle.Rating);
+      }, 1000);
+    } else if (currentPuzzle) {
+      setCurrentPuzzleRating(currentPuzzle.Rating);
+    }
   }, [currentPuzzle]);
 
   return (
@@ -45,7 +54,7 @@ const ChessBoardHeader = ({ currentPuzzle }) => {
                 <Typography variant="h6">Current Rank: {userData.current_elo}</Typography>
               </Fade>
               <Fade in={true} timeout={1000} style={{ transitionDelay: "500ms" }}>
-                <Typography variant="h6">Current Puzzle: {currentPuzzle.Rating}</Typography>
+                <Typography variant="h6">Current Puzzle: {currentPuzzleRating}</Typography>
               </Fade>
             </Stack>
           ) : (
@@ -61,7 +70,7 @@ const ChessBoardHeader = ({ currentPuzzle }) => {
         </Paper>
       </Stack>
     )
-  );  
+  );
 };
 
 export default ChessBoardHeader;
