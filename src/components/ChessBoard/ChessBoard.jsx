@@ -47,7 +47,7 @@ const ChessBoard = forwardRef(
     const [boardState, setBoardState] = useState({
       board: {
         // base setup
-        11: { piece: "rook", player: "white", firstMove: false },
+        11: { piece: "rook", player: "white", firstMove: true },
         21: { piece: "knight", player: "white" },
         31: { piece: "bishop", player: "white" },
         41: { piece: "queen", player: "white" },
@@ -171,7 +171,7 @@ const ChessBoard = forwardRef(
         setBoardState({
           board: {
             // base setup
-            11: { piece: "rook", player: "white", firstMove: false },
+            11: { piece: "rook", player: "white", firstMove: true },
             21: { piece: "knight", player: "white" },
             31: { piece: "bishop", player: "white" },
             41: { piece: "queen", player: "white" },

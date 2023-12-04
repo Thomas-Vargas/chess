@@ -75,6 +75,8 @@ export const fenToBoardState = (fen, setBoardState) => {
     puzzleMoves: [],
   };
 
+  console.log("fen log", fen);
+
   const [position, turn, castling, enPassant, halfMove, fullMove] = fen.split(" ");
 
   console.log("castling rights", castling);
@@ -117,6 +119,10 @@ export const fenToBoardState = (fen, setBoardState) => {
           if (castling.includes("q") && square === 88 && pieceName === "rook") {
             pieceObj.firstMove = true;
           }
+
+          // If firstMove is not explicitly set to true, set it to false
+          pieceObj.firstMove = pieceObj.firstMove || false;
+
           fenBoardState.board[square] = pieceObj;
         } else {
           // Handle pawn separately
@@ -130,6 +136,8 @@ export const fenToBoardState = (fen, setBoardState) => {
     });
     rank--; // Move to the next rank
   });
+
+  console.log("this is the fen board state i am setting:", fenBoardState);
 
   setBoardState(fenBoardState);
 
