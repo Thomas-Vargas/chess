@@ -12,12 +12,14 @@ const ChessPuzzlePage = () => {
   const [puzzlesInEloRange, setPuzzlesInEloRange] = useState(null);
   const [currentPuzzle, setCurrentPuzzle] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [boardOrientation, setBoardOrientation] = useState(null);
   const { user } = useAuth();
   const { session } = useAuth();
   let userDataResult = useUserData(user?.id);
 
   console.log("user data in chess puzzle page", userData);
   console.log("puzzles in elo range", puzzlesInEloRange);
+  console.log("board orientation", boardOrientation);
 
   const calculateEloChange = (playerElo, puzzleDifficulty, isSolved) => {
     const K = 16; // Adjust this based on your system's K-factor
@@ -185,6 +187,7 @@ const ChessPuzzlePage = () => {
   return (
     <div>
       <ChessBoardHeader currentPuzzle={currentPuzzle} />
+
       <Stack alignItems="center" width="100%">
         <ChessBoard
           modeToSet={"puzzle"}
@@ -195,8 +198,11 @@ const ChessPuzzlePage = () => {
           currentPuzzle={currentPuzzle}
           setCurrentPuzzle={setCurrentPuzzle}
           fade={true}
+          setBoardOrientation={setBoardOrientation}
+          boardOrientation={boardOrientation}
         />
-        <ChessBoardFooter currentPuzzle={currentPuzzle} />
+
+        <ChessBoardFooter currentPuzzle={currentPuzzle} setBoardOrientation={setBoardOrientation} boardOrientation={boardOrientation} />
       </Stack>
     </div>
   );

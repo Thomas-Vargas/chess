@@ -41,6 +41,8 @@ const ChessBoard = forwardRef(
       fade,
       currentPuzzle,
       setCurrentPuzzle,
+      boardOrientation,
+      setBoardOrientation,
     },
     ref
   ) => {
@@ -227,6 +229,9 @@ const ChessBoard = forwardRef(
 
         console.log("useffect setting fen board state and starting puzzle has triggered");
         let fenBoardState = fenToBoardState(currentPuzzle.FEN, setBoardState);
+
+        console.log("!!!!!!!!!!!!!!!!!!!!! fen board", fenBoardState);
+        setBoardOrientation(fenBoardState.currentPlayer === "white" ? "black" : "white");
 
         console.log("fen board state", fenBoardState);
         setTimeout(() => {
@@ -2110,7 +2115,7 @@ const ChessBoard = forwardRef(
     };
 
     const renderBoard = () => {
-      const rows = [8, 7, 6, 5, 4, 3, 2, 1];
+      const rows = boardOrientation === "black" ? [1, 2, 3, 4, 5, 6, 7, 8] : [8, 7, 6, 5, 4, 3, 2, 1];
       return (
         <Grid
           container
@@ -2170,7 +2175,7 @@ const ChessBoard = forwardRef(
 
         {mode === "chess" && <Paper elevation={6}>{renderBoard()}</Paper>}
 
-        {puzzleCorrect && (
+        {/* {puzzleCorrect && (
           <Stack direction="row" justifyContent="center">
             <Typography variant="h5">Puzzle Complete</Typography>
           </Stack>
@@ -2180,7 +2185,7 @@ const ChessBoard = forwardRef(
           <Stack direction="row" justifyContent="center">
             <Typography variant="h5">Puzzle Failed</Typography>
           </Stack>
-        )}
+        )} */}
 
         {checkmate && mode !== "puzzle" && (
           <Typography variant="h5" textAlign="center">
