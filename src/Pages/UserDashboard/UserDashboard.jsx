@@ -58,7 +58,7 @@ const UserDashboard = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && !userCompletedPuzzles && !userData) {
       getUserData();
       getUserCompletedPuzzles();
     }

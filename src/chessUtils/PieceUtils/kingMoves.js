@@ -64,7 +64,7 @@ export const getKingMoves = (
       !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
       !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
       piece.firstMove === true &&
-      boardState.board["81"].firstMove === true &&
+      boardState.board["81"]?.firstMove === true &&
       !opponentMoves.includes("61") &&
       !opponentMoves.includes("71")
     ) {
@@ -75,7 +75,7 @@ export const getKingMoves = (
       !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
       !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
       piece.firstMove === true &&
-      boardState.board["11"].firstMove === true &&
+      boardState.board["11"]?.firstMove === true &&
       !opponentMoves.includes("21") &&
       !opponentMoves.includes("31") &&
       !opponentMoves.includes("41")
@@ -87,7 +87,7 @@ export const getKingMoves = (
       !boardState.board.hasOwnProperty(`${Number(col) + 1}` + row) &&
       !boardState.board.hasOwnProperty(`${Number(col) + 2}` + row) &&
       piece.firstMove === true &&
-      boardState.board["88"].firstMove === true &&
+      boardState.board["88"]?.firstMove === true &&
       !opponentMoves.includes("68") &&
       !opponentMoves.includes("78")
     ) {
@@ -98,7 +98,7 @@ export const getKingMoves = (
       !boardState.board.hasOwnProperty(`${Number(col) - 2}` + row) &&
       !boardState.board.hasOwnProperty(`${Number(col) - 3}` + row) &&
       piece.firstMove === true &&
-      boardState.board["18"].firstMove === true &&
+      boardState.board["18"]?.firstMove === true &&
       !opponentMoves.includes("28") &&
       !opponentMoves.includes("38") &&
       !opponentMoves.includes("48")
