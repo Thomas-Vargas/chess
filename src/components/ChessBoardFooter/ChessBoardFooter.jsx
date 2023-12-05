@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Stack, Paper, Typography, Button, Chip, Fade, IconButton } from "@mui/material";
-import CachedIcon from '@mui/icons-material/Cached';
+import CachedIcon from "@mui/icons-material/Cached";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 const ChessBoardFooter = ({ currentPuzzle, setBoardOrientation, boardOrientation }) => {
@@ -14,21 +14,13 @@ const ChessBoardFooter = ({ currentPuzzle, setBoardOrientation, boardOrientation
 
   return (
     <div>
-      {/* <Stack direction="row" gap={2} mt={1}>
-        {currentPuzzle &&
-          currentPuzzle.Themes.split(" ").map((theme) => (
-            <Fade in={true} timeout={delay}>
-              <Chip label={convertCamelToSeparated(theme)} />
-            </Fade>
-          ))}
-      </Stack> */}
-
       {currentPuzzle && (
         <Fade in={true} timeout={delay}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mt={1} width="480px">
             <IconButton onClick={() => setBoardOrientation(boardOrientation === "white" ? "black" : "white")}>
               <CachedIcon />
             </IconButton>
+
             <Chip
               label="Game Review"
               component="a"
