@@ -46,7 +46,7 @@ const ChessBoardHeader = ({ currentPuzzle }) => {
 
   return (
     currentPuzzle && (
-      <Stack direction="row" justifyContent="center">
+      <Stack direction="row" justifyContent="center" mb={2}>
         <Paper elevation={6} sx={{ width: "480px", padding: 3 }}>
           {userData && currentPuzzle ? (
             <Stack direction="row" justifyContent="space-between">

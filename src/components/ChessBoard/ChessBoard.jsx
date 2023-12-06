@@ -4,11 +4,12 @@ import { useAuth } from "../AuthProvider/AuthProvider";
 import useUserData from "../../utils/userData";
 import axios from "axios";
 
-import _, { endsWith, random } from "lodash";
+import _, { endsWith, random, sample } from "lodash";
 
 import PawnPromotionModal from "../PawnPromotionModal/PawnPromotionModal";
 import Piece from "../Piece/Piece";
 
+import { supabaseClient } from "../../config/supabaseClient";
 import { getPawnMoves } from "../../chessUtils/PieceUtils/pawnMoves";
 import { getBishopMoves } from "../../chessUtils/PieceUtils/bishopMoves";
 import { getKnightMoves } from "../../chessUtils/PieceUtils/knightMoves";
@@ -155,7 +156,7 @@ const ChessBoard = forwardRef(
     console.log("checkmate status", checkmate);
     console.log("current puzzle:", currentPuzzle);
     // console.log("random puzzles in state", randomPuzzles);
-    // console.log("current mode", mode);
+    console.log("current mode", mode);
     // console.log("puzzles in elo range in chessboard", puzzlesInEloRange);
 
     useEffect(() => {
@@ -230,7 +231,6 @@ const ChessBoard = forwardRef(
         console.log("useffect setting fen board state and starting puzzle has triggered");
         let fenBoardState = fenToBoardState(currentPuzzle.FEN, setBoardState);
 
-        console.log("!!!!!!!!!!!!!!!!!!!!! fen board", fenBoardState);
         setBoardOrientation(fenBoardState.currentPlayer === "white" ? "black" : "white");
 
         console.log("fen board state", fenBoardState);
@@ -247,9 +247,14 @@ const ChessBoard = forwardRef(
 
       // if in sampleMode (landingPage), only get 3 puzzles.
       // will need to send a different prop when in regular puzzle mode to control how many puzzles to get/actions after puzzle is complete
-      if (!randomPuzzles && sampleMode && !puzzlesInEloRange) {
-        getAnyNumberOfPuzzles(3);
-      }
+      // if (!randomPuzzles && sampleMode && !puzzlesInEloRange) {
+      //   getSamplePuzzles();
+      // }
+
+      // if (sampleMode && puzzlesInEloRange && !currentPuzzle) {
+      //   setRandomPuzzles(puzzlesInEloRange)
+      //   setCurrentPuzzle(randomPuzzles[0]);
+      // }
     }, [boardState.validMoves, currentPuzzle, mode, randomPuzzles, boardState.fen, sampleMode, puzzlesInEloRange]);
 
     // puzzle functions - this is old and currently used in the landing page for sample puzzles
@@ -263,33 +268,61 @@ const ChessBoard = forwardRef(
       return randomNumber;
     };
 
-    const getAnyNumberOfPuzzles = async (num) => {
-      const randomIDs = [];
-      const maxAttempts = 100;
+    // const getSamplePuzzles = async () => {
+    //   // only 5 puzzles for now
+    //   const puzzleCount = 5;
+    //   const randomPuzzles = [];
 
-      while (randomIDs.length < num && randomIDs.length < maxAttempts) {
-        let id = generateRandomPuzzleID();
+    //   while (randomPuzzles.length < puzzleCount) {
+    //     let randomID = generateRandomPuzzleID();
 
-        // Check if the generated ID is not already in the array
-        if (!randomIDs.includes(id)) {
-          randomIDs.push(id);
-        }
-      }
-      try {
-        const promises = randomIDs.map((id) => axios.get(`http://localhost:5000/api/chessPuzzles/puzzleById/${id}`));
+    //     const { data: selectedPuzzle, error: puzzleError } = await supabaseClient
+    //       .from("chess_puzzles")
+    //       .select("*")
+    //       .eq("id", randomID);
 
-        const results = await Promise.all(promises);
+    //     if (!puzzleError && selectedPuzzle && selectedPuzzle.length > 0) {
+    //       randomPuzzles.push(selectedPuzzle[0]);
+    //     } else {
+    //       console.error("Error fetching puzzle:", puzzleError);
+    //     }
+    //   }
 
-        const randomPuzzles = results.map((result) => result.data);
+    //   console.log("random puzzles", randomPuzzles);
 
-        console.log("ten random puzzles ids:", randomIDs);
-        console.log("ten random puzzles", randomPuzzles);
+    //   const reformattedPuzzles = randomPuzzles.map((puzzle) => {
+    //     return { ...puzzle, moves: puzzle.Moves.split(" ") };
+    //   });
+    //   setRandomPuzzles(reformattedPuzzles);
+    // };
 
-        setRandomPuzzles(randomPuzzles);
-      } catch (error) {
-        console.log("Error in getAnyNumberOfPuzzles", error);
-      }
-    };
+    // const getAnyNumberOfPuzzles = async (num) => {
+    //   const randomIDs = [];
+    //   const maxAttempts = 100;
+
+    //   while (randomIDs.length < num && randomIDs.length < maxAttempts) {
+    //     let id = generateRandomPuzzleID();
+
+    //     // Check if the generated ID is not already in the array
+    //     if (!randomIDs.includes(id)) {
+    //       randomIDs.push(id);
+    //     }
+    //   }
+    //   try {
+    //     const promises = randomIDs.map((id) => axios.get(`http://localhost:5000/api/chessPuzzles/puzzleById/${id}`));
+
+    //     const results = await Promise.all(promises);
+
+    //     const randomPuzzles = results.map((result) => result.data);
+
+    //     console.log("ten random puzzles ids:", randomIDs);
+    //     console.log("ten random puzzles", randomPuzzles);
+
+    //     setRandomPuzzles(randomPuzzles);
+    //   } catch (error) {
+    //     console.log("Error in getAnyNumberOfPuzzles", error);
+    //   }
+    // };
 
     // implement next puzzle logic for both sample mode and regular user mode
     // const startNextPuzzle = async () => {
@@ -2149,18 +2182,6 @@ const ChessBoard = forwardRef(
             Draw!
           </Typography>
         )}
-        <Stack direction="row" gap={3} mb={3} justifyContent="space-between">
-          {sampleMode && (
-            <Button variant="contained" onClick={() => setMode("puzzle")}>
-              Try Puzzle Mode
-            </Button>
-          )}
-
-          {/* <Button variant="contained" onClick={() => setMode("chess")}>
-          Chess Mode
-        </Button> */}
-        </Stack>
-
         {mode === "puzzle" && currentPuzzle && (
           <div>
             {fade ? (
